@@ -14,14 +14,14 @@ export default function Home() {
         <Hero />
         
         <div className="relative z-10 bg-background">
+          <FeaturedCollection />
+
           <div className="py-20 text-center max-w-2xl mx-auto px-6">
             <p className="text-2xl md:text-3xl font-serif leading-relaxed text-primary">
               Lumière creates timeless pieces for the modern woman. 
               Merging classic silhouettes with contemporary attitude.
             </p>
           </div>
-
-          <FeaturedCollection />
           
           <BlackDressShowcase />
 
