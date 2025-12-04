@@ -155,6 +155,17 @@ export default function BlackDressShowcase() {
               </motion.div>
             ))}
           </div>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 20 }}
+            transition={{ duration: 0.8, delay: 1.8, ease: "easeOut" }}
+            className="flex justify-center mt-16"
+          >
+            <button className="px-8 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
+              View All Products
+            </button>
+          </motion.div>
         </div>
       </div>
     </section>
