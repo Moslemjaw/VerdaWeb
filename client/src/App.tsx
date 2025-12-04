@@ -7,6 +7,10 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import AdminDashboard from "@/pages/admin";
+import Shop from "@/pages/shop";
+import NewIn from "@/pages/new-in";
+import BestSellers from "@/pages/best";
+import About from "@/pages/about";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +20,10 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/shop" component={Shop} />
+      <Route path="/new-in" component={NewIn} />
+      <Route path="/best" component={BestSellers} />
+      <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>
   );

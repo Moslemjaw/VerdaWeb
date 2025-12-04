@@ -14,8 +14,9 @@ import {
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +25,18 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const navLinks = [
+    { href: "/new-in", label: "New In" },
+    { href: "/best", label: "Best" },
+    { href: "/shop", label: "Shop" },
+    { href: "/about", label: "About" },
+  ];
+
+  const handleNavClick = (href: string) => {
+    setLocation(href);
+    setIsSheetOpen(false);
+  };
 
   return (
     <nav
@@ -36,28 +49,47 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link href="/">
-          <a className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">
+          <span className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">
             Lumière
-          </a>
+          </span>
         </Link>
 
         <div className="hidden md:flex items-center space-x-8 text-sm tracking-widest uppercase font-medium">
-          <a href="#" className="hover:opacity-70 transition-opacity">New In</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Best</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Shop</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">About</a>
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href}>
+              <span 
+                className={cn(
+                  "cursor-pointer hover:opacity-70 transition-opacity",
+                  location === link.href && "underline underline-offset-4"
+                )}
+                data-testid={`nav-link-${link.label.toLowerCase().replace(' ', '-')}`}
+              >
+                {link.label}
+              </span>
+            </Link>
+          ))}
         </div>
 
         <div className="flex items-center space-x-6">
-          <Search className="w-5 h-5 cursor-pointer hover:opacity-70 transition-opacity" />
-          <div className="relative cursor-pointer hover:opacity-70 transition-opacity">
-            <ShoppingBag className="w-5 h-5" />
-          </div>
+          <Link href="/shop">
+            <Search 
+              className="w-5 h-5 cursor-pointer hover:opacity-70 transition-opacity" 
+              data-testid="nav-search-icon"
+            />
+          </Link>
+          <Link href="/shop">
+            <div className="relative cursor-pointer hover:opacity-70 transition-opacity" data-testid="nav-cart-icon">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+          </Link>
 
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center space-x-2 hover:opacity-70 transition-opacity">
+                <button 
+                  className="flex items-center space-x-2 hover:opacity-70 transition-opacity"
+                  data-testid="nav-user-menu"
+                >
                   <User className="w-5 h-5" />
                 </button>
               </DropdownMenuTrigger>
@@ -68,12 +100,12 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {isAdmin && (
-                  <DropdownMenuItem onClick={() => setLocation('/admin')}>
+                  <DropdownMenuItem onClick={() => setLocation('/admin')} data-testid="nav-admin-link">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Admin Dashboard
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => logout()}>
+                <DropdownMenuItem onClick={() => logout()} data-testid="nav-logout">
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </DropdownMenuItem>
@@ -81,41 +113,71 @@ export default function Navbar() {
             </DropdownMenu>
           ) : (
             <Link href="/login">
-              <a className="text-sm tracking-widest uppercase font-medium hover:opacity-70 transition-opacity">
+              <span 
+                className="text-sm tracking-widest uppercase font-medium hover:opacity-70 transition-opacity cursor-pointer"
+                data-testid="nav-login-link"
+              >
                 Login
-              </a>
+              </span>
             </Link>
           )}
 
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <Menu className="w-5 h-5 md:hidden cursor-pointer" />
+              <button className="md:hidden" data-testid="nav-mobile-menu">
+                <Menu className="w-5 h-5 cursor-pointer" />
+              </button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col space-y-6 mt-10 text-lg font-serif">
-                <a href="#" className="hover:text-muted-foreground">New In</a>
-                <a href="#" className="hover:text-muted-foreground">Best</a>
-                <a href="#" className="hover:text-muted-foreground">Shop</a>
-                <a href="#" className="hover:text-muted-foreground">About</a>
+                {navLinks.map((link) => (
+                  <button
+                    key={link.href}
+                    onClick={() => handleNavClick(link.href)}
+                    className={cn(
+                      "text-left hover:text-muted-foreground transition-colors",
+                      location === link.href && "underline underline-offset-4"
+                    )}
+                    data-testid={`mobile-nav-${link.label.toLowerCase().replace(' ', '-')}`}
+                  >
+                    {link.label}
+                  </button>
+                ))}
                 {isAuthenticated ? (
                   <>
                     {isAdmin && (
-                      <button onClick={() => setLocation('/admin')} className="text-left hover:text-muted-foreground">
+                      <button 
+                        onClick={() => handleNavClick('/admin')} 
+                        className="text-left hover:text-muted-foreground"
+                        data-testid="mobile-nav-admin"
+                      >
                         Admin Dashboard
                       </button>
                     )}
-                    <button onClick={() => logout()} className="text-left hover:text-muted-foreground">
+                    <button 
+                      onClick={() => { logout(); setIsSheetOpen(false); }} 
+                      className="text-left hover:text-muted-foreground"
+                      data-testid="mobile-nav-logout"
+                    >
                       Logout
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link href="/login">
-                      <a className="hover:text-muted-foreground">Login</a>
-                    </Link>
-                    <Link href="/signup">
-                      <a className="hover:text-muted-foreground">Sign Up</a>
-                    </Link>
+                    <button
+                      onClick={() => handleNavClick('/login')}
+                      className="text-left hover:text-muted-foreground"
+                      data-testid="mobile-nav-login"
+                    >
+                      Login
+                    </button>
+                    <button
+                      onClick={() => handleNavClick('/signup')}
+                      className="text-left hover:text-muted-foreground"
+                      data-testid="mobile-nav-signup"
+                    >
+                      Sign Up
+                    </button>
                   </>
                 )}
               </div>
