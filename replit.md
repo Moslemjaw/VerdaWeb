@@ -1,0 +1,159 @@
+# Lumière - Modern Women's Fashion E-commerce Platform
+
+## Overview
+
+Lumière is a luxury women's fashion e-commerce web application that provides an elegant shopping experience with high-end visual design. The platform features product browsing, user authentication, and an admin dashboard for managing products and users. Built with a modern full-stack architecture, it emphasizes smooth animations, minimalist aesthetics, and responsive design.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+
+**Framework & Build System**
+- React 18 with TypeScript for type-safe component development
+- Vite as the build tool and development server for fast HMR (Hot Module Replacement)
+- Wouter for lightweight client-side routing
+- Component architecture follows a modular, reusable pattern
+
+**UI & Styling**
+- Tailwind CSS v4 with custom design tokens for consistent theming
+- shadcn/ui component library (New York style variant) for pre-built, accessible components
+- Radix UI primitives for headless, accessible component foundations
+- Custom CSS variables for theme configuration (light/dark mode support)
+- Framer Motion for animations and transitions throughout the UI
+- Custom fonts: Inter for UI elements, Playfair Display for elegant typography
+
+**State Management**
+- TanStack Query (React Query) for server state management, caching, and data fetching
+- React Hook Form with Zod resolvers for form validation
+- Session-based authentication state synchronized with backend
+
+**Key Design Patterns**
+- Container/Presentational component separation
+- Custom hooks for reusable logic (useAuth, useIsMobile, useToast)
+- Component composition using Radix Slot pattern
+- Path aliases for clean imports (@/, @shared/, @assets/)
+
+### Backend Architecture
+
+**Server Framework**
+- Express.js with TypeScript for the REST API server
+- HTTP server created with Node's native `http` module for WebSocket support potential
+- Session-based authentication using express-session
+- Middleware pattern for request logging, authentication, and authorization
+
+**Database Layer**
+- MongoDB with Mongoose ODM for document-based data storage
+- Schema definitions for User and Product models
+- Connection pooling with cached connections to optimize performance
+- Bcrypt for password hashing with pre-save hooks
+
+**Authentication & Authorization**
+- Session-based authentication (cookies with express-session)
+- Role-based access control (user vs admin roles)
+- Custom middleware for route protection (requireAuth, requireAdmin)
+- Password hashing using bcryptjs
+
+**API Design**
+- RESTful API endpoints under `/api` namespace
+- Structured error handling with appropriate HTTP status codes
+- JSON request/response format
+- Separate route handlers for auth, products, and admin operations
+
+**Build & Deployment**
+- ESBuild for server-side bundling with selective dependency bundling
+- Vite for client-side bundling and static asset generation
+- Production build outputs to `dist/` directory
+- Environment-based configuration (development vs production)
+
+### Code Organization
+
+**Directory Structure**
+- `/client` - Frontend React application
+  - `/src/components` - Reusable UI components and shadcn/ui components
+  - `/src/pages` - Route-level page components
+  - `/src/hooks` - Custom React hooks
+  - `/src/lib` - Utility functions and client configuration
+- `/server` - Backend Express application
+  - `/models` - Mongoose schema definitions
+  - `/middleware` - Express middleware functions
+  - Route handlers and database connection
+- `/shared` - Code shared between client and server
+  - Originally configured for Drizzle/PostgreSQL schemas (currently using MongoDB)
+- `/attached_assets` - Static assets and generated images
+
+**Configuration Files**
+- TypeScript configuration with path aliases and ESNext module resolution
+- Separate Vite configuration for client development and build
+- Drizzle configuration present but not actively used (MongoDB in use instead)
+
+### Development Workflow
+
+**Development Mode**
+- Vite dev server runs on port 5000 for the client with HMR
+- Express server runs with tsx for TypeScript execution
+- Separate `dev` and `dev:client` npm scripts
+- Runtime error overlay plugin for better DX on Replit
+
+**Build Process**
+- Custom build script coordinates Vite and ESBuild
+- Client assets compiled to `dist/public`
+- Server bundled to `dist/index.cjs`
+- Selective dependency bundling to reduce cold start times
+
+## External Dependencies
+
+### Core Framework Dependencies
+- **React & React DOM** (v18+) - Frontend framework
+- **Express** - Backend web server framework
+- **Mongoose** - MongoDB object modeling
+- **TypeScript** - Type safety across the stack
+
+### UI & Styling Libraries
+- **Tailwind CSS** - Utility-first CSS framework
+- **@radix-ui/* packages** - Headless UI component primitives (accordion, dialog, dropdown, etc.)
+- **Framer Motion** - Animation library
+- **lucide-react** - Icon library
+- **embla-carousel-react** - Carousel/slider component
+
+### State & Data Management
+- **@tanstack/react-query** - Server state management and caching
+- **react-hook-form** - Form state management
+- **@hookform/resolvers** - Form validation resolvers
+- **zod** - Schema validation library
+- **drizzle-zod** - Drizzle to Zod schema conversion (not actively used)
+
+### Authentication & Security
+- **bcryptjs** - Password hashing
+- **express-session** - Session management
+- **connect-pg-simple** - PostgreSQL session store (configured but using MongoDB)
+
+### Build Tools & Development
+- **Vite** - Frontend build tool and dev server
+- **ESBuild** - Server-side bundling
+- **tsx** - TypeScript execution for Node.js
+- **PostCSS & Autoprefixer** - CSS processing
+
+### Routing & Navigation
+- **wouter** - Lightweight client-side routing
+
+### Database
+- **MongoDB** - NoSQL database (via MONGODB_URI environment variable)
+- **Drizzle ORM** - Configured for PostgreSQL but not actively used
+
+### Replit-Specific Plugins
+- **@replit/vite-plugin-runtime-error-modal** - Error overlay
+- **@replit/vite-plugin-cartographer** - Development tooling
+- **@replit/vite-plugin-dev-banner** - Development banner
+
+### Utilities
+- **class-variance-authority** - CSS class variance utility
+- **clsx & tailwind-merge** - Class name utilities
+- **date-fns** - Date manipulation
+- **nanoid** - Unique ID generation
+
+### Notes on Database Configuration
+The application is currently configured to use MongoDB despite having Drizzle configuration files for PostgreSQL. The shared schema definitions in `/shared/schema.ts` use Drizzle with PostgreSQL, but the active implementation uses Mongoose models with MongoDB. This suggests a potential migration path or legacy configuration that should be aligned.
