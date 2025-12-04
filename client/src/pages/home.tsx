@@ -23,8 +23,6 @@ export default function Home() {
 
           <FeaturedCollection />
           
-          <Intersection />
-
           <BlackDressShowcase />
 
           <BestSellers />
