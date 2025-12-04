@@ -33,9 +33,9 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center space-x-8 text-sm tracking-widest uppercase font-medium">
           <a href="#" className="hover:opacity-70 transition-opacity">New In</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Collection</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Accessories</a>
-          <a href="#" className="hover:opacity-70 transition-opacity">Editorial</a>
+          <a href="#" className="hover:opacity-70 transition-opacity">Best</a>
+          <a href="#" className="hover:opacity-70 transition-opacity">Shop</a>
+          <a href="#" className="hover:opacity-70 transition-opacity">About</a>
         </div>
 
         <div className="flex items-center space-x-6">
@@ -51,9 +51,9 @@ export default function Navbar() {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col space-y-6 mt-10 text-lg font-serif">
                 <a href="#" className="hover:text-muted-foreground">New In</a>
-                <a href="#" className="hover:text-muted-foreground">Collection</a>
-                <a href="#" className="hover:text-muted-foreground">Accessories</a>
-                <a href="#" className="hover:text-muted-foreground">Editorial</a>
+                <a href="#" className="hover:text-muted-foreground">Best</a>
+                <a href="#" className="hover:text-muted-foreground">Shop</a>
+                <a href="#" className="hover:text-muted-foreground">About</a>
               </div>
             </SheetContent>
           </Sheet>
