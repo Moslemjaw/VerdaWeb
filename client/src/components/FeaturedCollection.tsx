@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 interface Product {
   _id: string;
@@ -7,12 +9,16 @@ interface Product {
   price: number;
   description: string;
   category: string;
+  brand: string;
   imageUrl: string;
   inStock: boolean;
   featured: boolean;
 }
 
 export default function FeaturedCollection() {
+  const { data: siteContent } = useSiteContent();
+  const featuredSettings = siteContent?.featured_collection;
+
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['featuredProducts'],
     queryFn: async () => {
@@ -22,25 +28,37 @@ export default function FeaturedCollection() {
     },
   });
 
+  const sectionTitle = featuredSettings?.title || "Featured Collection";
+  const sectionSubtitle = featuredSettings?.subtitle || "Curated Selection";
+  const buttonText = featuredSettings?.buttonText || "View All Products";
+  const buttonLink = featuredSettings?.buttonLink || "/shop";
+
   if (isLoading) {
     return (
       <section className="py-24 px-6 bg-background">
         <div className="container mx-auto">
-          <div className="text-center">Loading featured products...</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-[3/4] bg-muted mb-6 rounded" />
+                <div className="h-4 bg-muted rounded w-1/4 mb-2" />
+                <div className="h-6 bg-muted rounded w-3/4" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );
   }
 
-  // If no products in database, show placeholder message
   if (products.length === 0) {
     return (
       <section className="py-24 px-6 bg-background">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16">
             <div>
-              <h3 className="text-sm font-sans uppercase tracking-widest text-muted-foreground mb-2">Curated Selection</h3>
-              <h2 className="text-4xl md:text-5xl font-serif text-primary">Featured Collection</h2>
+              <h3 className="text-sm font-sans uppercase tracking-widest text-muted-foreground mb-2">{sectionSubtitle}</h3>
+              <h2 className="text-4xl md:text-5xl font-serif text-primary">{sectionTitle}</h2>
             </div>
           </div>
           <div className="text-center text-muted-foreground py-12">
@@ -57,12 +75,14 @@ export default function FeaturedCollection() {
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16">
           <div>
-            <h3 className="text-sm font-sans uppercase tracking-widest text-muted-foreground mb-2">Curated Selection</h3>
-            <h2 className="text-4xl md:text-5xl font-serif text-primary">Featured Collection</h2>
+            <h3 className="text-sm font-sans uppercase tracking-widest text-muted-foreground mb-2">{sectionSubtitle}</h3>
+            <h2 className="text-4xl md:text-5xl font-serif text-primary">{sectionTitle}</h2>
           </div>
-          <a href="#" className="text-sm border-b border-primary pb-1 hover:opacity-60 transition-opacity mt-4 md:mt-0">
-            View All Products
-          </a>
+          <Link href={buttonLink}>
+            <span className="text-sm border-b border-primary pb-1 hover:opacity-60 transition-opacity mt-4 md:mt-0 cursor-pointer">
+              {buttonText}
+            </span>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
@@ -74,6 +94,7 @@ export default function FeaturedCollection() {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               className="group cursor-pointer"
+              data-testid={`card-featured-product-${product._id}`}
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6">
                 <img 
@@ -82,7 +103,10 @@ export default function FeaturedCollection() {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
-                <button className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium">
+                <button 
+                  className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium"
+                  data-testid={`button-add-cart-${product._id}`}
+                >
                   Add to Cart
                 </button>
               </div>

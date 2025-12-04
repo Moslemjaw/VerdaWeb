@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -93,9 +93,10 @@ export default function AdminDashboard() {
   const [heroContent, setHeroContent] = useState({
     title: '',
     subtitle: '',
+    description: '',
     buttonText: '',
     buttonLink: '',
-    images: '',
+    imageUrl: '',
   });
 
   const [featuredContent, setFeaturedContent] = useState({
@@ -148,6 +149,33 @@ export default function AdminDashboard() {
     },
     enabled: isAdmin,
   });
+
+  useEffect(() => {
+    if (siteContent.length > 0) {
+      const heroData = siteContent.find(c => c.section === 'hero');
+      if (heroData?.content) {
+        setHeroContent({
+          title: heroData.content.title || '',
+          subtitle: heroData.content.subtitle || '',
+          description: heroData.content.description || '',
+          buttonText: heroData.content.buttonText || '',
+          buttonLink: heroData.content.buttonLink || '',
+          imageUrl: heroData.content.imageUrl || '',
+        });
+      }
+      
+      const featuredData = siteContent.find(c => c.section === 'featured_collection');
+      if (featuredData?.content) {
+        setFeaturedContent({
+          title: featuredData.content.title || '',
+          subtitle: featuredData.content.subtitle || '',
+          category: featuredData.content.category || '',
+          buttonText: featuredData.content.buttonText || '',
+          buttonLink: featuredData.content.buttonLink || '',
+        });
+      }
+    }
+  }, [siteContent]);
 
   const createProductMutation = useMutation({
     mutationFn: async (product: any) => {
@@ -320,9 +348,10 @@ export default function AdminDashboard() {
       content: {
         title: heroContent.title,
         subtitle: heroContent.subtitle,
+        description: heroContent.description,
         buttonText: heroContent.buttonText,
         buttonLink: heroContent.buttonLink,
-        images: heroContent.images ? heroContent.images.split(',').map(s => s.trim()) : [],
+        imageUrl: heroContent.imageUrl,
       },
     });
   };
@@ -807,7 +836,15 @@ export default function AdminDashboard() {
                     <Input
                       value={heroContent.subtitle}
                       onChange={(e) => setHeroContent({ ...heroContent, subtitle: e.target.value })}
-                      placeholder="e.g., Timeless Elegance"
+                      placeholder="e.g., REDEFINED"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Season Text (small text above title)</Label>
+                    <Input
+                      value={heroContent.description}
+                      onChange={(e) => setHeroContent({ ...heroContent, description: e.target.value })}
+                      placeholder="e.g., Spring / Summer 2025"
                     />
                   </div>
                   <div className="space-y-2">
@@ -815,7 +852,7 @@ export default function AdminDashboard() {
                     <Input
                       value={heroContent.buttonText}
                       onChange={(e) => setHeroContent({ ...heroContent, buttonText: e.target.value })}
-                      placeholder="e.g., Shop Now"
+                      placeholder="e.g., Explore Collection"
                     />
                   </div>
                   <div className="space-y-2">
@@ -827,13 +864,13 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Image URLs (comma-separated for gallery)</Label>
-                    <Textarea
-                      value={heroContent.images}
-                      onChange={(e) => setHeroContent({ ...heroContent, images: e.target.value })}
-                      placeholder="https://image1.jpg, https://image2.jpg, ..."
-                      rows={3}
+                    <Label>Background Image URL</Label>
+                    <Input
+                      value={heroContent.imageUrl}
+                      onChange={(e) => setHeroContent({ ...heroContent, imageUrl: e.target.value })}
+                      placeholder="https://example.com/hero-image.jpg"
                     />
+                    <p className="text-xs text-muted-foreground">Leave empty to use default image</p>
                   </div>
                   <Button onClick={handleSaveHeroContent} className="w-full" disabled={updateContentMutation.isPending}>
                     Save Hero Content
