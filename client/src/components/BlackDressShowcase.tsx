@@ -10,7 +10,7 @@ import model5 from "@assets/generated_images/full_body_shot_of_model_in_black_dr
 const heroImages = [model1, model2, model3, model4, model5];
 
 // Mock data for the product grid below
-const products = Array.from({ length: 10 }).map((_, i) => ({
+const products = Array.from({ length: 5 }).map((_, i) => ({
   id: i + 1,
   name: [
     "The Enchanté Gown",
