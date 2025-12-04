@@ -1,36 +1,57 @@
 import { motion } from "framer-motion";
-import handbag from "@assets/generated_images/product_shot_of_a_black_leather_handbag.png";
-import necklace from "@assets/generated_images/close_up_of_gold_jewelry_necklace.png";
-import dress from "@assets/generated_images/fashion_model_in_a_red_silk_dress.png";
+import { useQuery } from "@tanstack/react-query";
 
-const products = [
-  {
-    id: 1,
-    name: "The Classic Tote",
-    price: "$590",
-    image: handbag,
-    category: "Accessories",
-    delay: 0.2
-  },
-  {
-    id: 2,
-    name: "Silk Evening Gown",
-    price: "$1,200",
-    image: dress,
-    category: "Ready to Wear",
-    delay: 0.4
-  },
-  {
-    id: 3,
-    name: "Gold Chain No. 5",
-    price: "$350",
-    image: necklace,
-    category: "Jewelry",
-    delay: 0.6
-  }
-];
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+  imageUrl: string;
+  inStock: boolean;
+  featured: boolean;
+}
 
 export default function FeaturedCollection() {
+  const { data: products = [], isLoading } = useQuery<Product[]>({
+    queryKey: ['featuredProducts'],
+    queryFn: async () => {
+      const res = await fetch('/api/products/featured');
+      if (!res.ok) throw new Error('Failed to fetch products');
+      return res.json();
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <section className="py-24 px-6 bg-background">
+        <div className="container mx-auto">
+          <div className="text-center">Loading featured products...</div>
+        </div>
+      </section>
+    );
+  }
+
+  // If no products in database, show placeholder message
+  if (products.length === 0) {
+    return (
+      <section className="py-24 px-6 bg-background">
+        <div className="container mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16">
+            <div>
+              <h3 className="text-sm font-sans uppercase tracking-widest text-muted-foreground mb-2">Curated Selection</h3>
+              <h2 className="text-4xl md:text-5xl font-serif text-primary">Featured Collection</h2>
+            </div>
+          </div>
+          <div className="text-center text-muted-foreground py-12">
+            <p className="text-lg">No featured products yet. Check back soon!</p>
+            <p className="text-sm mt-2">Admins can add products from the admin dashboard.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-24 px-6 bg-background">
       <div className="container mx-auto">
@@ -45,18 +66,18 @@ export default function FeaturedCollection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-          {products.map((product) => (
+          {products.map((product, index) => (
             <motion.div
-              key={product.id}
+              key={product._id}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: product.delay }}
+              transition={{ duration: 0.8, delay: index * 0.2 }}
               className="group cursor-pointer"
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6">
                 <img 
-                  src={product.image} 
+                  src={product.imageUrl} 
                   alt={product.name} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -72,7 +93,7 @@ export default function FeaturedCollection() {
                     {product.name}
                   </h3>
                 </div>
-                <span className="text-lg font-serif">{product.price}</span>
+                <span className="text-lg font-serif">${product.price}</span>
               </div>
             </motion.div>
           ))}
