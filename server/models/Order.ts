@@ -64,7 +64,12 @@ const ShippingAddressSchema = new Schema<IShippingAddress>({
 });
 
 const OrderSchema = new Schema<IOrder>({
-  orderNumber: { type: String, required: true, unique: true },
+  orderNumber: { type: String, unique: true, default: () => {
+    const prefix = 'LUM';
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${prefix}-${timestamp}-${random}`;
+  }},
   userId: { type: Schema.Types.ObjectId, ref: 'User' },
   customerEmail: { type: String, required: true },
   customerName: { type: String, required: true },
@@ -95,20 +100,5 @@ const OrderSchema = new Schema<IOrder>({
 
 OrderSchema.index({ createdAt: -1 });
 OrderSchema.index({ status: 1 });
-OrderSchema.index({ orderNumber: 1 });
-
-function generateOrderNumber(): string {
-  const prefix = 'LUM';
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `${prefix}-${timestamp}-${random}`;
-}
-
-OrderSchema.pre('save', function(next: Function) {
-  if (!this.orderNumber) {
-    this.orderNumber = generateOrderNumber();
-  }
-  next();
-});
 
 export const Order = mongoose.model<IOrder>('Order', OrderSchema);
