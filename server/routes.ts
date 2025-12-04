@@ -4,6 +4,7 @@ import { connectDB } from "./db";
 import { User, IUser } from "./models/User";
 import { Product, IProduct } from "./models/Product";
 import { SiteContent, ISiteContent } from "./models/SiteContent";
+import { Order, IOrder } from "./models/Order";
 import { requireAuth, requireAdmin, AuthRequest } from "./middleware/auth";
 import { Request, Response } from "express";
 
@@ -268,14 +269,47 @@ export async function registerRoutes(
   
   app.get("/api/admin/stats", requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
-      const [totalUsers, totalProducts, totalCategories, featuredProducts, inStockProducts, outOfStockProducts] = await Promise.all([
+      const [
+        totalUsers, 
+        totalProducts, 
+        totalCategories, 
+        featuredProducts, 
+        inStockProducts, 
+        outOfStockProducts,
+        totalOrders,
+        pendingOrders,
+        processingOrders,
+        shippedOrders,
+        deliveredOrders,
+        cancelledOrders,
+      ] = await Promise.all([
         User.countDocuments(),
         Product.countDocuments(),
         Product.distinct('category').then(cats => cats.length),
         Product.countDocuments({ featured: true }),
         Product.countDocuments({ inStock: true }),
         Product.countDocuments({ inStock: false }),
+        Order.countDocuments(),
+        Order.countDocuments({ status: 'pending' }),
+        Order.countDocuments({ status: 'processing' }),
+        Order.countDocuments({ status: 'shipped' }),
+        Order.countDocuments({ status: 'delivered' }),
+        Order.countDocuments({ status: 'cancelled' }),
       ]);
+
+      const revenueResult = await Order.aggregate([
+        { $match: { paymentStatus: 'paid' } },
+        { $group: { _id: null, total: { $sum: '$total' } } }
+      ]);
+      const totalRevenue = revenueResult[0]?.total || 0;
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayRevenueResult = await Order.aggregate([
+        { $match: { paymentStatus: 'paid', createdAt: { $gte: todayStart } } },
+        { $group: { _id: null, total: { $sum: '$total' } } }
+      ]);
+      const todayRevenue = todayRevenueResult[0]?.total || 0;
 
       const recentUsers = await User.find()
         .select('-password')
@@ -283,6 +317,10 @@ export async function registerRoutes(
         .limit(5);
 
       const recentProducts = await Product.find()
+        .sort({ createdAt: -1 })
+        .limit(5);
+
+      const recentOrders = await Order.find()
         .sort({ createdAt: -1 })
         .limit(5);
 
@@ -294,9 +332,18 @@ export async function registerRoutes(
           featuredProducts,
           inStockProducts,
           outOfStockProducts,
+          totalOrders,
+          pendingOrders,
+          processingOrders,
+          shippedOrders,
+          deliveredOrders,
+          cancelledOrders,
+          totalRevenue,
+          todayRevenue,
         },
         recentUsers,
         recentProducts,
+        recentOrders,
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch stats" });
@@ -356,6 +403,133 @@ export async function registerRoutes(
       res.json(content);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch content" });
+    }
+  });
+
+  // ============================================
+  // ORDER ROUTES
+  // ============================================
+
+  app.get("/api/admin/orders", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { status, paymentStatus, page = '1', limit = '20' } = req.query;
+      
+      const filter: any = {};
+      if (status && status !== 'all') filter.status = status;
+      if (paymentStatus && paymentStatus !== 'all') filter.paymentStatus = paymentStatus;
+
+      const pageNum = parseInt(page as string) || 1;
+      const limitNum = parseInt(limit as string) || 20;
+      const skip = (pageNum - 1) * limitNum;
+
+      const [orders, total] = await Promise.all([
+        Order.find(filter)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limitNum),
+        Order.countDocuments(filter),
+      ]);
+
+      res.json({
+        orders,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          pages: Math.ceil(total / limitNum),
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/admin/orders/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const order = await Order.findById(req.params.id);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch order" });
+    }
+  });
+
+  app.patch("/api/admin/orders/:id/status", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { status } = req.body;
+      
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      
+      const order = await Order.findByIdAndUpdate(
+        req.params.id,
+        { status },
+        { new: true }
+      );
+      
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update order status" });
+    }
+  });
+
+  app.patch("/api/admin/orders/:id/payment", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { paymentStatus } = req.body;
+      
+      const validStatuses = ['unpaid', 'paid', 'refunded'];
+      if (!validStatuses.includes(paymentStatus)) {
+        return res.status(400).json({ error: "Invalid payment status" });
+      }
+      
+      const order = await Order.findByIdAndUpdate(
+        req.params.id,
+        { paymentStatus },
+        { new: true }
+      );
+      
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update payment status" });
+    }
+  });
+
+  app.delete("/api/admin/orders/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const order = await Order.findByIdAndDelete(req.params.id);
+      
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      res.json({ message: "Order deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete order" });
+    }
+  });
+
+  // Create order (for testing/demo purposes)
+  app.post("/api/orders", async (req: Request, res: Response) => {
+    try {
+      const orderData = req.body;
+      const order = new Order(orderData);
+      await order.save();
+      res.status(201).json(order);
+    } catch (error) {
+      console.error('Create order error:', error);
+      res.status(500).json({ error: "Failed to create order" });
     }
   });
 
