@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText } from 'lucide-react';
+import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface Product {
   _id: string;
@@ -45,6 +46,53 @@ interface Stats {
   featuredProducts: number;
   inStockProducts: number;
   outOfStockProducts: number;
+  totalOrders: number;
+  pendingOrders: number;
+  processingOrders: number;
+  shippedOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  totalRevenue: number;
+  todayRevenue: number;
+}
+
+interface OrderItem {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  size?: string;
+  color?: string;
+  image?: string;
+}
+
+interface Order {
+  _id: string;
+  orderNumber: string;
+  customerEmail: string;
+  customerName: string;
+  items: OrderItem[];
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  discount: number;
+  total: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+  paymentStatus: 'unpaid' | 'paid' | 'refunded';
+  paymentMethod: 'card' | 'cod' | 'paypal';
+  shippingAddress: {
+    name: string;
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone?: string;
+  };
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface SiteContent {
@@ -112,7 +160,10 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const { data: statsData } = useQuery<{ stats: Stats; recentUsers: User[]; recentProducts: Product[] }>({
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+  const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
+
+  const { data: statsData } = useQuery<{ stats: Stats; recentUsers: User[]; recentProducts: Product[]; recentOrders: Order[] }>({
     queryKey: ['adminStats'],
     queryFn: async () => {
       const res = await fetch('/api/admin/stats', { credentials: 'include' });
@@ -149,6 +200,21 @@ export default function AdminDashboard() {
     },
     enabled: isAdmin,
   });
+
+  const { data: ordersData } = useQuery<{ orders: Order[]; pagination: { page: number; limit: number; total: number; pages: number } }>({
+    queryKey: ['adminOrders', orderStatusFilter, orderPaymentFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (orderStatusFilter !== 'all') params.append('status', orderStatusFilter);
+      if (orderPaymentFilter !== 'all') params.append('paymentStatus', orderPaymentFilter);
+      const res = await fetch(`/api/admin/orders?${params.toString()}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch orders');
+      return res.json();
+    },
+    enabled: isAdmin,
+  });
+
+  const orders = ordersData?.orders || [];
 
   useEffect(() => {
     if (siteContent.length > 0) {
@@ -279,6 +345,55 @@ export default function AdminDashboard() {
     },
   });
 
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await fetch(`/api/admin/orders/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to update order status');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['adminStats'] });
+    },
+  });
+
+  const updateOrderPaymentMutation = useMutation({
+    mutationFn: async ({ id, paymentStatus }: { id: string; paymentStatus: string }) => {
+      const res = await fetch(`/api/admin/orders/${id}/payment`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus }),
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to update payment status');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['adminStats'] });
+    },
+  });
+
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to delete order');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['adminStats'] });
+    },
+  });
+
   const resetForm = () => {
     setProductForm({
       name: '',
@@ -401,9 +516,12 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="w-4 h-4" /> Overview
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" /> Orders
             </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2">
               <ShoppingBag className="w-4 h-4" /> Products
@@ -417,6 +535,49 @@ export default function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-green-800">Total Revenue</CardTitle>
+                  <DollarSign className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-900">${(stats?.totalRevenue || 0).toLocaleString()}</div>
+                  <p className="text-xs text-green-700">Lifetime sales</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-blue-800">Today's Revenue</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-blue-900">${(stats?.todayRevenue || 0).toLocaleString()}</div>
+                  <p className="text-xs text-blue-700">Sales today</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-purple-800">Total Orders</CardTitle>
+                  <ShoppingBag className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-purple-900">{stats?.totalOrders || 0}</div>
+                  <p className="text-xs text-purple-700">{stats?.pendingOrders || 0} pending</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-orange-800">In Progress</CardTitle>
+                  <Truck className="h-4 w-4 text-orange-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-orange-900">{(stats?.processingOrders || 0) + (stats?.shippedOrders || 0)}</div>
+                  <p className="text-xs text-orange-700">{stats?.deliveredOrders || 0} delivered</p>
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -517,6 +678,159 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Orders</CardTitle>
+                <CardDescription>Latest customer orders</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {statsData?.recentOrders?.map((order) => (
+                    <div key={order._id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <ShoppingBag className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{order.orderNumber}</p>
+                          <p className="text-sm text-muted-foreground">{order.customerName} • {order.items.length} item(s)</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">${order.total.toFixed(2)}</p>
+                        <Badge variant={order.status === 'delivered' ? 'default' : order.status === 'cancelled' ? 'destructive' : 'secondary'} className="text-xs">
+                          {order.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {!statsData?.recentOrders?.length && (
+                    <p className="text-muted-foreground text-center py-4">No orders yet</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="orders" className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-serif font-bold">Orders</h2>
+              <p className="text-muted-foreground">Manage customer orders and track fulfillment</p>
+            </div>
+
+            <div className="flex gap-4 flex-wrap">
+              <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="refunded">Refunded</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={orderPaymentFilter} onValueChange={setOrderPaymentFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by payment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Payments</SelectItem>
+                  <SelectItem value="unpaid">Unpaid</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="refunded">Refunded</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="text-left p-4 font-medium">Order</th>
+                      <th className="text-left p-4 font-medium">Customer</th>
+                      <th className="text-left p-4 font-medium">Items</th>
+                      <th className="text-left p-4 font-medium">Total</th>
+                      <th className="text-left p-4 font-medium">Status</th>
+                      <th className="text-left p-4 font-medium">Payment</th>
+                      <th className="text-left p-4 font-medium">Date</th>
+                      <th className="text-left p-4 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map((order) => (
+                      <tr key={order._id} className="border-b hover:bg-muted/30">
+                        <td className="p-4">
+                          <p className="font-medium">{order.orderNumber}</p>
+                        </td>
+                        <td className="p-4">
+                          <p className="font-medium">{order.customerName}</p>
+                          <p className="text-sm text-muted-foreground">{order.customerEmail}</p>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-sm">{order.items.length} item(s)</p>
+                        </td>
+                        <td className="p-4">
+                          <p className="font-medium">${order.total.toFixed(2)}</p>
+                        </td>
+                        <td className="p-4">
+                          <Select
+                            value={order.status}
+                            onValueChange={(value) => updateOrderStatusMutation.mutate({ id: order._id, status: value })}
+                          >
+                            <SelectTrigger className="w-[130px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="processing">Processing</SelectItem>
+                              <SelectItem value="shipped">Shipped</SelectItem>
+                              <SelectItem value="delivered">Delivered</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                              <SelectItem value="refunded">Refunded</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="p-4">
+                          <Badge 
+                            variant={order.paymentStatus === 'paid' ? 'default' : order.paymentStatus === 'refunded' ? 'secondary' : 'destructive'}
+                          >
+                            {order.paymentStatus}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-sm">{new Date(order.createdAt).toLocaleDateString()}</p>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteOrderMutation.mutate(order._id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {orders.length === 0 && (
+                <div className="p-12 text-center">
+                  <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No orders found</p>
+                  <p className="text-sm text-muted-foreground mt-2">Orders will appear here when customers make purchases</p>
+                </div>
+              )}
+            </Card>
           </TabsContent>
 
           <TabsContent value="products" className="space-y-4">
