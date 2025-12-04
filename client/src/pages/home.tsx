@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import FeaturedCollection from "@/components/FeaturedCollection";
 import BestSellers from "@/components/BestSellers";
 import Intersection from "@/components/Intersection";
+import BlackDressShowcase from "@/components/BlackDressShowcase";
 
 export default function Home() {
   return (
@@ -23,6 +24,8 @@ export default function Home() {
           <FeaturedCollection />
           
           <Intersection />
+
+          <BlackDressShowcase />
 
           <BestSellers />
           
