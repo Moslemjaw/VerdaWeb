@@ -10,7 +10,7 @@ export interface IProduct extends Document {
   images: string[];
   inStock: boolean;
   featured: boolean;
-  isNew: boolean;
+  newArrival: boolean;
   sizes: string[];
   colors: string[];
   material: string;
@@ -54,7 +54,7 @@ const productSchema = new Schema<IProduct>({
     type: Boolean,
     default: false,
   },
-  isNew: {
+  newArrival: {
     type: Boolean,
     default: true,
   },
