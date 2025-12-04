@@ -1,91 +1,167 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import heroImage from "@assets/generated_images/hero_image_of_a_fashion_model_in_a_trench_coat.png";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import model1 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_1.png";
+import model2 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_2.png";
+import model3 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_3.png";
+import model4 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_4.png";
+import model5 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_5.png";
+
+// Using the generated images for the hero gallery
+const heroImages = [model1, model2, model3, model4, model5];
+
+// Mock data for the product grid below
+const products = Array.from({ length: 10 }).map((_, i) => ({
+  id: i + 1,
+  name: [
+    "The Enchanté Gown",
+    "Midnight Silk Slip",
+    "Noir Cocktail Dress",
+    "Obsidian Maxi",
+    "Eclipse Evening Wear",
+    "Shadow Velvet Mini",
+    "Raven Lace Gown",
+    "Onyx Wrap Dress",
+    "Jet Black Sheath",
+    "Carbon Cut-Out"
+  ][i],
+  price: ["$120", "$180", "$250", "$320", "$150", "$210", "$450", "$190", "$280", "$310"][i],
+  image: heroImages[i % 5] // Cycling through the hero images for the grid
+}));
 
 export default function Hero() {
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 500], [0, 200]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const [animationPhase, setAnimationPhase] = useState(0); // 0: Initial, 1: Expanding
+
+  useEffect(() => {
+    // Start the expansion animation after a short delay
+    const timer = setTimeout(() => {
+      setAnimationPhase(1);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-stone-900">
-      {/* Background Image with Parallax */}
-      <motion.div 
-        style={{ y, opacity }}
-        className="absolute inset-0 w-full h-full"
-      >
-        <div className="absolute inset-0 bg-black/30 z-10" />
-        <motion.img
-          initial={{ scale: 1.2 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut" }}
-          src={heroImage}
-          alt="Hero Fashion Model"
-          className="w-full h-full object-cover object-center"
-        />
-      </motion.div>
-
-      {/* Text Content */}
-      <div className="relative z-20 h-full flex flex-col items-center justify-center text-center text-white px-4">
-        <div className="overflow-hidden">
-          <motion.h2
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.8, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.5 }}
-            className="text-sm md:text-base font-sans tracking-[0.3em] uppercase mb-4"
-          >
-            Spring / Summer 2025
-          </motion.h2>
-        </div>
+    <section className="relative min-h-screen w-full bg-black text-white overflow-hidden flex flex-col">
+      {/* Phase 1 & 2 Container */}
+      <div className="relative h-[70vh] flex items-center justify-center w-full">
         
-        <div className="overflow-hidden">
-          <motion.h1
-            initial={{ y: 150 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 1, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.7 }}
-            className="text-6xl md:text-8xl lg:text-9xl font-serif font-medium tracking-tight"
+        {/* Left Side: Tagline */}
+        <div className="absolute top-10 left-10 md:top-20 md:left-20 z-20 max-w-xs">
+          <motion.p 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="text-xs md:text-sm font-sans tracking-[0.2em] uppercase text-white/70 leading-relaxed"
           >
-            ELEGANCE
+            New Collection<br />
+            Fall / Winter 2025<br />
+            Limited Edition
+          </motion.p>
+        </div>
+
+        {/* Right Side: Large Heading */}
+        <div className="absolute top-10 right-10 md:top-20 md:right-20 z-10 text-right max-w-xl pointer-events-none">
+           <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-sans font-bold tracking-tighter leading-[0.9] text-white mix-blend-difference"
+          >
+            DESIGNED<br />TO MAKE<br />AN ENTRANCE
           </motion.h1>
         </div>
 
-        <div className="overflow-hidden">
-          <motion.h1
-            initial={{ y: 150 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 1, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.9 }}
-            className="text-6xl md:text-8xl lg:text-9xl font-serif italic font-medium tracking-tight"
+        {/* Center Image / Expanding Gallery */}
+        <div className="relative w-full max-w-7xl mx-auto h-full flex items-center justify-center perspective-[1000px]">
+          
+          {/* The central image that starts first */}
+          <motion.div
+            className="absolute z-30 h-[70%] md:h-[80%] aspect-[3/4] shadow-2xl shadow-black/50"
+            initial={{ scale: 0.9, x: 0, opacity: 0 }}
+            animate={{ 
+              scale: animationPhase === 1 ? 1 : 0.9, 
+              x: animationPhase === 1 ? 0 : 0, // It stays center but scales up relative to others
+              opacity: 1
+            }}
+            transition={{ duration: 1, ease: "easeInOut" }}
           >
-            REDEFINED
-          </motion.h1>
-        </div>
+             <img src={heroImages[2]} alt="Center Model" className="w-full h-full object-cover" />
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.5 }}
-          className="mt-12"
-        >
-          <button className="px-8 py-4 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
-            Explore Collection
-          </button>
-        </motion.div>
+          {/* The other images that fan out */}
+          <AnimatePresence>
+            {animationPhase === 1 && (
+              <>
+                {/* Far Left */}
+                <motion.div
+                  initial={{ x: 0, opacity: 0, scale: 0.8 }}
+                  animate={{ x: "-220%", opacity: 1, scale: 0.9 }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+                  className="absolute z-10 h-[60%] md:h-[70%] aspect-[3/4] shadow-xl"
+                >
+                   <img src={heroImages[0]} alt="Model 1" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
+                </motion.div>
+
+                {/* Mid Left */}
+                <motion.div
+                  initial={{ x: 0, opacity: 0, scale: 0.85 }}
+                  animate={{ x: "-110%", opacity: 1, scale: 0.95 }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                  className="absolute z-20 h-[65%] md:h-[75%] aspect-[3/4] shadow-xl"
+                >
+                   <img src={heroImages[1]} alt="Model 2" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
+                </motion.div>
+
+                {/* Mid Right */}
+                <motion.div
+                  initial={{ x: 0, opacity: 0, scale: 0.85 }}
+                  animate={{ x: "110%", opacity: 1, scale: 0.95 }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                  className="absolute z-20 h-[65%] md:h-[75%] aspect-[3/4] shadow-xl"
+                >
+                   <img src={heroImages[3]} alt="Model 4" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
+                </motion.div>
+
+                {/* Far Right */}
+                <motion.div
+                  initial={{ x: 0, opacity: 0, scale: 0.8 }}
+                  animate={{ x: "220%", opacity: 1, scale: 0.9 }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+                  className="absolute z-10 h-[60%] md:h-[70%] aspect-[3/4] shadow-xl"
+                >
+                   <img src={heroImages[4]} alt="Model 5" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20"
-      >
-        <div className="w-[1px] h-20 bg-white/20 relative overflow-hidden">
-          <motion.div 
-            animate={{ y: [0, 80] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-            className="absolute top-0 w-full h-1/2 bg-white"
-          />
+      {/* Product Showcase Section (Below Hero) */}
+      <div className="bg-black px-6 py-20 z-40 relative">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-12">
+            {products.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 50 }}
+                transition={{ duration: 0.8, delay: 1 + (index * 0.1), ease: "easeOut" }}
+                className="group cursor-pointer"
+              >
+                <div className="aspect-[3/4] overflow-hidden mb-4 bg-white/5">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <h3 className="text-white font-serif text-sm tracking-wide mb-1 group-hover:underline underline-offset-4 decoration-white/50">{product.name}</h3>
+                <p className="text-white font-bold text-sm">{product.price}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
