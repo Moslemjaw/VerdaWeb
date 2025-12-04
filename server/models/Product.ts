@@ -5,9 +5,15 @@ export interface IProduct extends Document {
   price: number;
   description: string;
   category: string;
+  brand: string;
   imageUrl: string;
+  images: string[];
   inStock: boolean;
   featured: boolean;
+  isNew: boolean;
+  sizes: string[];
+  colors: string[];
+  material: string;
   createdAt: Date;
 }
 
@@ -28,9 +34,17 @@ const productSchema = new Schema<IProduct>({
     type: String,
     required: true,
   },
+  brand: {
+    type: String,
+    default: 'Lumière',
+  },
   imageUrl: {
     type: String,
     required: true,
+  },
+  images: {
+    type: [String],
+    default: [],
   },
   inStock: {
     type: Boolean,
@@ -39,6 +53,22 @@ const productSchema = new Schema<IProduct>({
   featured: {
     type: Boolean,
     default: false,
+  },
+  isNew: {
+    type: Boolean,
+    default: true,
+  },
+  sizes: {
+    type: [String],
+    default: ['XS', 'S', 'M', 'L', 'XL'],
+  },
+  colors: {
+    type: [String],
+    default: [],
+  },
+  material: {
+    type: String,
+    default: '',
   },
   createdAt: {
     type: Date,
