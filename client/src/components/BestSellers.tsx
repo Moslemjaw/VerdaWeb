@@ -79,41 +79,27 @@ export default function BestSellers() {
           <p className="text-gray-500 text-sm mb-4">Shop our bestselling styles.</p>
         </motion.div>
 
-        <div 
-          ref={scrollRef}
-          className="overflow-x-auto scroll-smooth hide-scrollbar -mx-4 px-4"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-          <div className="flex gap-3 pb-4">
-            {products.map((product, index) => (
-              <Link href={`/product/${product._id}`} key={product._id}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="flex-shrink-0 w-[140px] group cursor-pointer"
-                >
-                  <div className="aspect-[3/4] bg-gray-100 mb-2 overflow-hidden rounded-lg">
-                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                  </div>
-                  <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
-                  <p className="text-sm font-medium text-black">{product.price} KWD</p>
-                </motion.div>
-              </Link>
-            ))}
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          {products.slice(0, 4).map((product, index) => (
+            <Link href={`/product/${product._id}`} key={product._id}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="group cursor-pointer"
+              >
+                <div className="aspect-[3/4] bg-gray-100 mb-2 overflow-hidden rounded-lg">
+                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                </div>
+                <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
+                <p className="text-sm font-medium text-black">{product.price} KWD</p>
+              </motion.div>
+            </Link>
+          ))}
         </div>
 
-        <div className="mt-4 mb-4">
-          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-black rounded-full transition-all duration-150 ease-out"
-              style={{ width: `${Math.max(20, scrollProgress * 100)}%`, marginLeft: `${scrollProgress * (100 - Math.max(20, scrollProgress * 100))}%` }} />
-          </div>
-        </div>
-
-        <div className="text-center">
+        <div className="mt-6 text-center">
           <Link href="/shop?filter=bestsellers">
             <span className="inline-block border border-black text-black px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition-all cursor-pointer min-h-[44px]">
               {buttonText}

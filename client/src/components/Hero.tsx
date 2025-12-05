@@ -35,13 +35,14 @@ export default function Hero() {
         />
       </motion.div>
 
-      <div className="relative z-20 h-full flex flex-col items-center justify-center text-center text-white px-4">
+      {/* Desktop Layout - centered */}
+      <div className="hidden md:flex relative z-20 h-full flex-col items-center justify-center text-center text-white px-4">
         <div className="overflow-hidden">
           <motion.h2
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.8, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.5 }}
-            className="text-sm md:text-base font-sans tracking-[0.3em] uppercase mb-4"
+            className="text-base font-sans tracking-[0.3em] uppercase mb-4"
           >
             {seasonText}
           </motion.h2>
@@ -52,7 +53,7 @@ export default function Hero() {
             initial={{ y: 150 }}
             animate={{ y: 0 }}
             transition={{ duration: 1, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.7 }}
-            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-serif font-medium tracking-tight leading-tight"
+            className="text-8xl lg:text-9xl font-serif font-medium tracking-tight leading-tight"
           >
             {title}
           </motion.h1>
@@ -63,7 +64,7 @@ export default function Hero() {
             initial={{ y: 150 }}
             animate={{ y: 0 }}
             transition={{ duration: 1, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.9 }}
-            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-serif italic font-medium tracking-tight leading-tight"
+            className="text-8xl lg:text-9xl font-serif italic font-medium tracking-tight leading-tight"
           >
             {subtitle}
           </motion.h1>
@@ -76,7 +77,56 @@ export default function Hero() {
           className="mt-12"
         >
           <Link href={buttonLink}>
-            <span className="px-6 sm:px-8 py-3 sm:py-4 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold cursor-pointer inline-block min-h-[44px] flex items-center justify-center">
+            <span className="px-8 py-4 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold cursor-pointer inline-block min-h-[44px] flex items-center justify-center">
+              {buttonText}
+            </span>
+          </Link>
+        </motion.div>
+      </div>
+
+      {/* Mobile Layout - text at bottom */}
+      <div className="md:hidden relative z-20 h-full flex flex-col justify-end text-white px-4 pb-24">
+        <div className="overflow-hidden">
+          <motion.h2
+            initial={{ y: 100 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.8, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.5 }}
+            className="text-xs font-sans tracking-[0.3em] uppercase mb-3 text-white/80"
+          >
+            {seasonText}
+          </motion.h2>
+        </div>
+        
+        <div className="overflow-hidden">
+          <motion.h1
+            initial={{ y: 150 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 1, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.7 }}
+            className="text-4xl sm:text-5xl font-bold tracking-tight leading-none text-white"
+          >
+            {title}
+          </motion.h1>
+        </div>
+
+        <div className="overflow-hidden">
+          <motion.h1
+            initial={{ y: 150 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 1, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.9 }}
+            className="text-4xl sm:text-5xl font-bold tracking-tight leading-none text-white"
+          >
+            {subtitle}
+          </motion.h1>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.5 }}
+          className="mt-6"
+        >
+          <Link href={buttonLink}>
+            <span className="px-6 py-3 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold cursor-pointer inline-block min-h-[44px] flex items-center justify-center">
               {buttonText}
             </span>
           </Link>
