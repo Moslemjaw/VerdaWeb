@@ -5,6 +5,7 @@ import { User, IUser } from "./models/User";
 import { Product, IProduct } from "./models/Product";
 import { SiteContent, ISiteContent } from "./models/SiteContent";
 import { Order, IOrder } from "./models/Order";
+import { Discount, IDiscount } from "./models/Discount";
 import { requireAuth, requireAdmin, AuthRequest } from "./middleware/auth";
 import { Request, Response } from "express";
 import multer from "multer";
@@ -582,6 +583,147 @@ export async function registerRoutes(
     } catch (error) {
       console.error('Create order error:', error);
       res.status(500).json({ error: "Failed to create order" });
+    }
+  });
+
+  // ============================================
+  // DISCOUNT CODE ROUTES
+  // ============================================
+
+  app.get("/api/admin/discounts", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const discounts = await Discount.find().sort({ createdAt: -1 });
+      res.json(discounts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch discounts" });
+    }
+  });
+
+  app.post("/api/admin/discounts", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { code, type, value, minOrderAmount, maxUses, expiresAt } = req.body;
+      
+      const existingDiscount = await Discount.findOne({ code: code.toUpperCase() });
+      if (existingDiscount) {
+        return res.status(400).json({ error: "Discount code already exists" });
+      }
+      
+      const discount = new Discount({
+        code: code.toUpperCase(),
+        type,
+        value,
+        minOrderAmount: minOrderAmount || 0,
+        maxUses: maxUses || 0,
+        expiresAt: expiresAt || null,
+      });
+      
+      await discount.save();
+      res.status(201).json(discount);
+    } catch (error) {
+      console.error('Create discount error:', error);
+      res.status(500).json({ error: "Failed to create discount" });
+    }
+  });
+
+  app.patch("/api/admin/discounts/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { isActive } = req.body;
+      
+      const discount = await Discount.findByIdAndUpdate(
+        req.params.id,
+        { isActive },
+        { new: true }
+      );
+      
+      if (!discount) {
+        return res.status(404).json({ error: "Discount not found" });
+      }
+      
+      res.json(discount);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update discount" });
+    }
+  });
+
+  app.delete("/api/admin/discounts/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const discount = await Discount.findByIdAndDelete(req.params.id);
+      
+      if (!discount) {
+        return res.status(404).json({ error: "Discount not found" });
+      }
+      
+      res.json({ message: "Discount deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete discount" });
+    }
+  });
+
+  app.post("/api/discounts/validate", async (req: Request, res: Response) => {
+    try {
+      const { code, orderTotal } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ error: "Discount code is required" });
+      }
+      
+      const discount = await Discount.findOne({ code: code.toUpperCase(), isActive: true });
+      
+      if (!discount) {
+        return res.status(404).json({ error: "Invalid discount code" });
+      }
+      
+      if (discount.expiresAt && new Date(discount.expiresAt) < new Date()) {
+        return res.status(400).json({ error: "This discount code has expired" });
+      }
+      
+      if (discount.maxUses > 0 && discount.usedCount >= discount.maxUses) {
+        return res.status(400).json({ error: "This discount code has reached its usage limit" });
+      }
+      
+      if (discount.minOrderAmount > 0 && orderTotal < discount.minOrderAmount) {
+        return res.status(400).json({ error: `Minimum order amount is ${discount.minOrderAmount} KWD` });
+      }
+      
+      let discountAmount = 0;
+      if (discount.type === 'percentage') {
+        discountAmount = (orderTotal * discount.value) / 100;
+      } else {
+        discountAmount = Math.min(discount.value, orderTotal);
+      }
+      
+      res.json({
+        valid: true,
+        discount: {
+          code: discount.code,
+          type: discount.type,
+          value: discount.value,
+          discountAmount: Math.round(discountAmount * 100) / 100,
+        },
+      });
+    } catch (error) {
+      console.error('Validate discount error:', error);
+      res.status(500).json({ error: "Failed to validate discount" });
+    }
+  });
+
+  app.post("/api/discounts/use", async (req: Request, res: Response) => {
+    try {
+      const { code } = req.body;
+      
+      const discount = await Discount.findOneAndUpdate(
+        { code: code.toUpperCase(), isActive: true },
+        { $inc: { usedCount: 1 } },
+        { new: true }
+      );
+      
+      if (!discount) {
+        return res.status(404).json({ error: "Discount not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to use discount" });
     }
   });
 
