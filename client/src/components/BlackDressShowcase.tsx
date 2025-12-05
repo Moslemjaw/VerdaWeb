@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import model1 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_1.png";
 import model2 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_2.png";
 import model3 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_3.png";
@@ -25,6 +26,9 @@ export default function BlackDressShowcase() {
   const [animationPhase, setAnimationPhase] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [rotationIndex, setRotationIndex] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { data: siteContent } = useSiteContent();
   const { formatPrice } = useCurrency();
 
@@ -56,11 +60,11 @@ export default function BlackDressShowcase() {
     queryKey: ['newCollectionProducts', selectedCategory],
     queryFn: async () => {
       if (!selectedCategory || selectedCategory === 'all') {
-        const res = await fetch('/api/products/featured?limit=4');
+        const res = await fetch('/api/products?limit=10');
         if (!res.ok) return [];
         return res.json();
       }
-      const res = await fetch(`/api/products?category=${encodeURIComponent(selectedCategory)}&limit=4`);
+      const res = await fetch(`/api/products?category=${encodeURIComponent(selectedCategory)}&limit=10`);
       if (!res.ok) return [];
       return res.json();
     },
@@ -79,7 +83,34 @@ export default function BlackDressShowcase() {
     baseImages[(4 + rotationIndex) % 5],
   ];
 
-  const products = apiProducts.length > 0 ? apiProducts.slice(0, 4) : [];
+  const products = apiProducts.length > 0 ? apiProducts.slice(0, 10) : [];
+
+  const checkScrollButtons = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = scrollContainerRef.current.clientWidth * 0.8;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollButtons);
+      checkScrollButtons();
+      return () => container.removeEventListener('scroll', checkScrollButtons);
+    }
+  }, [products]);
 
   const seasonLines = seasonText.split('\n');
   const headingLines = heading.split('\n');
@@ -231,35 +262,64 @@ export default function BlackDressShowcase() {
       <div className="bg-black px-6 py-20 z-40 relative">
         <div className="container mx-auto">
           {products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12">
-              {products.map((product, index) => (
-                <Link href={`/product/${product._id}`} key={product._id}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 50 }}
-                    transition={{ duration: 0.8, delay: 1 + (index * 0.1), ease: "easeOut" }}
-                    className="group cursor-pointer"
-                    data-testid={`new-collection-product-${product._id}`}
-                  >
-                    <div className="aspect-[3/4] overflow-hidden mb-2 sm:mb-4 bg-gradient-to-b from-neutral-800 to-neutral-900">
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
-                      />
-                    </div>
-                    <h3 className="text-xs sm:text-sm text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {product.compareAtPrice && product.compareAtPrice < product.price && (
-                        <span className="text-xs text-white/40 line-through">{formatPrice(product.price)}</span>
-                      )}
-                      <span className="text-sm text-white/70 font-medium">{formatPrice(product.compareAtPrice && product.compareAtPrice < product.price ? product.compareAtPrice : product.price)}</span>
-                    </div>
-                  </motion.div>
-                </Link>
-              ))}
+            <div className="relative">
+              {/* Scroll Left Button */}
+              {canScrollLeft && (
+                <button
+                  onClick={() => scroll('left')}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black border border-white/20 rounded-full p-2 md:p-3 transition-all duration-300 -translate-x-2 md:-translate-x-4"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                </button>
+              )}
+              
+              {/* Scroll Right Button */}
+              {canScrollRight && (
+                <button
+                  onClick={() => scroll('right')}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black border border-white/20 rounded-full p-2 md:p-3 transition-all duration-300 translate-x-2 md:translate-x-4"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                </button>
+              )}
+
+              {/* Scrollable Products Container */}
+              <div 
+                ref={scrollContainerRef}
+                className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {products.map((product, index) => (
+                  <Link href={`/product/${product._id}`} key={product._id}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 50 }}
+                      transition={{ duration: 0.8, delay: 1 + (index * 0.1), ease: "easeOut" }}
+                      className="group cursor-pointer flex-shrink-0 w-[calc((100%-16px)/2)] md:w-[calc((100%-64px)/5)]"
+                      data-testid={`new-collection-product-${product._id}`}
+                    >
+                      <div className="aspect-[3/4] overflow-hidden mb-2 sm:mb-4 bg-gradient-to-b from-neutral-800 to-neutral-900">
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
+                        />
+                      </div>
+                      <h3 className="text-xs sm:text-sm text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        {product.compareAtPrice && product.compareAtPrice < product.price && (
+                          <span className="text-xs text-white/40 line-through">{formatPrice(product.price)}</span>
+                        )}
+                        <span className="text-sm text-white/70 font-medium">{formatPrice(product.compareAtPrice && product.compareAtPrice < product.price ? product.compareAtPrice : product.price)}</span>
+                      </div>
+                    </motion.div>
+                  </Link>
+                ))}
+              </div>
             </div>
           ) : (
             <motion.div
