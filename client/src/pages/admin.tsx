@@ -451,8 +451,8 @@ export default function AdminDashboard() {
         const date = new Date(now);
         date.setDate(date.getDate() - i);
         const dateStr = date.toLocaleDateString('en-US', { weekday: 'short' });
-        const dayStart = new Date(date.setHours(0, 0, 0, 0));
-        const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+        const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+        const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
         
         const dayOrders = orders.filter(order => {
           const orderDate = new Date(order.createdAt);
@@ -1699,7 +1699,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{order.orderNumber}</p>
-                          <p className="text-xs text-gray-500">{order.customerName} • ${order.total.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500">{order.customerName} • {order.total.toFixed(3)} KWD</p>
                         </div>
                       </button>
                     ))}
