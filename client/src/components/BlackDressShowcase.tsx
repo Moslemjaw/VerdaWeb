@@ -20,8 +20,9 @@ export default function BlackDressShowcase() {
   const buttonText = newCollectionContent?.buttonText || "View All Products";
   const cmsImages = (newCollectionContent as any)?.images || [];
   
-  const heroImages = cmsImages.length === 5 
-    ? cmsImages 
+  const validCmsImages = cmsImages.filter((img: string) => img && img.trim() !== '');
+  const heroImages = validCmsImages.length === 5 
+    ? validCmsImages 
     : defaultImages;
 
   const products = Array.from({ length: 5 }).map((_, i) => ({

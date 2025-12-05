@@ -18,6 +18,12 @@ export interface SiteContentData {
     buttonLink?: string;
     category?: string;
   };
+  new_collection?: {
+    seasonText?: string;
+    heading?: string;
+    buttonText?: string;
+    images?: string[];
+  };
   brand_story?: {
     title?: string;
     description?: string;
