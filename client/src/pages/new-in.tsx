@@ -104,7 +104,7 @@ export default function NewIn() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="text-center mt-20"
           >
-            <Link href="/shop">
+            <Link href="/shop?filter=newin">
               <span className="inline-block border border-white/30 px-10 py-4 text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all duration-300 cursor-pointer font-medium">
                 View All Products
               </span>

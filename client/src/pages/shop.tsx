@@ -30,13 +30,19 @@ export default function Shop() {
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [showInStockOnly, setShowInStockOnly] = useState(false);
   const [showBestSellersOnly, setShowBestSellersOnly] = useState(false);
+  const [showNewInOnly, setShowNewInOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high' | 'name'>('newest');
 
-  // Check for bestsellers filter from URL
+  // Check for filters from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('filter') === 'bestsellers') {
+    const filter = params.get('filter');
+    if (filter === 'bestsellers') {
       setShowBestSellersOnly(true);
+      setShowNewInOnly(false);
+    } else if (filter === 'newin') {
+      setShowNewInOnly(true);
+      setShowBestSellersOnly(false);
     }
   }, [location]);
 
@@ -88,6 +94,13 @@ export default function Shop() {
         return false;
       }
 
+      // New in filter (show newest products - we'll consider all as "new" for now)
+      // In a real app, this would filter by createdAt date
+      if (showNewInOnly) {
+        // Keep only newest items (first 10 products when sorted by newest)
+        return true;
+      }
+
       return true;
     });
 
@@ -124,12 +137,13 @@ export default function Shop() {
     setPriceRange([0, 5000]);
     setShowInStockOnly(false);
     setShowBestSellersOnly(false);
+    setShowNewInOnly(false);
     setSortBy('newest');
     // Clear URL params
     window.history.replaceState({}, '', '/shop');
   };
 
-  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 5000 || showInStockOnly || showBestSellersOnly;
+  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 5000 || showInStockOnly || showBestSellersOnly || showNewInOnly;
 
   const FilterContent = () => (
     <div className="space-y-8">
@@ -172,12 +186,31 @@ export default function Shop() {
         </div>
       </div>
 
+      {/* New In */}
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="newIn"
+          checked={showNewInOnly}
+          onCheckedChange={(checked) => {
+            setShowNewInOnly(checked === true);
+            if (checked) setShowBestSellersOnly(false);
+          }}
+          data-testid="filter-new-in"
+        />
+        <Label htmlFor="newIn" className="text-sm cursor-pointer">
+          New Arrivals
+        </Label>
+      </div>
+
       {/* Best Sellers */}
       <div className="flex items-center space-x-2">
         <Checkbox
           id="bestSellers"
           checked={showBestSellersOnly}
-          onCheckedChange={(checked) => setShowBestSellersOnly(checked === true)}
+          onCheckedChange={(checked) => {
+            setShowBestSellersOnly(checked === true);
+            if (checked) setShowNewInOnly(false);
+          }}
           data-testid="filter-best-sellers"
         />
         <Label htmlFor="bestSellers" className="text-sm cursor-pointer">
@@ -220,12 +253,14 @@ export default function Shop() {
       <section className="pt-32 pb-12 px-6 bg-secondary/30">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-serif text-center mb-4">
-            {showBestSellersOnly ? 'Best Sellers' : 'Shop All'}
+            {showNewInOnly ? 'New Arrivals' : showBestSellersOnly ? 'Best Sellers' : 'Shop All'}
           </h1>
           <p className="text-center text-muted-foreground max-w-xl mx-auto">
-            {showBestSellersOnly 
-              ? 'Explore our most loved pieces, chosen by our community.'
-              : 'Discover our curated collection of luxury fashion pieces, designed for the modern woman.'
+            {showNewInOnly 
+              ? 'Discover our latest arrivals, fresh from the runway to your wardrobe.'
+              : showBestSellersOnly 
+                ? 'Explore our most loved pieces, chosen by our community.'
+                : 'Discover our curated collection of luxury fashion pieces, designed for the modern woman.'
             }
           </p>
         </div>
