@@ -1248,6 +1248,13 @@ export default function AdminDashboard() {
       ...productForm.uploadedImages,
       ...(productForm.images ? productForm.images.split(',').map(s => s.trim()).filter(Boolean) : [])
     ];
+    
+    // Validate that at least one image is provided
+    if (allImages.length === 0) {
+      alert('Please upload at least one product image');
+      return;
+    }
+    
     const productData = {
       name: productForm.name,
       price: parseFloat(productForm.price),
