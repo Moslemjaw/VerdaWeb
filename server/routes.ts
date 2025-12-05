@@ -78,6 +78,100 @@ export async function registerRoutes(
   });
 
   // ============================================
+  // CURRENCY ROUTES
+  // ============================================
+
+  // Cache for exchange rates
+  let cachedRates: { rates: Record<string, number>; lastUpdated: number } | null = null;
+  const RATES_CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 hours
+
+  const DEFAULT_RATES: Record<string, number> = {
+    KWD: 1,
+    SAR: 12.19,
+    AED: 11.95,
+    QAR: 11.85,
+    BHD: 1.23,
+    OMR: 1.25,
+    USD: 3.26,
+    EUR: 3.09,
+    GBP: 2.59,
+  };
+
+  const COUNTRY_TO_CURRENCY: Record<string, string> = {
+    KW: 'KWD', SA: 'SAR', AE: 'AED', QA: 'QAR', BH: 'BHD', OM: 'OMR',
+    US: 'USD', GB: 'GBP', DE: 'EUR', FR: 'EUR', IT: 'EUR', ES: 'EUR',
+    NL: 'EUR', BE: 'EUR', AT: 'EUR', IE: 'EUR', PT: 'EUR', GR: 'EUR',
+  };
+
+  app.get("/api/currency/rates", async (req: Request, res: Response) => {
+    try {
+      // Check cache
+      if (cachedRates && Date.now() - cachedRates.lastUpdated < RATES_CACHE_DURATION) {
+        return res.json({ rates: cachedRates.rates });
+      }
+
+      // Try to fetch live rates (using a free API)
+      try {
+        const response = await fetch('https://api.exchangerate.host/latest?base=KWD&symbols=SAR,AED,QAR,BHD,OMR,USD,EUR,GBP');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.rates) {
+            const rates: Record<string, number> = { KWD: 1 };
+            for (const [code, rate] of Object.entries(data.rates)) {
+              rates[code] = Number(rate);
+            }
+            cachedRates = { rates, lastUpdated: Date.now() };
+            return res.json({ rates });
+          }
+        }
+      } catch (fetchError) {
+        console.log('Failed to fetch live rates, using defaults');
+      }
+
+      // Fallback to default rates
+      cachedRates = { rates: DEFAULT_RATES, lastUpdated: Date.now() };
+      res.json({ rates: DEFAULT_RATES });
+    } catch (error) {
+      console.error('Currency rates error:', error);
+      res.json({ rates: DEFAULT_RATES });
+    }
+  });
+
+  app.get("/api/currency/detect", async (req: Request, res: Response) => {
+    try {
+      // Get IP from headers (works behind proxies like Replit)
+      const ip = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() 
+        || req.headers['x-real-ip']?.toString() 
+        || req.socket.remoteAddress 
+        || '';
+
+      // Try to detect country from IP using free API
+      try {
+        const response = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.countryCode) {
+            const currency = COUNTRY_TO_CURRENCY[data.countryCode] || 'KWD';
+            return res.json({ 
+              country: data.countryCode, 
+              currency,
+              detected: true 
+            });
+          }
+        }
+      } catch (geoError) {
+        console.log('Geolocation lookup failed');
+      }
+
+      // Default to Kuwait
+      res.json({ country: 'KW', currency: 'KWD', detected: false });
+    } catch (error) {
+      console.error('Currency detection error:', error);
+      res.json({ country: 'KW', currency: 'KWD', detected: false });
+    }
+  });
+
+  // ============================================
   // AUTH ROUTES
   // ============================================
   

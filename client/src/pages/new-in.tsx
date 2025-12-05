@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Link } from 'wouter';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface Product {
   _id: string;
@@ -30,6 +31,7 @@ interface NewInContent {
 
 export default function NewIn() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { formatPrice } = useCurrency();
 
   const { data: pageContent } = useQuery<NewInContent>({
     queryKey: ['newInContent'],
@@ -182,9 +184,9 @@ export default function NewIn() {
                         </h3>
                         <div className="flex items-center gap-2">
                           {product.compareAtPrice && (
-                            <span className="text-xs text-white/40 line-through">{product.compareAtPrice} KWD</span>
+                            <span className="text-xs text-white/40 line-through">{formatPrice(product.compareAtPrice)}</span>
                           )}
-                          <span className="text-sm text-white/70 font-medium">{product.price} KWD</span>
+                          <span className="text-sm text-white/70 font-medium">{formatPrice(product.price)}</span>
                         </div>
                       </div>
                     </motion.div>

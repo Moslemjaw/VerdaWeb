@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Search, Menu, User, LogOut, LayoutDashboard } from "lucide-react";
+import { ShoppingBag, Search, Menu, User, LogOut, LayoutDashboard, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { currency, setCurrency, availableCurrencies } = useCurrency();
   const [location, setLocation] = useLocation();
 
   const { data: newInContent } = useQuery({
@@ -98,6 +100,30 @@ export default function Navbar() {
               <ShoppingBag className="w-5 h-5" />
             </span>
           </Link>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button 
+                className="hidden md:flex items-center space-x-1 hover:opacity-70 transition-opacity text-xs tracking-wider"
+                data-testid="nav-currency-selector"
+              >
+                <Globe className="w-4 h-4" />
+                <span>{currency.code}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {availableCurrencies.map((curr) => (
+                <DropdownMenuItem 
+                  key={curr.code}
+                  onClick={() => setCurrency(curr.code)}
+                  className={cn(currency.code === curr.code && "bg-accent")}
+                >
+                  <span className="w-12">{curr.code}</span>
+                  <span className="text-muted-foreground text-xs">{curr.name}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {isAuthenticated ? (
             <DropdownMenu>
