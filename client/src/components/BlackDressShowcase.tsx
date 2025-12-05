@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import model1 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_1.png";
 import model2 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_2.png";
 import model3 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_3.png";
@@ -24,6 +25,7 @@ export default function BlackDressShowcase() {
   const [isMobile, setIsMobile] = useState(false);
   const [rotationIndex, setRotationIndex] = useState(0);
   const { data: siteContent } = useSiteContent();
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -246,7 +248,7 @@ export default function BlackDressShowcase() {
                       />
                     </div>
                     <h3 className="text-white font-serif text-sm tracking-wide mb-1 group-hover:underline underline-offset-4 decoration-white/50">{product.name}</h3>
-                    <p className="text-white font-bold text-sm">{product.price} KWD</p>
+                    <p className="text-white font-bold text-sm">{formatPrice(product.price)}</p>
                   </motion.div>
                 </Link>
               ))}

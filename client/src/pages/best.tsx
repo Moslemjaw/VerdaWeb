@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Link } from 'wouter';
 import { Star } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface Product {
   _id: string;
@@ -17,6 +18,7 @@ interface Product {
 }
 
 export default function BestSellers() {
+  const { formatPrice } = useCurrency();
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['bestProducts'],
     queryFn: async () => {
@@ -110,7 +112,7 @@ export default function BestSellers() {
                         {product.description}
                       </p>
                     </div>
-                    <span className="text-xl font-serif">{product.price} KWD</span>
+                    <span className="text-xl font-serif">{formatPrice(product.price)}</span>
                   </div>
                 </motion.div>
               ))}

@@ -3,6 +3,7 @@ import { useLocation, Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag, User, Tag, X, Globe } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +51,7 @@ interface CheckoutFormData {
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
@@ -129,7 +131,7 @@ export default function Checkout() {
       }
 
       setAppliedDiscount(data.discount);
-      toast({ title: `Discount applied: ${data.discount.type === 'percentage' ? `${data.discount.value}% off` : `${data.discount.value} KWD off`}` });
+      toast({ title: `Discount applied: ${data.discount.type === 'percentage' ? `${data.discount.value}% off` : `${formatPrice(data.discount.value)} off`}` });
     } catch (error) {
       toast({ title: 'Failed to apply discount code', variant: 'destructive' });
     } finally {
@@ -574,7 +576,7 @@ export default function Checkout() {
                             <span className="text-xs text-muted-foreground">
                               {country.shippingRate === 0 
                                 ? 'Free Shipping' 
-                                : `${country.shippingRate} KWD shipping`}
+                                : `${formatPrice(country.shippingRate)} shipping`}
                             </span>
                           </div>
                         </SelectItem>
@@ -583,7 +585,7 @@ export default function Checkout() {
                   </Select>
                   {selectedCountry && selectedCountry.enableFreeThreshold && (
                     <p className="text-xs text-muted-foreground">
-                      Free shipping on orders over {selectedCountry.freeThreshold} KWD
+                      Free shipping on orders over {formatPrice(selectedCountry.freeThreshold)}
                     </p>
                   )}
                 </div>
@@ -783,7 +785,7 @@ export default function Checkout() {
                         <p className="text-xs text-muted-foreground">Size: {item.selectedSize}</p>
                       )}
                     </div>
-                    <p className="text-sm font-medium whitespace-nowrap">{item.price * item.quantity} KWD</p>
+                    <p className="text-sm font-medium whitespace-nowrap">{formatPrice(item.price * item.quantity)}</p>
                   </div>
                 ))}
               </div>
@@ -801,7 +803,7 @@ export default function Checkout() {
                         <p className="text-xs text-muted-foreground">
                           {appliedDiscount.type === 'percentage' 
                             ? `${appliedDiscount.value}% off` 
-                            : `${appliedDiscount.value} KWD off`}
+                            : `${formatPrice(appliedDiscount.value)} off`}
                         </p>
                       </div>
                       <Button
@@ -840,26 +842,26 @@ export default function Checkout() {
               <div className="border-t border-border pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>{totalPrice.toFixed(2)} KWD</span>
+                  <span>{formatPrice(totalPrice)}</span>
                 </div>
                 {appliedDiscount && (
                   <div className="flex justify-between text-sm text-primary">
                     <span>Discount ({appliedDiscount.code})</span>
-                    <span>-{appliedDiscount.discountAmount.toFixed(2)} KWD</span>
+                    <span>-{formatPrice(appliedDiscount.discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
                     Shipping{selectedCountry ? ` (${selectedCountry.name})` : ''}
                   </span>
-                  <span>{shippingCost === 0 ? 'Free' : `${shippingCost} KWD`}</span>
+                  <span>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
                 </div>
               </div>
 
               <div className="border-t border-border mt-4 pt-4">
                 <div className="flex justify-between items-center mb-6">
                   <span className="font-medium">Total</span>
-                  <span className="text-xl font-serif">{finalTotal.toFixed(2)} KWD</span>
+                  <span className="text-xl font-serif">{formatPrice(finalTotal)}</span>
                 </div>
 
                 <Button

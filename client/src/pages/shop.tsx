@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface Product {
   _id: string;
@@ -25,6 +26,7 @@ interface Product {
 
 export default function Shop() {
   const [location] = useLocation();
+  const { formatPrice } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 5000]);
@@ -186,8 +188,8 @@ export default function Shop() {
             data-testid="filter-price-range"
           />
           <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{priceRange[0]} KWD</span>
-            <span>{priceRange[1]} KWD</span>
+            <span>{formatPrice(priceRange[0])}</span>
+            <span>{formatPrice(priceRange[1])}</span>
           </div>
         </div>
       </div>
@@ -408,7 +410,7 @@ export default function Shop() {
                             {product.name}
                           </h3>
                         </div>
-                        <span className="text-sm sm:text-lg font-serif sm:flex-shrink-0">{product.price} KWD</span>
+                        <span className="text-sm sm:text-lg font-serif sm:flex-shrink-0">{formatPrice(product.price)}</span>
                       </div>
                     </motion.div>
                   </Link>

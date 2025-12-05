@@ -4,6 +4,7 @@ import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-mo
 import { Link, useLocation } from 'wouter';
 import { ShoppingBag, X, RotateCcw, ArrowLeft, Heart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface Product {
   _id: string;
@@ -30,11 +31,13 @@ const sampleProducts: Product[] = [
 function ProductCard({ 
   product, 
   onSwipe, 
-  isTop 
+  isTop,
+  formatPrice
 }: { 
   product: Product; 
   onSwipe: (direction: 'left' | 'right') => void;
   isTop: boolean;
+  formatPrice: (price: number) => string;
 }) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
@@ -99,7 +102,7 @@ function ProductCard({
           <p className="text-xs sm:text-sm uppercase tracking-widest opacity-70 mb-1 sm:mb-2">{product.category}</p>
           <h2 className="text-xl sm:text-3xl font-serif mb-1 sm:mb-2">{product.name}</h2>
           <p className="text-sm sm:text-lg opacity-80 mb-2 sm:mb-4 line-clamp-2">{product.description}</p>
-          <p className="text-xl sm:text-2xl font-bold">{product.price} KWD</p>
+          <p className="text-xl sm:text-2xl font-bold">{formatPrice(product.price)}</p>
         </div>
       </div>
     </motion.div>
@@ -114,6 +117,7 @@ export default function Explore() {
   const [, setLocation] = useLocation();
   
   const { addItem, items: globalCartItems, totalPrice: globalCartTotal } = useCart();
+  const { formatPrice } = useCurrency();
 
   const { data: apiProducts = [] } = useQuery<Product[]>({
     queryKey: ['allProducts'],
@@ -203,13 +207,13 @@ export default function Explore() {
               {localCart.map((item, i) => (
                 <div key={i} className="flex justify-between text-white/80 text-xs sm:text-sm">
                   <span className="truncate flex-1 mr-2">{item.name}</span>
-                  <span>{item.price} KWD</span>
+                  <span>{formatPrice(item.price)}</span>
                 </div>
               ))}
             </div>
             <div className="border-t border-white/20 mt-2 sm:mt-3 pt-2 sm:pt-3 flex justify-between text-white font-bold text-sm sm:text-base">
               <span>Total</span>
-              <span>{cartTotal} KWD</span>
+              <span>{formatPrice(cartTotal)}</span>
             </div>
           </motion.div>
         )}
@@ -235,7 +239,7 @@ export default function Explore() {
                       className="w-full bg-white text-black py-3 sm:py-4 rounded-full font-medium hover:bg-white/90 transition-colors min-h-[44px] text-sm sm:text-base"
                       data-testid="button-checkout"
                     >
-                      Checkout ({cartTotal} KWD)
+                      Checkout ({formatPrice(cartTotal)})
                     </button>
                   )}
                   <button 
@@ -256,6 +260,7 @@ export default function Explore() {
                   product={nextProduct} 
                   onSwipe={() => {}} 
                   isTop={false}
+                  formatPrice={formatPrice}
                 />
               )}
               {currentProduct && (
@@ -264,6 +269,7 @@ export default function Explore() {
                   product={currentProduct} 
                   onSwipe={handleSwipe} 
                   isTop={true}
+                  formatPrice={formatPrice}
                 />
               )}
             </AnimatePresence>

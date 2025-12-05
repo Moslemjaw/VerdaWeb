@@ -2,10 +2,12 @@ import { Link, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Button } from '@/components/ui/button';
 
 export default function Cart() {
   const { items, totalPrice, updateQuantity, removeItem } = useCart();
+  const { formatPrice } = useCurrency();
   const [, setLocation] = useLocation();
 
   const shippingCost = totalPrice >= 50 ? 0 : 3;
@@ -80,7 +82,7 @@ export default function Cart() {
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-sm truncate">{item.name}</h3>
                   <p className="text-xs text-muted-foreground mb-2">{item.category}</p>
-                  <p className="font-bold">{item.price} KWD</p>
+                  <p className="font-bold">{formatPrice(item.price)}</p>
                   
                   <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-2">
@@ -116,20 +118,20 @@ export default function Cart() {
           <div className="mt-8 p-4 bg-secondary/30 rounded-lg space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span>{totalPrice} KWD</span>
+              <span>{formatPrice(totalPrice)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Shipping</span>
-              <span>{shippingCost === 0 ? 'Free' : `${shippingCost} KWD`}</span>
+              <span>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
             </div>
             {totalPrice < 50 && (
               <p className="text-xs text-muted-foreground">
-                Add {50 - totalPrice} KWD more for free shipping
+                Add {formatPrice(50 - totalPrice)} more for free shipping
               </p>
             )}
             <div className="flex justify-between font-bold pt-2 border-t">
               <span>Total</span>
-              <span>{finalTotal} KWD</span>
+              <span>{formatPrice(finalTotal)}</span>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState, useEffect } from "react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Product {
   _id: string;
@@ -27,6 +28,7 @@ const bestSellerProducts: Product[] = [
 
 export default function BestSellers() {
   const { data: siteContent } = useSiteContent();
+  const { formatPrice } = useCurrency();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   
@@ -93,7 +95,7 @@ export default function BestSellers() {
                   <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
-                <p className="text-sm font-medium text-black">{product.price} KWD</p>
+                <p className="text-sm font-medium text-black">{formatPrice(product.price)}</p>
               </motion.div>
             </Link>
           ))}
@@ -150,7 +152,7 @@ export default function BestSellers() {
                       <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </div>
                     <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
-                    <p className="text-sm font-medium text-black">{product.price} KWD</p>
+                    <p className="text-sm font-medium text-black">{formatPrice(product.price)}</p>
                   </motion.div>
                 </Link>
               ))}

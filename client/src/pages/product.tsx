@@ -6,6 +6,7 @@ import { ArrowLeft, ShoppingBag, Heart, Check, Minus, Plus, Share2, ZoomIn, X, C
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface Product {
   _id: string;
@@ -28,6 +29,7 @@ export default function ProductDetails() {
   const [, setLocation] = useLocation();
   const { addItem, items } = useCart();
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
   
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -316,6 +318,7 @@ export default function ProductDetails() {
                   isInCart={isInCart}
                   sizeError={sizeError}
                   setSizeError={setSizeError}
+                  formatPrice={formatPrice}
                 />
               </div>
             </div>
@@ -414,6 +417,7 @@ export default function ProductDetails() {
               isInCart={isInCart}
               sizeError={sizeError}
               setSizeError={setSizeError}
+              formatPrice={formatPrice}
             />
           </div>
         </div>
@@ -424,7 +428,7 @@ export default function ProductDetails() {
         <div className="container mx-auto flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground">Total</p>
-            <p className="text-lg font-bold">{product.price * quantity} KWD</p>
+            <p className="text-lg font-bold">{formatPrice(product.price * quantity)}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -473,6 +477,7 @@ interface ProductInfoProps {
   isInCart: boolean;
   sizeError: boolean;
   setSizeError: (val: boolean) => void;
+  formatPrice: (price: number) => string;
 }
 
 function ProductInfo({
@@ -487,6 +492,7 @@ function ProductInfo({
   isInCart,
   sizeError,
   setSizeError,
+  formatPrice,
 }: ProductInfoProps) {
   return (
     <motion.div
@@ -515,7 +521,7 @@ function ProductInfo({
       </div>
 
       <p className="text-2xl sm:text-3xl font-medium mt-4" data-testid="text-product-price">
-        {product.price} KWD
+        {formatPrice(product.price)}
       </p>
 
       <p className="text-muted-foreground mt-4 text-sm sm:text-base leading-relaxed" data-testid="text-product-description">
