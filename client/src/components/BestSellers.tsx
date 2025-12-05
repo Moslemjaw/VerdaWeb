@@ -1,10 +1,7 @@
-import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Product {
   _id: string;
@@ -28,16 +25,6 @@ const bestSellerProducts: Product[] = [
 ];
 
 export default function BestSellers() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    align: "start", 
-    loop: false, 
-    dragFree: false,
-    containScroll: "trimSnaps",
-    slidesToScroll: 1
-  });
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(true);
   const { data: siteContent } = useSiteContent();
   
   const bestSellersContent = siteContent?.best_sellers;
@@ -57,100 +44,60 @@ export default function BestSellers() {
     ? apiProducts.slice(0, 10)
     : [...apiProducts, ...bestSellerProducts].slice(0, 10);
 
-  const onScroll = useCallback(() => {
-    if (!emblaApi) return;
-    const progress = Math.max(0, Math.min(1, emblaApi.scrollProgress()));
-    setScrollProgress(progress);
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onScroll();
-    emblaApi.on('scroll', onScroll);
-    emblaApi.on('reInit', onScroll);
-    emblaApi.on('select', onScroll);
-    return () => {
-      emblaApi.off('scroll', onScroll);
-      emblaApi.off('reInit', onScroll);
-      emblaApi.off('select', onScroll);
-    };
-  }, [emblaApi, onScroll]);
-
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-
   return (
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="lg:w-56 flex-shrink-0"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">{title}</h2>
-            <p className="text-muted-foreground text-sm mb-6">Shop our bestselling styles.</p>
-            <Link href="/best">
-              <span className="inline-block border border-foreground px-5 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-foreground hover:text-background transition-all cursor-pointer">
-                {buttonText}
-              </span>
-            </Link>
-          </motion.div>
+    <section className="py-16 bg-white">
+      <div className="flex">
+        {/* Left Side - Static Content (25-30% width) */}
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="w-[28%] flex-shrink-0 pl-8 pr-6 flex flex-col justify-center"
+        >
+          <h2 className="text-3xl font-bold tracking-tight text-black mb-3">{title}</h2>
+          <p className="text-gray-500 text-sm mb-8">Shop our bestselling styles.</p>
+          <Link href="/best">
+            <span className="inline-block border border-black text-black px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition-all cursor-pointer">
+              {buttonText}
+            </span>
+          </Link>
+        </motion.div>
 
-          <div className="flex-1 relative">
-            <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
-              <div className="flex">
-                {products.map((product, index) => (
-                  <motion.div
-                    key={product._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.03 }}
-                    className="flex-[0_0_20%] min-w-0 px-2 group cursor-pointer select-none"
-                  >
-                    <div className="aspect-[3/4] bg-secondary/50 mb-3 overflow-hidden">
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" 
-                        draggable={false}
-                      />
-                    </div>
-                    <h3 className="text-xs uppercase tracking-wide text-foreground/80 mb-1 truncate">{product.name}</h3>
-                    <p className="text-sm font-medium">{product.price} KWD</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            <button 
-              onClick={scrollPrev}
-              disabled={!canScrollPrev}
-              className={`absolute left-0 top-1/3 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-background border border-foreground/20 flex items-center justify-center transition-opacity ${canScrollPrev ? 'opacity-100 hover:bg-foreground hover:text-background' : 'opacity-0 pointer-events-none'}`}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={scrollNext}
-              disabled={!canScrollNext}
-              className={`absolute right-0 top-1/3 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-background border border-foreground/20 flex items-center justify-center transition-opacity ${canScrollNext ? 'opacity-100 hover:bg-foreground hover:text-background' : 'opacity-0 pointer-events-none'}`}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-8 flex justify-center lg:justify-end">
-          <div className="w-full max-w-md lg:max-w-xl h-1 bg-muted rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-foreground rounded-full transition-all duration-150"
-              style={{ width: `${Math.max(20, scrollProgress * 100)}%` }}
-            />
+        {/* Right Side - Scrollable Product List (70-75% width) */}
+        <div 
+          className="w-[72%] overflow-x-auto scroll-smooth pr-8"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          <style>{`
+            .hide-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+          <div className="flex gap-5 hide-scrollbar pb-4">
+            {products.map((product, index) => (
+              <motion.div
+                key={product._id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="flex-shrink-0 w-[200px] group cursor-pointer"
+              >
+                <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden">
+                  <img 
+                    src={product.imageUrl} 
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                  />
+                </div>
+                <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
+                <p className="text-sm font-medium text-black">{product.price} KWD</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
