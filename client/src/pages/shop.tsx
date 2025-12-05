@@ -20,9 +20,26 @@ interface Product {
   compareAtPrice?: number;
   description: string;
   category: string;
+  brand?: string;
   imageUrl: string;
   inStock: boolean;
   featured: boolean;
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  order: number;
+}
+
+interface Brand {
+  _id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  order: number;
 }
 
 export default function Shop() {
@@ -30,6 +47,7 @@ export default function Shop() {
   const { formatPrice } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [showInStockOnly, setShowInStockOnly] = useState(false);
   const [showBestSellersOnly, setShowBestSellersOnly] = useState(false);
@@ -65,11 +83,34 @@ export default function Shop() {
     },
   });
 
-  // Get unique categories
-  const categories = useMemo(() => {
-    const cats = new Set(products.map(p => p.category));
-    return Array.from(cats);
-  }, [products]);
+  // Fetch categories from API
+  const { data: categoriesData = [] } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await fetch('/api/categories');
+      if (!res.ok) throw new Error('Failed to fetch categories');
+      return res.json();
+    },
+  });
+
+  // Fetch brands from API
+  const { data: brandsData = [] } = useQuery<Brand[]>({
+    queryKey: ['brands'],
+    queryFn: async () => {
+      const res = await fetch('/api/brands');
+      if (!res.ok) throw new Error('Failed to fetch brands');
+      return res.json();
+    },
+  });
+
+  // Filter for active categories and brands only
+  const categories = useMemo(() => 
+    categoriesData.filter(c => c.isActive).map(c => c.name),
+  [categoriesData]);
+
+  const brands = useMemo(() => 
+    brandsData.filter(b => b.isActive).map(b => b.name),
+  [brandsData]);
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
@@ -86,6 +127,11 @@ export default function Shop() {
 
       // Category filter
       if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
+        return false;
+      }
+
+      // Brand filter - exclude products without a brand or with non-selected brand
+      if (selectedBrands.length > 0 && (!product.brand || !selectedBrands.includes(product.brand))) {
         return false;
       }
 
@@ -136,7 +182,7 @@ export default function Shop() {
     }
 
     return result;
-  }, [products, searchQuery, selectedCategories, priceRange, showInStockOnly, showBestSellersOnly, showNewInOnly, showOnSaleOnly, sortBy]);
+  }, [products, searchQuery, selectedCategories, selectedBrands, priceRange, showInStockOnly, showBestSellersOnly, showNewInOnly, showOnSaleOnly, sortBy]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
@@ -146,9 +192,18 @@ export default function Shop() {
     );
   };
 
+  const toggleBrand = (brand: string) => {
+    setSelectedBrands(prev => 
+      prev.includes(brand) 
+        ? prev.filter(b => b !== brand)
+        : [...prev, brand]
+    );
+  };
+
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedCategories([]);
+    setSelectedBrands([]);
     setPriceRange([0, 5000]);
     setShowInStockOnly(false);
     setShowBestSellersOnly(false);
@@ -159,7 +214,7 @@ export default function Shop() {
     window.history.replaceState({}, '', '/shop');
   };
 
-  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 5000 || showInStockOnly || showBestSellersOnly || showNewInOnly || showOnSaleOnly;
+  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || selectedBrands.length > 0 || priceRange[0] > 0 || priceRange[1] < 5000 || showInStockOnly || showBestSellersOnly || showNewInOnly || showOnSaleOnly;
 
   const FilterContent = () => (
     <div className="space-y-8">
@@ -170,13 +225,33 @@ export default function Shop() {
           {categories.map(category => (
             <div key={category} className="flex items-center space-x-2">
               <Checkbox
-                id={category}
+                id={`cat-${category}`}
                 checked={selectedCategories.includes(category)}
                 onCheckedChange={() => toggleCategory(category)}
                 data-testid={`filter-category-${category}`}
               />
-              <Label htmlFor={category} className="text-sm cursor-pointer">
+              <Label htmlFor={`cat-${category}`} className="text-sm cursor-pointer">
                 {category}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Brands */}
+      <div>
+        <h3 className="font-serif text-lg mb-4">Brands</h3>
+        <div className="space-y-3">
+          {brands.map(brand => (
+            <div key={brand} className="flex items-center space-x-2">
+              <Checkbox
+                id={`brand-${brand}`}
+                checked={selectedBrands.includes(brand)}
+                onCheckedChange={() => toggleBrand(brand)}
+                data-testid={`filter-brand-${brand}`}
+              />
+              <Label htmlFor={`brand-${brand}`} className="text-sm cursor-pointer">
+                {brand}
               </Label>
             </div>
           ))}

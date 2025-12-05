@@ -260,8 +260,7 @@ const POPUP_TYPE_LABELS: Record<PopupType, string> = {
   announcement: 'Announcement',
 };
 
-const CATEGORIES = ['Dresses', 'Evening Wear', 'Accessories', 'Outerwear', 'Tops', 'Bottoms', 'Shoes'];
-const BRANDS = ['Lumière', 'Maison Élégance', 'Atelier Noir', 'Belle Couture', 'Chic Parisien'];
+// Categories and brands are now fetched from the API - see useQuery hooks below
 
 export default function AdminDashboard() {
   const { user, isLoading, isAdmin, logout } = useAuth();
@@ -277,7 +276,7 @@ export default function AdminDashboard() {
     compareAtPrice: '',
     description: '',
     category: '',
-    brand: 'Lumière',
+    brand: '',
     imageUrl: '',
     images: '',
     uploadedImages: [] as string[],
@@ -1875,8 +1874,8 @@ export default function AdminDashboard() {
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {CATEGORIES.map((cat) => (
-                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            {categories.filter(cat => cat.isActive).map((cat) => (
+                              <SelectItem key={cat._id} value={cat.name}>{cat.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -1891,8 +1890,8 @@ export default function AdminDashboard() {
                             <SelectValue placeholder="Select brand" />
                           </SelectTrigger>
                           <SelectContent>
-                            {BRANDS.map((brand) => (
-                              <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                            {brands.filter(brand => brand.isActive).map((brand) => (
+                              <SelectItem key={brand._id} value={brand.name}>{brand.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -3364,8 +3363,8 @@ export default function AdminDashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Categories (Featured)</SelectItem>
-                          {CATEGORIES.map((cat) => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          {categories.filter(cat => cat.isActive).map((cat) => (
+                            <SelectItem key={cat._id} value={cat.name}>{cat.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -3448,8 +3447,8 @@ export default function AdminDashboard() {
                                 <SelectValue placeholder="Select a category" />
                               </SelectTrigger>
                               <SelectContent>
-                                {CATEGORIES.map((category) => (
-                                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                                {categories.filter(cat => cat.isActive).map((cat) => (
+                                  <SelectItem key={cat._id} value={cat.name}>{cat.name}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
