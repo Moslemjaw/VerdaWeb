@@ -77,7 +77,7 @@ export default function BestSellers() {
         >
           <h2 className="text-3xl font-bold tracking-tight text-black mb-3">{title}</h2>
           <p className="text-gray-500 text-sm mb-8">Shop our bestselling styles.</p>
-          <Link href="/best">
+          <Link href="/shop?filter=bestsellers">
             <span className="inline-block border border-black text-black px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition-all cursor-pointer">
               {buttonText}
             </span>
