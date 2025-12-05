@@ -54,7 +54,8 @@ export async function registerRoutes(
   connectDB().catch(console.error);
 
   // Serve uploaded files
-  app.use('/uploads', require('express').static(uploadDir));
+  const express = await import('express');
+  app.use('/uploads', express.default.static(uploadDir));
 
   // ============================================
   // IMAGE UPLOAD ROUTE

@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,8 +11,90 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye } from 'lucide-react';
+import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+
+function ImageUploadInput({ 
+  value, 
+  onChange, 
+  label, 
+  placeholder = "Paste image URL or upload file" 
+}: { 
+  value: string; 
+  onChange: (url: string) => void; 
+  label: string;
+  placeholder?: string;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        onChange(data.url);
+      } else {
+        console.error('Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label className="font-medium">{label}</Label>
+      <div className="flex gap-2">
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="flex-1"
+        />
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          title="Upload image"
+        >
+          {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+        </Button>
+      </div>
+      {value && (
+        <div className="mt-2 relative w-20 h-20 rounded border overflow-hidden">
+          <img src={value} alt="Preview" className="w-full h-full object-cover" />
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface Product {
   _id: string;
@@ -1300,15 +1382,12 @@ export default function AdminDashboard() {
                         placeholder="e.g., /shop"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="font-medium">Background Image URL</Label>
-                      <Input
-                        value={heroContent.imageUrl}
-                        onChange={(e) => setHeroContent({ ...heroContent, imageUrl: e.target.value })}
-                        placeholder="Paste image URL here"
-                      />
-                      <p className="text-xs text-muted-foreground">Paste a URL to an image (e.g., from Unsplash or your image hosting)</p>
-                    </div>
+                    <ImageUploadInput
+                      label="Background Image"
+                      value={heroContent.imageUrl}
+                      onChange={(url) => setHeroContent({ ...heroContent, imageUrl: url })}
+                      placeholder="Paste URL or upload image"
+                    />
                   </div>
                 </div>
                 <Button onClick={handleSaveHeroContent} className="mt-6" disabled={updateContentMutation.isPending}>
@@ -1431,48 +1510,38 @@ export default function AdminDashboard() {
                     <Label className="font-medium text-lg mb-4 block">Gallery Images (5 images)</Label>
                     <p className="text-sm text-muted-foreground mb-4">Enter URLs for 5 model images. They will display in a fanning animation.</p>
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-sm">Image 1 (far left)</Label>
-                        <Input
-                          value={newCollectionContent.image1}
-                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image1: e.target.value })}
-                          placeholder="Image URL"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm">Image 2 (mid left)</Label>
-                        <Input
-                          value={newCollectionContent.image2}
-                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image2: e.target.value })}
-                          placeholder="Image URL"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm">Image 3 (center)</Label>
-                        <Input
-                          value={newCollectionContent.image3}
-                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image3: e.target.value })}
-                          placeholder="Image URL"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm">Image 4 (mid right)</Label>
-                        <Input
-                          value={newCollectionContent.image4}
-                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image4: e.target.value })}
-                          placeholder="Image URL"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm">Image 5 (far right)</Label>
-                        <Input
-                          value={newCollectionContent.image5}
-                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image5: e.target.value })}
-                          placeholder="Image URL"
-                        />
-                      </div>
+                      <ImageUploadInput
+                        label="Image 1 (far left)"
+                        value={newCollectionContent.image1}
+                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image1: url })}
+                        placeholder="Upload or paste URL"
+                      />
+                      <ImageUploadInput
+                        label="Image 2 (mid left)"
+                        value={newCollectionContent.image2}
+                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image2: url })}
+                        placeholder="Upload or paste URL"
+                      />
+                      <ImageUploadInput
+                        label="Image 3 (center)"
+                        value={newCollectionContent.image3}
+                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image3: url })}
+                        placeholder="Upload or paste URL"
+                      />
+                      <ImageUploadInput
+                        label="Image 4 (mid right)"
+                        value={newCollectionContent.image4}
+                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image4: url })}
+                        placeholder="Upload or paste URL"
+                      />
+                      <ImageUploadInput
+                        label="Image 5 (far right)"
+                        value={newCollectionContent.image5}
+                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image5: url })}
+                        placeholder="Upload or paste URL"
+                      />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">Leave empty to use default images</p>
+                    <p className="text-xs text-muted-foreground mt-2">Upload all 5 images for custom gallery, or leave empty to use defaults</p>
                   </div>
                 </div>
                 <Button onClick={handleSaveNewCollectionContent} className="mt-6" disabled={updateContentMutation.isPending}>
