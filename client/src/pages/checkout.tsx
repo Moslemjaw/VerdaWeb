@@ -15,9 +15,11 @@ interface CheckoutFormData {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  block: string;
   street: string;
+  houseNumber: string;
+  apartmentNumber: string;
   area: string;
-  city: string;
   notes: string;
   isGift: boolean;
 }
@@ -36,9 +38,11 @@ export default function Checkout() {
     customerName: '',
     customerEmail: '',
     customerPhone: '',
+    block: '',
     street: '',
+    houseNumber: '',
+    apartmentNumber: '',
     area: '',
-    city: '',
     notes: '',
     isGift: false,
   });
@@ -64,12 +68,16 @@ export default function Checkout() {
       toast({ title: 'Please enter your phone number', variant: 'destructive' });
       return false;
     }
-    if (!formData.street.trim()) {
-      toast({ title: 'Please enter your street address', variant: 'destructive' });
+    if (!formData.area.trim()) {
+      toast({ title: 'Please enter your area', variant: 'destructive' });
       return false;
     }
-    if (!formData.area.trim()) {
-      toast({ title: 'Please enter your city/area', variant: 'destructive' });
+    if (!formData.block.trim()) {
+      toast({ title: 'Please enter your block number', variant: 'destructive' });
+      return false;
+    }
+    if (!formData.street.trim()) {
+      toast({ title: 'Please enter your street', variant: 'destructive' });
       return false;
     }
     return true;
@@ -98,7 +106,7 @@ export default function Checkout() {
       status: 'pending',
       shippingAddress: {
         name: formData.customerName,
-        line1: formData.street,
+        line1: `Block ${formData.block}, Street ${formData.street}${formData.houseNumber ? `, House ${formData.houseNumber}` : ''}${formData.apartmentNumber ? `, Apt ${formData.apartmentNumber}` : ''}`,
         city: formData.area,
         state: formData.area,
         postalCode: '',
@@ -311,20 +319,7 @@ export default function Checkout() {
               <h2 className="font-serif text-lg mb-4">Delivery Address</h2>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="street" className="text-xs uppercase tracking-wide text-muted-foreground">Street Address *</Label>
-                  <Input
-                    id="street"
-                    name="street"
-                    value={formData.street}
-                    onChange={handleInputChange}
-                    placeholder=""
-                    className="h-11 bg-background border-border"
-                    data-testid="input-street"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="area" className="text-xs uppercase tracking-wide text-muted-foreground">City / Area *</Label>
+                  <Label htmlFor="area" className="text-xs uppercase tracking-wide text-muted-foreground">Area *</Label>
                   <Input
                     id="area"
                     name="area"
@@ -334,6 +329,60 @@ export default function Checkout() {
                     className="h-11 bg-background border-border"
                     data-testid="input-area"
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="block" className="text-xs uppercase tracking-wide text-muted-foreground">Block *</Label>
+                    <Input
+                      id="block"
+                      name="block"
+                      value={formData.block}
+                      onChange={handleInputChange}
+                      placeholder=""
+                      className="h-11 bg-background border-border"
+                      data-testid="input-block"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="street" className="text-xs uppercase tracking-wide text-muted-foreground">Street *</Label>
+                    <Input
+                      id="street"
+                      name="street"
+                      value={formData.street}
+                      onChange={handleInputChange}
+                      placeholder=""
+                      className="h-11 bg-background border-border"
+                      data-testid="input-street"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="houseNumber" className="text-xs uppercase tracking-wide text-muted-foreground">House Number</Label>
+                    <Input
+                      id="houseNumber"
+                      name="houseNumber"
+                      value={formData.houseNumber}
+                      onChange={handleInputChange}
+                      placeholder=""
+                      className="h-11 bg-background border-border"
+                      data-testid="input-house-number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="apartmentNumber" className="text-xs uppercase tracking-wide text-muted-foreground">Apartment Number</Label>
+                    <Input
+                      id="apartmentNumber"
+                      name="apartmentNumber"
+                      value={formData.apartmentNumber}
+                      onChange={handleInputChange}
+                      placeholder=""
+                      className="h-11 bg-background border-border"
+                      data-testid="input-apartment-number"
+                    />
+                  </div>
                 </div>
               </div>
             </section>
