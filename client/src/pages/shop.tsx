@@ -147,8 +147,8 @@ export default function Shop() {
             data-testid="filter-price-range"
           />
           <div className="flex justify-between text-sm text-muted-foreground">
-            <span>${priceRange[0]}</span>
-            <span>${priceRange[1]}</span>
+            <span>{priceRange[0]} KWD</span>
+            <span>{priceRange[1]} KWD</span>
           </div>
         </div>
       </div>
@@ -331,7 +331,7 @@ export default function Shop() {
                           {product.name}
                         </h3>
                       </div>
-                      <span className="text-lg font-serif">${product.price}</span>
+                      <span className="text-lg font-serif">{product.price} KWD</span>
                     </div>
                   </motion.div>
                 ))}

@@ -34,7 +34,7 @@ export default function BlackDressShowcase() {
       "Obsidian Maxi",
       "Eclipse Evening Wear",
     ][i],
-    price: ["$120", "$180", "$250", "$320", "$150"][i],
+    price: ["120 KWD", "180 KWD", "250 KWD", "320 KWD", "150 KWD"][i],
     image: heroImages[i % 5]
   }));
 

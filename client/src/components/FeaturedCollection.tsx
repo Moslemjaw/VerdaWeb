@@ -117,7 +117,7 @@ export default function FeaturedCollection() {
                     {product.name}
                   </h3>
                 </div>
-                <span className="text-lg font-serif">${product.price}</span>
+                <span className="text-lg font-serif">{product.price} KWD</span>
               </div>
             </motion.div>
           ))}

@@ -90,7 +90,7 @@ export default function NewIn() {
                     <h3 className="text-sm md:text-base text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors">
                       {product.name}
                     </h3>
-                    <p className="text-sm text-white/70 font-medium">${product.price}</p>
+                    <p className="text-sm text-white/70 font-medium">{product.price} KWD</p>
                   </div>
                 </motion.div>
               ))}

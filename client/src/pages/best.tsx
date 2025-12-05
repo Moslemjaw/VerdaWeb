@@ -110,7 +110,7 @@ export default function BestSellers() {
                         {product.description}
                       </p>
                     </div>
-                    <span className="text-xl font-serif">${product.price}</span>
+                    <span className="text-xl font-serif">{product.price} KWD</span>
                   </div>
                 </motion.div>
               ))}

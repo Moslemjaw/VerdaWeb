@@ -7,11 +7,11 @@ import necklace from "@assets/generated_images/close_up_of_gold_jewelry_necklace
 import dress from "@assets/generated_images/fashion_model_in_a_red_silk_dress.png";
 
 const products = [
-  { id: 1, name: "Velvet Evening Clutch", price: "$450", image: handbag },
-  { id: 2, name: "Pearl Drop Earrings", price: "$290", image: necklace },
-  { id: 3, name: "Cashmere Wrap", price: "$890", image: dress },
-  { id: 4, name: "Leather Crossbody", price: "$550", image: handbag },
-  { id: 5, name: "Silk Scarf", price: "$180", image: dress },
+  { id: 1, name: "Velvet Evening Clutch", price: "450 KWD", image: handbag },
+  { id: 2, name: "Pearl Drop Earrings", price: "290 KWD", image: necklace },
+  { id: 3, name: "Cashmere Wrap", price: "890 KWD", image: dress },
+  { id: 4, name: "Leather Crossbody", price: "550 KWD", image: handbag },
+  { id: 5, name: "Silk Scarf", price: "180 KWD", image: dress },
 ];
 
 export default function BestSellers() {
