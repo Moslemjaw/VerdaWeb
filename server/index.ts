@@ -23,10 +23,16 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
+// Validate required environment variables
+const SESSION_SECRET = process.env.SESSION_SECRET;
+if (!SESSION_SECRET) {
+  throw new Error('SESSION_SECRET environment variable is required');
+}
+
 // Session middleware
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "lumiere-secret-key-change-in-production",
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {

@@ -49,4 +49,3 @@ mockupState = "FULLSTACK"
 [userenv]
 
 [userenv.shared]
-MONGODB_URI = "mongodb+srv://user:QZLRf1iYYNGdHGfg@cluster0.filwoq3.mongodb.net/lumiere-fashion?retryWrites=true&w=majority"

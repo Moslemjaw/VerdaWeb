@@ -155,5 +155,36 @@ Preferred communication style: Simple, everyday language.
 - **date-fns** - Date manipulation
 - **nanoid** - Unique ID generation
 
-### Notes on Database Configuration
-The application is currently configured to use MongoDB despite having Drizzle configuration files for PostgreSQL. The shared schema definitions in `/shared/schema.ts` use Drizzle with PostgreSQL, but the active implementation uses Mongoose models with MongoDB. This suggests a potential migration path or legacy configuration that should be aligned.
+## Environment Variables
+
+The application requires the following environment variables to run. All sensitive values should be stored as secrets.
+
+### Required Environment Variables
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `MONGODB_URI` | Secret | MongoDB connection string for database access |
+| `SESSION_SECRET` | Secret | Secret key for signing session cookies (must be a secure random string) |
+
+### Optional Environment Variables
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `NODE_ENV` | Env | `development` | Set to `production` for production builds |
+| `PORT` | Env | `5000` | Port for the server to listen on |
+
+### Replit-Managed Variables
+
+These are automatically set by Replit and should not be modified:
+- `REPLIT_DOMAINS` - Available domains for the deployment
+- `REPLIT_DEV_DOMAIN` - Development domain
+- `REPL_ID` - Unique Repl identifier
+- `DATABASE_URL`, `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` - PostgreSQL credentials (available but not used, app uses MongoDB)
+
+## MERN Stack Architecture
+
+This application is built on the MERN stack:
+- **M**ongoDB - Document database for storing users, products, and content
+- **E**xpress.js - Backend web framework for REST API
+- **R**eact - Frontend library for building the user interface
+- **N**ode.js - JavaScript runtime for the server
