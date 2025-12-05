@@ -7,6 +7,7 @@ import { SiteContent, ISiteContent } from "./models/SiteContent";
 import { Order, IOrder } from "./models/Order";
 import { Discount, IDiscount } from "./models/Discount";
 import { ShippingSettings, getShippingSettings } from "./models/ShippingSettings";
+import { ShippingCountry, initializeDefaultCountries } from "./models/ShippingCountry";
 import { requireAuth, requireAdmin, AuthRequest } from "./middleware/auth";
 import { Request, Response } from "express";
 import multer from "multer";
@@ -786,6 +787,129 @@ export async function registerRoutes(
     } catch (error) {
       console.error('Update shipping settings error:', error);
       res.status(500).json({ error: "Failed to update shipping settings" });
+    }
+  });
+
+  // ============================================
+  // SHIPPING COUNTRIES ROUTES
+  // ============================================
+
+  await initializeDefaultCountries();
+
+  app.get("/api/shipping/countries", async (req: Request, res: Response) => {
+    try {
+      const countries = await ShippingCountry.find({ isActive: true }).sort({ isDefault: -1, name: 1 });
+      res.json(countries);
+    } catch (error) {
+      console.error('Get shipping countries error:', error);
+      res.status(500).json({ error: "Failed to get shipping countries" });
+    }
+  });
+
+  app.get("/api/admin/shipping/countries", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const countries = await ShippingCountry.find().sort({ isDefault: -1, name: 1 });
+      res.json(countries);
+    } catch (error) {
+      console.error('Get admin shipping countries error:', error);
+      res.status(500).json({ error: "Failed to get shipping countries" });
+    }
+  });
+
+  app.post("/api/admin/shipping/countries", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { name, code, shippingRate, freeThreshold, enableFreeThreshold, isDefault } = req.body;
+
+      if (!name || !code) {
+        return res.status(400).json({ error: "Country name and code are required" });
+      }
+
+      if (typeof shippingRate !== 'number' || shippingRate < 0) {
+        return res.status(400).json({ error: "Shipping rate must be a non-negative number" });
+      }
+
+      const existingCountry = await ShippingCountry.findOne({ code: code.toUpperCase() });
+      if (existingCountry) {
+        return res.status(400).json({ error: "Country with this code already exists" });
+      }
+
+      if (isDefault) {
+        await ShippingCountry.updateMany({}, { isDefault: false });
+      }
+
+      const country = new ShippingCountry({
+        name,
+        code: code.toUpperCase(),
+        shippingRate,
+        freeThreshold: freeThreshold || 50,
+        enableFreeThreshold: enableFreeThreshold ?? true,
+        isActive: true,
+        isDefault: isDefault || false,
+      });
+
+      await country.save();
+      res.status(201).json(country);
+    } catch (error) {
+      console.error('Create shipping country error:', error);
+      res.status(500).json({ error: "Failed to create shipping country" });
+    }
+  });
+
+  app.put("/api/admin/shipping/countries/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name, code, shippingRate, freeThreshold, enableFreeThreshold, isActive, isDefault } = req.body;
+
+      const country = await ShippingCountry.findById(id);
+      if (!country) {
+        return res.status(404).json({ error: "Country not found" });
+      }
+
+      if (code && code.toUpperCase() !== country.code) {
+        const existingCountry = await ShippingCountry.findOne({ code: code.toUpperCase(), _id: { $ne: id } });
+        if (existingCountry) {
+          return res.status(400).json({ error: "Country with this code already exists" });
+        }
+      }
+
+      if (isDefault && !country.isDefault) {
+        await ShippingCountry.updateMany({ _id: { $ne: id } }, { isDefault: false });
+      }
+
+      if (name !== undefined) country.name = name;
+      if (code !== undefined) country.code = code.toUpperCase();
+      if (shippingRate !== undefined) country.shippingRate = shippingRate;
+      if (freeThreshold !== undefined) country.freeThreshold = freeThreshold;
+      if (enableFreeThreshold !== undefined) country.enableFreeThreshold = enableFreeThreshold;
+      if (isActive !== undefined) country.isActive = isActive;
+      if (isDefault !== undefined) country.isDefault = isDefault;
+
+      await country.save();
+      res.json(country);
+    } catch (error) {
+      console.error('Update shipping country error:', error);
+      res.status(500).json({ error: "Failed to update shipping country" });
+    }
+  });
+
+  app.delete("/api/admin/shipping/countries/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const country = await ShippingCountry.findById(id);
+      if (!country) {
+        return res.status(404).json({ error: "Country not found" });
+      }
+
+      if (country.isDefault) {
+        return res.status(400).json({ error: "Cannot delete the default country" });
+      }
+
+      await ShippingCountry.findByIdAndDelete(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Delete shipping country error:', error);
+      res.status(500).json({ error: "Failed to delete shipping country" });
     }
   });
 
