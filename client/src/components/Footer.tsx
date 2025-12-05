@@ -49,13 +49,17 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <span className="hover:opacity-100 cursor-pointer transition-opacity">Contact</span>
+                <a href="https://wa.me/96599999999" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 cursor-pointer transition-opacity">Contact</a>
               </li>
               <li>
-                <span className="hover:opacity-100 cursor-pointer transition-opacity">Shipping & Returns</span>
+                <Link href="/faq">
+                  <span className="hover:opacity-100 cursor-pointer transition-opacity">Shipping & Returns</span>
+                </Link>
               </li>
               <li>
-                <span className="hover:opacity-100 cursor-pointer transition-opacity">FAQ</span>
+                <Link href="/faq">
+                  <span className="hover:opacity-100 cursor-pointer transition-opacity">FAQ</span>
+                </Link>
               </li>
             </ul>
           </div>
