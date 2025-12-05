@@ -4,6 +4,7 @@ import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { triggerNewAccountPopup } from '@/components/PopupManager';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -16,6 +17,7 @@ export default function Signup() {
     e.preventDefault();
     try {
       await signup({ email, password, name });
+      triggerNewAccountPopup();
       setLocation('/');
     } catch (error) {
       console.error('Signup error:', error);
