@@ -794,10 +794,9 @@ export async function registerRoutes(
   // SHIPPING COUNTRIES ROUTES
   // ============================================
 
-  await initializeDefaultCountries();
-
   app.get("/api/shipping/countries", async (req: Request, res: Response) => {
     try {
+      await initializeDefaultCountries();
       const countries = await ShippingCountry.find({ isActive: true }).sort({ isDefault: -1, name: 1 });
       res.json(countries);
     } catch (error) {
@@ -808,6 +807,7 @@ export async function registerRoutes(
 
   app.get("/api/admin/shipping/countries", requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
+      await initializeDefaultCountries();
       const countries = await ShippingCountry.find().sort({ isDefault: -1, name: 1 });
       res.json(countries);
     } catch (error) {

@@ -206,6 +206,17 @@ interface Discount {
   createdAt: string;
 }
 
+interface ShippingCountry {
+  _id: string;
+  name: string;
+  code: string;
+  shippingRate: number;
+  freeThreshold: number;
+  enableFreeThreshold: boolean;
+  isActive: boolean;
+  isDefault: boolean;
+}
+
 const CATEGORIES = ['Dresses', 'Evening Wear', 'Accessories', 'Outerwear', 'Tops', 'Bottoms', 'Shoes'];
 const BRANDS = ['Lumière', 'Maison Élégance', 'Atelier Noir', 'Belle Couture', 'Chic Parisien'];
 
@@ -293,6 +304,17 @@ export default function AdminDashboard() {
     baseRate: 2,
     freeThreshold: 50,
     enableFreeThreshold: true,
+  });
+
+  const [isAddCountryOpen, setIsAddCountryOpen] = useState(false);
+  const [editingCountry, setEditingCountry] = useState<ShippingCountry | null>(null);
+  const [countryForm, setCountryForm] = useState({
+    name: '',
+    code: '',
+    shippingRate: 2,
+    freeThreshold: 50,
+    enableFreeThreshold: true,
+    isDefault: false,
   });
 
   const { data: statsData } = useQuery<{ stats: Stats; recentUsers: User[]; recentProducts: Product[]; recentOrders: Order[] }>({
@@ -459,6 +481,81 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminShipping'] });
+    },
+  });
+
+  const { data: shippingCountries = [] } = useQuery<ShippingCountry[]>({
+    queryKey: ['adminShippingCountries'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/shipping/countries', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch shipping countries');
+      return res.json();
+    },
+    enabled: isAdmin,
+  });
+
+  const createCountryMutation = useMutation({
+    mutationFn: async (data: typeof countryForm) => {
+      const res = await fetch('/api/admin/shipping/countries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to create country');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminShippingCountries'] });
+      setIsAddCountryOpen(false);
+      setCountryForm({
+        name: '',
+        code: '',
+        shippingRate: 2,
+        freeThreshold: 50,
+        enableFreeThreshold: true,
+        isDefault: false,
+      });
+    },
+  });
+
+  const updateCountryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<ShippingCountry> }) => {
+      const res = await fetch(`/api/admin/shipping/countries/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to update country');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminShippingCountries'] });
+      setEditingCountry(null);
+    },
+  });
+
+  const deleteCountryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/shipping/countries/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to delete country');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminShippingCountries'] });
     },
   });
 
@@ -1628,84 +1725,219 @@ export default function AdminDashboard() {
             )}
           </TabsContent>
 
-          <TabsContent value="shipping" className="space-y-4">
-            <div>
-              <h2 className="text-2xl font-serif font-bold">Shipping Settings</h2>
-              <p className="text-muted-foreground">Configure shipping rates and free shipping threshold</p>
+          <TabsContent value="shipping" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-serif font-bold">Shipping Countries</h2>
+                <p className="text-muted-foreground">Configure shipping rates for each country</p>
+              </div>
+              <Dialog open={isAddCountryOpen} onOpenChange={setIsAddCountryOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Truck className="w-4 h-4 mr-2" />
+                    Add Country
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Add New Country</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => { e.preventDefault(); createCountryMutation.mutate(countryForm); }} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Country Name *</Label>
+                        <Input
+                          value={countryForm.name}
+                          onChange={(e) => setCountryForm(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="e.g. Saudi Arabia"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Country Code *</Label>
+                        <Input
+                          value={countryForm.code}
+                          onChange={(e) => setCountryForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+                          placeholder="e.g. SA"
+                          maxLength={3}
+                          className="uppercase"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Shipping Rate (KWD) *</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={countryForm.shippingRate}
+                          onChange={(e) => setCountryForm(prev => ({ ...prev, shippingRate: parseFloat(e.target.value) || 0 }))}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Free Threshold (KWD)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={countryForm.freeThreshold}
+                          onChange={(e) => setCountryForm(prev => ({ ...prev, freeThreshold: parseFloat(e.target.value) || 0 }))}
+                          disabled={!countryForm.enableFreeThreshold}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Switch
+                        checked={countryForm.enableFreeThreshold}
+                        onCheckedChange={(checked) => setCountryForm(prev => ({ ...prev, enableFreeThreshold: checked }))}
+                      />
+                      <Label>Enable free shipping threshold</Label>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Switch
+                        checked={countryForm.isDefault}
+                        onCheckedChange={(checked) => setCountryForm(prev => ({ ...prev, isDefault: checked }))}
+                      />
+                      <Label>Set as default country</Label>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={createCountryMutation.isPending}>
+                      {createCountryMutation.isPending ? 'Adding...' : 'Add Country'}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
 
-            <Card className="p-6">
-              <form onSubmit={(e) => { e.preventDefault(); updateShippingMutation.mutate(shippingForm); }} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="baseRate">Base Shipping Rate (KWD)</Label>
-                    <Input
-                      id="baseRate"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={shippingForm.baseRate}
-                      onChange={(e) => setShippingForm(prev => ({ ...prev, baseRate: parseFloat(e.target.value) || 0 }))}
-                      placeholder="2.00"
-                    />
-                    <p className="text-xs text-muted-foreground">Default shipping cost for all orders</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="freeThreshold">Free Shipping Threshold (KWD)</Label>
-                    <Input
-                      id="freeThreshold"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={shippingForm.freeThreshold}
-                      onChange={(e) => setShippingForm(prev => ({ ...prev, freeThreshold: parseFloat(e.target.value) || 0 }))}
-                      placeholder="50.00"
-                      disabled={!shippingForm.enableFreeThreshold}
-                    />
-                    <p className="text-xs text-muted-foreground">Orders above this amount get free shipping</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-                  <Switch
-                    checked={shippingForm.enableFreeThreshold}
-                    onCheckedChange={(checked) => setShippingForm(prev => ({ ...prev, enableFreeThreshold: checked }))}
-                  />
-                  <div>
-                    <Label className="font-medium">Enable Free Shipping Threshold</Label>
-                    <p className="text-xs text-muted-foreground">When enabled, orders above the threshold get free shipping</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <Button type="submit" disabled={updateShippingMutation.isPending}>
-                    {updateShippingMutation.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      'Save Shipping Settings'
-                    )}
-                  </Button>
-                </div>
-
-                {shippingSettings && (
-                  <div className="p-4 bg-muted/30 rounded-lg border">
-                    <h4 className="font-medium mb-2">Current Settings Preview</h4>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p>Base shipping rate: <span className="font-medium text-foreground">{shippingSettings.baseRate} KWD</span></p>
-                      {shippingSettings.enableFreeThreshold ? (
-                        <p>Free shipping for orders over: <span className="font-medium text-foreground">{shippingSettings.freeThreshold} KWD</span></p>
-                      ) : (
-                        <p className="text-amber-600">Free shipping threshold is disabled</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </form>
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="p-4 text-left font-medium">Country</th>
+                      <th className="p-4 text-left font-medium">Code</th>
+                      <th className="p-4 text-left font-medium">Shipping Rate</th>
+                      <th className="p-4 text-left font-medium">Free Threshold</th>
+                      <th className="p-4 text-left font-medium">Status</th>
+                      <th className="p-4 text-left font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shippingCountries.map((country) => (
+                      <tr key={country._id} className="border-b last:border-0 hover:bg-muted/30">
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{country.name}</span>
+                            {country.isDefault && (
+                              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Default</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4 font-mono">{country.code}</td>
+                        <td className="p-4">{country.shippingRate} KWD</td>
+                        <td className="p-4">
+                          {country.enableFreeThreshold ? `${country.freeThreshold} KWD` : 'Disabled'}
+                        </td>
+                        <td className="p-4">
+                          <Switch
+                            checked={country.isActive}
+                            onCheckedChange={(checked) => updateCountryMutation.mutate({ id: country._id, data: { isActive: checked } })}
+                          />
+                        </td>
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <Dialog open={editingCountry?._id === country._id} onOpenChange={(open) => !open && setEditingCountry(null)}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingCountry(country)}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Edit {country.name}</DialogTitle>
+                                </DialogHeader>
+                                {editingCountry && (
+                                  <form onSubmit={(e) => { 
+                                    e.preventDefault(); 
+                                    const formData = new FormData(e.currentTarget);
+                                    updateCountryMutation.mutate({
+                                      id: editingCountry._id,
+                                      data: {
+                                        name: formData.get('name') as string,
+                                        code: (formData.get('code') as string).toUpperCase(),
+                                        shippingRate: parseFloat(formData.get('shippingRate') as string) || 0,
+                                        freeThreshold: parseFloat(formData.get('freeThreshold') as string) || 0,
+                                        enableFreeThreshold: formData.get('enableFreeThreshold') === 'on',
+                                        isDefault: formData.get('isDefault') === 'on',
+                                      }
+                                    });
+                                  }} className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="space-y-2">
+                                        <Label>Country Name</Label>
+                                        <Input name="name" defaultValue={editingCountry.name} required />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Code</Label>
+                                        <Input name="code" defaultValue={editingCountry.code} maxLength={3} className="uppercase" required />
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="space-y-2">
+                                        <Label>Shipping Rate (KWD)</Label>
+                                        <Input name="shippingRate" type="number" step="0.01" min="0" defaultValue={editingCountry.shippingRate} required />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Free Threshold (KWD)</Label>
+                                        <Input name="freeThreshold" type="number" step="0.01" min="0" defaultValue={editingCountry.freeThreshold} />
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                      <input type="checkbox" name="enableFreeThreshold" defaultChecked={editingCountry.enableFreeThreshold} className="h-4 w-4" />
+                                      <Label>Enable free shipping threshold</Label>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                      <input type="checkbox" name="isDefault" defaultChecked={editingCountry.isDefault} className="h-4 w-4" />
+                                      <Label>Set as default country</Label>
+                                    </div>
+                                    <Button type="submit" className="w-full" disabled={updateCountryMutation.isPending}>
+                                      {updateCountryMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                  </form>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            {!country.isDefault && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteCountryMutation.mutate(country._id)}
+                              >
+                                <Trash2 className="w-4 h-4 text-destructive" />
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </Card>
+
+            {shippingCountries.length === 0 && (
+              <Card className="p-12 text-center">
+                <Truck className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-serif text-xl mb-2">No countries configured</h3>
+                <p className="text-muted-foreground mb-4">Add your first shipping country to get started</p>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="users" className="space-y-4">

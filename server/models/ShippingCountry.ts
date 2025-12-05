@@ -23,7 +23,6 @@ const ShippingCountrySchema = new Schema<IShippingCountry>({
   isDefault: { type: Boolean, required: true, default: false },
 }, { timestamps: true });
 
-ShippingCountrySchema.index({ code: 1 });
 ShippingCountrySchema.index({ isDefault: 1 });
 
 export const ShippingCountry = mongoose.model<IShippingCountry>('ShippingCountry', ShippingCountrySchema);
