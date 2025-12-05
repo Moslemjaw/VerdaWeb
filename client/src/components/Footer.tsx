@@ -1,98 +1,116 @@
 import { Link } from "wouter";
+import { Instagram, MessageCircle } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-primary text-primary-foreground py-12 sm:py-16 px-4 sm:px-6">
+    <footer className="bg-neutral-950 text-white py-16 px-4 sm:px-6">
       <div className="container mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/">
-              <span className="text-xl sm:text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">
+              <span className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">
                 Lumière
               </span>
             </Link>
-            <p className="mt-3 sm:mt-4 text-sm opacity-80">
+            <p className="mt-4 text-sm text-neutral-400 leading-relaxed">
               Timeless elegance for the modern woman.
             </p>
+            <div className="flex gap-4 mt-6">
+              <a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full border border-neutral-700 flex items-center justify-center hover:bg-white hover:text-neutral-950 transition-all"
+                data-testid="link-instagram"
+              >
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a 
+                href="https://wa.me/96599999999" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full border border-neutral-700 flex items-center justify-center hover:bg-white hover:text-neutral-950 transition-all"
+                data-testid="link-whatsapp"
+              >
+                <MessageCircle className="w-5 h-5" />
+              </a>
+            </div>
           </div>
 
           {/* Shop */}
           <div>
-            <h4 className="font-serif text-base sm:text-lg mb-3 sm:mb-4">Shop</h4>
-            <ul className="space-y-2 sm:space-y-3 text-sm opacity-80">
+            <h4 className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-5 font-medium">Shop</h4>
+            <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/new-in">
-                  <span className="hover:opacity-100 cursor-pointer transition-opacity">New Arrivals</span>
+                  <span className="text-neutral-400 hover:text-white cursor-pointer transition-colors">New In</span>
                 </Link>
               </li>
               <li>
-                <Link href="/best">
-                  <span className="hover:opacity-100 cursor-pointer transition-opacity">Best Sellers</span>
+                <Link href="/explore">
+                  <span className="text-neutral-400 hover:text-white cursor-pointer transition-colors">Explore</span>
                 </Link>
               </li>
               <li>
                 <Link href="/shop">
-                  <span className="hover:opacity-100 cursor-pointer transition-opacity">All Products</span>
+                  <span className="text-neutral-400 hover:text-white cursor-pointer transition-colors">All Products</span>
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Help */}
+          {/* Company */}
           <div>
-            <h4 className="font-serif text-base sm:text-lg mb-3 sm:mb-4">Help</h4>
-            <ul className="space-y-2 sm:space-y-3 text-sm opacity-80">
+            <h4 className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-5 font-medium">Company</h4>
+            <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/about">
-                  <span className="hover:opacity-100 cursor-pointer transition-opacity">About Us</span>
+                  <span className="text-neutral-400 hover:text-white cursor-pointer transition-colors">About Us</span>
                 </Link>
               </li>
               <li>
-                <a href="https://wa.me/96599999999" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 cursor-pointer transition-opacity">Contact</a>
-              </li>
-              <li>
-                <Link href="/faq">
-                  <span className="hover:opacity-100 cursor-pointer transition-opacity">Shipping & Returns</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq">
-                  <span className="hover:opacity-100 cursor-pointer transition-opacity">FAQ</span>
-                </Link>
+                <a 
+                  href="https://wa.me/96599999999" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-neutral-400 hover:text-white cursor-pointer transition-colors"
+                >
+                  Contact
+                </a>
               </li>
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div className="col-span-2 md:col-span-1">
-            <h4 className="font-serif text-base sm:text-lg mb-3 sm:mb-4">Stay Connected</h4>
-            <p className="text-sm opacity-80 mb-3 sm:mb-4">
-              Subscribe to receive updates on new arrivals and special offers.
-            </p>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="flex-1 px-3 sm:px-4 py-3 text-base bg-transparent border border-primary-foreground/30 focus:border-primary-foreground outline-none placeholder:text-primary-foreground/50"
-                data-testid="input-newsletter-email"
-              />
-              <button 
-                className="px-4 py-3 bg-primary-foreground text-primary text-sm uppercase tracking-wider hover:opacity-90 active:opacity-80 transition-opacity min-w-[60px]"
-                data-testid="button-newsletter-subscribe"
-              >
-                Join
-              </button>
-            </div>
+          {/* Support */}
+          <div>
+            <h4 className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-5 font-medium">Support</h4>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <Link href="/faq">
+                  <span className="text-neutral-400 hover:text-white cursor-pointer transition-colors">FAQ</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq">
+                  <span className="text-neutral-400 hover:text-white cursor-pointer transition-colors">Shipping & Returns</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/cart">
+                  <span className="text-neutral-400 hover:text-white cursor-pointer transition-colors">Cart</span>
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-primary-foreground/20 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center text-xs sm:text-sm opacity-60 gap-3 md:gap-0">
+        <div className="border-t border-neutral-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-neutral-500 gap-4">
           <p>&copy; {new Date().getFullYear()} Lumière. All rights reserved.</p>
-          <div className="flex space-x-4 sm:space-x-6">
-            <span className="hover:opacity-100 cursor-pointer transition-opacity">Privacy Policy</span>
-            <span className="hover:opacity-100 cursor-pointer transition-opacity">Terms of Service</span>
+          <div className="flex gap-6">
+            <span className="hover:text-white cursor-pointer transition-colors">Privacy Policy</span>
+            <span className="hover:text-white cursor-pointer transition-colors">Terms of Service</span>
           </div>
         </div>
       </div>
