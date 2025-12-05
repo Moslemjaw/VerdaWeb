@@ -289,6 +289,12 @@ export default function AdminDashboard() {
     expiresAt: '',
   });
 
+  const [shippingForm, setShippingForm] = useState({
+    baseRate: 2,
+    freeThreshold: 50,
+    enableFreeThreshold: true,
+  });
+
   const { data: statsData } = useQuery<{ stats: Stats; recentUsers: User[]; recentProducts: Product[]; recentOrders: Order[] }>({
     queryKey: ['adminStats'],
     queryFn: async () => {
@@ -414,6 +420,45 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminDiscounts'] });
+    },
+  });
+
+  const { data: shippingSettings } = useQuery<{ baseRate: number; freeThreshold: number; enableFreeThreshold: boolean }>({
+    queryKey: ['adminShipping'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/shipping', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch shipping settings');
+      return res.json();
+    },
+    enabled: isAdmin,
+  });
+
+  useEffect(() => {
+    if (shippingSettings) {
+      setShippingForm({
+        baseRate: shippingSettings.baseRate,
+        freeThreshold: shippingSettings.freeThreshold,
+        enableFreeThreshold: shippingSettings.enableFreeThreshold,
+      });
+    }
+  }, [shippingSettings]);
+
+  const updateShippingMutation = useMutation({
+    mutationFn: async (data: typeof shippingForm) => {
+      const res = await fetch('/api/admin/shipping', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to update shipping settings');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminShipping'] });
     },
   });
 
@@ -816,7 +861,7 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6 mb-8">
+          <TabsList className="grid w-full grid-cols-7 mb-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="w-4 h-4" /> Overview
             </TabsTrigger>
@@ -828,6 +873,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="discounts" className="flex items-center gap-2">
               <Tag className="w-4 h-4" /> Discounts
+            </TabsTrigger>
+            <TabsTrigger value="shipping" className="flex items-center gap-2">
+              <Truck className="w-4 h-4" /> Shipping
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" /> Users
@@ -1578,6 +1626,86 @@ export default function AdminDashboard() {
                 <p className="text-muted-foreground mb-4">Create your first discount code to offer promotions</p>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="shipping" className="space-y-4">
+            <div>
+              <h2 className="text-2xl font-serif font-bold">Shipping Settings</h2>
+              <p className="text-muted-foreground">Configure shipping rates and free shipping threshold</p>
+            </div>
+
+            <Card className="p-6">
+              <form onSubmit={(e) => { e.preventDefault(); updateShippingMutation.mutate(shippingForm); }} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="baseRate">Base Shipping Rate (KWD)</Label>
+                    <Input
+                      id="baseRate"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={shippingForm.baseRate}
+                      onChange={(e) => setShippingForm(prev => ({ ...prev, baseRate: parseFloat(e.target.value) || 0 }))}
+                      placeholder="2.00"
+                    />
+                    <p className="text-xs text-muted-foreground">Default shipping cost for all orders</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="freeThreshold">Free Shipping Threshold (KWD)</Label>
+                    <Input
+                      id="freeThreshold"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={shippingForm.freeThreshold}
+                      onChange={(e) => setShippingForm(prev => ({ ...prev, freeThreshold: parseFloat(e.target.value) || 0 }))}
+                      placeholder="50.00"
+                      disabled={!shippingForm.enableFreeThreshold}
+                    />
+                    <p className="text-xs text-muted-foreground">Orders above this amount get free shipping</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+                  <Switch
+                    checked={shippingForm.enableFreeThreshold}
+                    onCheckedChange={(checked) => setShippingForm(prev => ({ ...prev, enableFreeThreshold: checked }))}
+                  />
+                  <div>
+                    <Label className="font-medium">Enable Free Shipping Threshold</Label>
+                    <p className="text-xs text-muted-foreground">When enabled, orders above the threshold get free shipping</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <Button type="submit" disabled={updateShippingMutation.isPending}>
+                    {updateShippingMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save Shipping Settings'
+                    )}
+                  </Button>
+                </div>
+
+                {shippingSettings && (
+                  <div className="p-4 bg-muted/30 rounded-lg border">
+                    <h4 className="font-medium mb-2">Current Settings Preview</h4>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>Base shipping rate: <span className="font-medium text-foreground">{shippingSettings.baseRate} KWD</span></p>
+                      {shippingSettings.enableFreeThreshold ? (
+                        <p>Free shipping for orders over: <span className="font-medium text-foreground">{shippingSettings.freeThreshold} KWD</span></p>
+                      ) : (
+                        <p className="text-amber-600">Free shipping threshold is disabled</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </form>
+            </Card>
           </TabsContent>
 
           <TabsContent value="users" className="space-y-4">
