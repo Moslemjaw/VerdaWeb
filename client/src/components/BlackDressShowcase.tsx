@@ -19,14 +19,6 @@ interface Product {
 
 const defaultImages = [model1, model2, model3, model4, model5];
 
-const defaultProducts = [
-  { _id: '1', name: "The Enchanté Gown", price: 120, imageUrl: model1, category: "Evening Wear" },
-  { _id: '2', name: "Midnight Silk Slip", price: 180, imageUrl: model2, category: "Evening Wear" },
-  { _id: '3', name: "Noir Cocktail Dress", price: 250, imageUrl: model3, category: "Evening Wear" },
-  { _id: '4', name: "Obsidian Maxi", price: 320, imageUrl: model4, category: "Evening Wear" },
-  { _id: '5', name: "Eclipse Evening Wear", price: 150, imageUrl: model5, category: "Evening Wear" },
-];
-
 export default function BlackDressShowcase() {
   const [animationPhase, setAnimationPhase] = useState(0);
   const { data: siteContent } = useSiteContent();
@@ -42,10 +34,12 @@ export default function BlackDressShowcase() {
   const { data: apiProducts = [] } = useQuery<Product[]>({
     queryKey: ['newCollectionProducts', selectedCategory],
     queryFn: async () => {
-      const url = selectedCategory 
-        ? `/api/products?category=${encodeURIComponent(selectedCategory)}&limit=5`
-        : '/api/products/featured?limit=5';
-      const res = await fetch(url);
+      if (!selectedCategory || selectedCategory === 'all') {
+        const res = await fetch('/api/products/featured?limit=5');
+        if (!res.ok) return [];
+        return res.json();
+      }
+      const res = await fetch(`/api/products?category=${encodeURIComponent(selectedCategory)}&limit=5`);
       if (!res.ok) return [];
       return res.json();
     },
@@ -56,15 +50,7 @@ export default function BlackDressShowcase() {
     ? validCmsImages 
     : defaultImages;
 
-  const products: Product[] = apiProducts.length >= 5 
-    ? apiProducts.slice(0, 5)
-    : apiProducts.length > 0
-      ? [...apiProducts, ...defaultProducts].slice(0, 5)
-      : defaultProducts;
-
-  const displayImages = products.map((p, i) => 
-    validCmsImages.length === 5 ? validCmsImages[i] : p.imageUrl
-  );
+  const products = apiProducts.length > 0 ? apiProducts.slice(0, 5) : [];
 
   const seasonLines = seasonText.split('\n');
   const headingLines = heading.split('\n');
@@ -81,7 +67,7 @@ export default function BlackDressShowcase() {
             transition={{ delay: 0.5, duration: 0.8 }}
             className="text-xs md:text-sm font-sans tracking-[0.2em] uppercase text-white/70 leading-relaxed"
           >
-            {seasonLines.map((line, i) => (
+            {seasonLines.map((line: string, i: number) => (
               <span key={i}>{line}{i < seasonLines.length - 1 && <br />}</span>
             ))}
           </motion.p>
@@ -95,7 +81,7 @@ export default function BlackDressShowcase() {
             transition={{ delay: 0.2, duration: 0.8 }}
             className="text-5xl md:text-7xl lg:text-8xl font-sans font-bold tracking-tighter leading-[0.9] text-white mix-blend-difference"
           >
-            {headingLines.map((line, i) => (
+            {headingLines.map((line: string, i: number) => (
               <span key={i}>{line}{i < headingLines.length - 1 && <br />}</span>
             ))}
           </motion.h1>
@@ -111,7 +97,7 @@ export default function BlackDressShowcase() {
             onViewportEnter={() => setTimeout(() => setAnimationPhase(1), 500)}
             transition={{ duration: 1, ease: "easeInOut" }}
           >
-             <img src={displayImages[2] || heroImages[2]} alt="Center Model" className="w-full h-full object-cover" />
+             <img src={heroImages[2]} alt="Center Model" className="w-full h-full object-cover" />
           </motion.div>
 
           <AnimatePresence>
@@ -123,7 +109,7 @@ export default function BlackDressShowcase() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
                   className="absolute z-10 h-[60%] md:h-[70%] aspect-[3/4] shadow-xl"
                 >
-                   <img src={displayImages[0] || heroImages[0]} alt="Model 1" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
+                   <img src={heroImages[0]} alt="Model 1" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
@@ -132,7 +118,7 @@ export default function BlackDressShowcase() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
                   className="absolute z-20 h-[65%] md:h-[75%] aspect-[3/4] shadow-xl"
                 >
-                   <img src={displayImages[1] || heroImages[1]} alt="Model 2" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
+                   <img src={heroImages[1]} alt="Model 2" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
@@ -141,7 +127,7 @@ export default function BlackDressShowcase() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
                   className="absolute z-20 h-[65%] md:h-[75%] aspect-[3/4] shadow-xl"
                 >
-                   <img src={displayImages[3] || heroImages[3]} alt="Model 4" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
+                   <img src={heroImages[3]} alt="Model 4" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
@@ -150,7 +136,7 @@ export default function BlackDressShowcase() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
                   className="absolute z-10 h-[60%] md:h-[70%] aspect-[3/4] shadow-xl"
                 >
-                   <img src={displayImages[4] || heroImages[4]} alt="Model 5" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
+                   <img src={heroImages[4]} alt="Model 5" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
                 </motion.div>
               </>
             )}
@@ -160,29 +146,40 @@ export default function BlackDressShowcase() {
 
       <div className="bg-black px-6 py-20 z-40 relative">
         <div className="container mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-12">
-            {products.map((product, index) => (
-              <Link href={product._id.length > 10 ? `/product/${product._id}` : `/shop`} key={product._id}>
-                <motion.div
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 50 }}
-                  transition={{ duration: 0.8, delay: 1 + (index * 0.1), ease: "easeOut" }}
-                  className="group cursor-pointer"
-                  data-testid={`new-collection-product-${product._id}`}
-                >
-                  <div className="aspect-[3/4] overflow-hidden mb-4 bg-white/5">
-                    <img 
-                      src={validCmsImages.length === 5 ? validCmsImages[index] : product.imageUrl} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <h3 className="text-white font-serif text-sm tracking-wide mb-1 group-hover:underline underline-offset-4 decoration-white/50">{product.name}</h3>
-                  <p className="text-white font-bold text-sm">{product.price} KWD</p>
-                </motion.div>
-              </Link>
-            ))}
-          </div>
+          {products.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-12">
+              {products.map((product, index) => (
+                <Link href={`/product/${product._id}`} key={product._id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 50 }}
+                    transition={{ duration: 0.8, delay: 1 + (index * 0.1), ease: "easeOut" }}
+                    className="group cursor-pointer"
+                    data-testid={`new-collection-product-${product._id}`}
+                  >
+                    <div className="aspect-[3/4] overflow-hidden mb-4 bg-white/5">
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    <h3 className="text-white font-serif text-sm tracking-wide mb-1 group-hover:underline underline-offset-4 decoration-white/50">{product.name}</h3>
+                    <p className="text-white font-bold text-sm">{product.price} KWD</p>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 20 }}
+              transition={{ duration: 0.8, delay: 1, ease: "easeOut" }}
+              className="text-center py-12"
+            >
+              <p className="text-white/60 text-lg">No products found in this category. Select a different category in the admin dashboard.</p>
+            </motion.div>
+          )}
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -190,7 +187,7 @@ export default function BlackDressShowcase() {
             transition={{ duration: 0.8, delay: 1.8, ease: "easeOut" }}
             className="flex justify-center mt-16"
           >
-            <Link href={selectedCategory ? `/shop?category=${encodeURIComponent(selectedCategory)}` : '/shop'}>
+            <Link href={selectedCategory && selectedCategory !== 'all' ? `/shop?category=${encodeURIComponent(selectedCategory)}` : '/shop'}>
               <button className="px-8 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
                 {buttonText}
               </button>
