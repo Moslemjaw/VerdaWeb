@@ -422,19 +422,14 @@ export default function ProductDetails() {
       {/* Fixed Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t p-4 safe-area-inset">
         <div className="container mx-auto flex items-center gap-3">
-          <Link href="/checkout">
-            <Button
-              variant="outline"
-              className="h-14 w-14 p-0 flex-shrink-0"
-              data-testid="button-cart-icon"
-            >
-              <ShoppingBag className="w-5 h-5" />
-            </Button>
-          </Link>
+          <div className="flex-shrink-0">
+            <p className="text-xs text-muted-foreground">Total</p>
+            <p className="text-lg font-bold">{product.price * quantity} KWD</p>
+          </div>
           <Button
             onClick={handleAddToCart}
             disabled={!product.inStock}
-            className="flex-1 h-14 text-base font-medium gap-2"
+            className="flex-1 h-12 text-base font-medium gap-2"
             data-testid="button-add-to-cart"
           >
             {isInCart ? (
@@ -448,6 +443,15 @@ export default function ProductDetails() {
               </>
             )}
           </Button>
+          <Link href="/checkout">
+            <Button
+              variant="outline"
+              className="h-12 w-12 p-0 flex-shrink-0"
+              data-testid="button-cart-icon"
+            >
+              <ShoppingBag className="w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
