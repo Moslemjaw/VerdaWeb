@@ -35,11 +35,11 @@ export default function BlackDressShowcase() {
     queryKey: ['newCollectionProducts', selectedCategory],
     queryFn: async () => {
       if (!selectedCategory || selectedCategory === 'all') {
-        const res = await fetch('/api/products/featured?limit=5');
+        const res = await fetch('/api/products/featured?limit=4');
         if (!res.ok) return [];
         return res.json();
       }
-      const res = await fetch(`/api/products?category=${encodeURIComponent(selectedCategory)}&limit=5`);
+      const res = await fetch(`/api/products?category=${encodeURIComponent(selectedCategory)}&limit=4`);
       if (!res.ok) return [];
       return res.json();
     },
@@ -50,7 +50,7 @@ export default function BlackDressShowcase() {
     ? validCmsImages 
     : defaultImages;
 
-  const products = apiProducts.length > 0 ? apiProducts.slice(0, 5) : [];
+  const products = apiProducts.length > 0 ? apiProducts.slice(0, 4) : [];
 
   const seasonLines = seasonText.split('\n');
   const headingLines = heading.split('\n');
@@ -147,7 +147,7 @@ export default function BlackDressShowcase() {
       <div className="bg-black px-6 py-20 z-40 relative">
         <div className="container mx-auto">
           {products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12">
               {products.map((product, index) => (
                 <Link href={`/product/${product._id}`} key={product._id}>
                   <motion.div
