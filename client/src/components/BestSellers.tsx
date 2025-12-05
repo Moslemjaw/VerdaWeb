@@ -73,7 +73,7 @@ export default function BestSellers() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-[28%] flex-shrink-0 pl-8 pr-6"
+          className="w-[28%] flex-shrink-0 px-6 text-center flex flex-col items-center justify-center"
         >
           <h2 className="text-3xl font-bold tracking-tight text-black mb-3">{title}</h2>
           <p className="text-gray-500 text-sm mb-8">Shop our bestselling styles.</p>
