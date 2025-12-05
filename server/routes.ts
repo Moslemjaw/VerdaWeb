@@ -279,7 +279,24 @@ export async function registerRoutes(
   
   app.get("/api/products", async (req: Request, res: Response) => {
     try {
-      const products = await Product.find().sort({ createdAt: -1 });
+      const category = req.query.category as string;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const query: any = {};
+      
+      // Filter by category if specified - check both categories array and legacy category field
+      if (category && category !== 'all') {
+        query.$or = [
+          { categories: { $elemMatch: { $regex: new RegExp(`^${category}$`, 'i') } } },
+          { category: { $regex: new RegExp(`^${category}$`, 'i') } }
+        ];
+      }
+      
+      let productsQuery = Product.find(query).sort({ createdAt: -1 });
+      if (limit) {
+        productsQuery = productsQuery.limit(limit);
+      }
+      
+      const products = await productsQuery;
       res.json(products);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch products" });
@@ -291,9 +308,12 @@ export async function registerRoutes(
       const category = req.query.category as string;
       const query: any = { featured: true };
       
-      // Filter by category if specified
+      // Filter by category if specified - check both categories array and legacy category field
       if (category) {
-        query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+        query.$or = [
+          { categories: { $elemMatch: { $regex: new RegExp(`^${category}$`, 'i') } } },
+          { category: { $regex: new RegExp(`^${category}$`, 'i') } }
+        ];
       }
       
       const products = await Product.find(query).limit(10);
@@ -305,8 +325,12 @@ export async function registerRoutes(
 
   app.get("/api/products/categories", async (req: Request, res: Response) => {
     try {
-      const categories = await Product.distinct('category');
-      res.json(categories);
+      // Get categories from both the legacy category field and new categories array
+      const legacyCategories = await Product.distinct('category');
+      const arrayCategories = await Product.distinct('categories');
+      const combined = [...legacyCategories, ...arrayCategories];
+      const allCategories = Array.from(new Set(combined)).filter(Boolean);
+      res.json(allCategories);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch categories" });
     }

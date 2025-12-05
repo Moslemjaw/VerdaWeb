@@ -72,7 +72,7 @@ export default function ProductDetails() {
         name: product.name,
         price: product.price,
         imageUrl: product.imageUrl,
-        category: product.category,
+        category: (product as any).categories?.[0] || product.category,
       });
     }
 
@@ -506,7 +506,9 @@ function ProductInfo({
       <div className="flex items-start justify-between gap-4 mb-2">
         <div>
           <p className="text-xs sm:text-sm uppercase tracking-widest text-muted-foreground mb-1">
-            {product.category}
+            {((product as any).categories && (product as any).categories.length > 0)
+              ? (product as any).categories.join(' / ')
+              : product.category}
           </p>
           <h1 className="text-2xl sm:text-3xl font-serif" data-testid="text-product-name">
             {product.name}
@@ -647,7 +649,11 @@ function ProductInfo({
             )}
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Category</dt>
-              <dd>{product.category}</dd>
+              <dd>
+                {((product as any).categories && (product as any).categories.length > 0)
+                  ? (product as any).categories.join(', ')
+                  : product.category}
+              </dd>
             </div>
           </dl>
         </div>

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2, MessageSquare, Copy, ExternalLink, FolderOpen, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -102,6 +103,7 @@ interface Product {
   price: number;
   description: string;
   category: string;
+  categories?: string[];
   brand: string;
   imageUrl: string;
   images: string[];
@@ -275,7 +277,7 @@ export default function AdminDashboard() {
     price: '',
     compareAtPrice: '',
     description: '',
-    category: '',
+    categories: [] as string[],
     brand: '',
     imageUrl: '',
     images: '',
@@ -1181,7 +1183,7 @@ export default function AdminDashboard() {
       price: '',
       compareAtPrice: '',
       description: '',
-      category: '',
+      categories: [],
       brand: 'Lumière',
       imageUrl: '',
       images: '',
@@ -1255,12 +1257,19 @@ export default function AdminDashboard() {
       return;
     }
     
+    // Validate that at least one category is selected
+    if (productForm.categories.length === 0) {
+      alert('Please select at least one category');
+      return;
+    }
+    
     const productData = {
       name: productForm.name,
       price: parseFloat(productForm.price),
       compareAtPrice: productForm.compareAtPrice ? parseFloat(productForm.compareAtPrice) : null,
       description: productForm.description,
-      category: productForm.category,
+      categories: productForm.categories,
+      category: productForm.categories[0] || '',
       brand: productForm.brand,
       imageUrl: productForm.imageUrl || allImages[0] || '',
       images: allImages,
@@ -1281,12 +1290,13 @@ export default function AdminDashboard() {
 
   const startEdit = (product: Product) => {
     setEditingProduct(product);
+    const productCategories = product.categories || (product.category ? [product.category] : []);
     setProductForm({
       name: product.name,
       price: product.price.toString(),
       compareAtPrice: (product as any).compareAtPrice?.toString() || '',
       description: product.description,
-      category: product.category,
+      categories: productCategories,
       brand: product.brand || 'Lumière',
       imageUrl: product.imageUrl,
       images: '',
@@ -1888,20 +1898,28 @@ export default function AdminDashboard() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="category">Category *</Label>
-                        <Select
-                          value={productForm.category}
-                          onValueChange={(value) => setProductForm({ ...productForm, category: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories.filter(cat => cat.isActive).map((cat) => (
-                              <SelectItem key={cat._id} value={cat.name}>{cat.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label>Categories * (select multiple)</Label>
+                        <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
+                          {categories.filter(cat => cat.isActive).map((cat) => (
+                            <div key={cat._id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`cat-${cat._id}`}
+                                checked={productForm.categories.includes(cat.name)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setProductForm({ ...productForm, categories: [...productForm.categories, cat.name] });
+                                  } else {
+                                    setProductForm({ ...productForm, categories: productForm.categories.filter(c => c !== cat.name) });
+                                  }
+                                }}
+                              />
+                              <label htmlFor={`cat-${cat._id}`} className="text-sm cursor-pointer">{cat.name}</label>
+                            </div>
+                          ))}
+                        </div>
+                        {productForm.categories.length > 0 && (
+                          <p className="text-xs text-muted-foreground">Selected: {productForm.categories.join(', ')}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="brand">Brand *</Label>

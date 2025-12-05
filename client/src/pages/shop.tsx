@@ -118,16 +118,24 @@ export default function Shop() {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
+        const productCategories = (product as any).categories || [];
+        const categoryMatches = product.category?.toLowerCase().includes(query) || 
+          productCategories.some((c: string) => c.toLowerCase().includes(query));
         if (!product.name.toLowerCase().includes(query) && 
             !product.description.toLowerCase().includes(query) &&
-            !product.category.toLowerCase().includes(query)) {
+            !categoryMatches) {
           return false;
         }
       }
 
-      // Category filter
-      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
-        return false;
+      // Category filter - check both legacy category and new categories array
+      if (selectedCategories.length > 0) {
+        const productCategories = (product as any).categories || [];
+        const hasLegacyMatch = product.category && selectedCategories.includes(product.category);
+        const hasArrayMatch = productCategories.some((c: string) => selectedCategories.includes(c));
+        if (!hasLegacyMatch && !hasArrayMatch) {
+          return false;
+        }
       }
 
       // Brand filter - exclude products without a brand or with non-selected brand
