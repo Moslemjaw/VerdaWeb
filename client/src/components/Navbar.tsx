@@ -4,6 +4,7 @@ import { ShoppingBag, Search, Menu, User, LogOut, LayoutDashboard } from "lucide
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,16 @@ export default function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [location, setLocation] = useLocation();
 
+  const { data: newInContent } = useQuery({
+    queryKey: ['newInNavLabel'],
+    queryFn: async () => {
+      const res = await fetch('/api/content/new_in');
+      if (!res.ok) return { navLabel: 'New In' };
+      const data = await res.json();
+      return { navLabel: data.content?.navLabel || 'New In' };
+    },
+  });
+
   const darkPages = ['/', '/new-in'];
   const isOnDarkPage = darkPages.includes(location);
 
@@ -31,7 +42,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/new-in", label: "New In" },
+    { href: "/new-in", label: newInContent?.navLabel || "New In" },
     { href: "/explore", label: "Explore" },
     { href: "/shop", label: "Shop" },
     { href: "/about", label: "About" },

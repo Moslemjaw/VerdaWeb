@@ -16,14 +16,64 @@ interface Product {
   createdAt: string;
 }
 
+interface NewInContent {
+  navLabel: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  category: string;
+  buttonText: string;
+}
+
 export default function NewIn() {
+  const { data: pageContent } = useQuery<NewInContent>({
+    queryKey: ['newInContent'],
+    queryFn: async () => {
+      const res = await fetch('/api/content/new_in');
+      if (!res.ok) {
+        return {
+          navLabel: 'New In',
+          title: 'New In',
+          subtitle: 'Just Arrived',
+          description: 'Discover our latest arrivals, fresh from the runway to your wardrobe.',
+          category: '',
+          buttonText: 'View All Products',
+        };
+      }
+      const data = await res.json();
+      return {
+        navLabel: data.content?.navLabel || 'New In',
+        title: data.content?.title || 'New In',
+        subtitle: data.content?.subtitle || 'Just Arrived',
+        description: data.content?.description || 'Discover our latest arrivals, fresh from the runway to your wardrobe.',
+        category: data.content?.category || '',
+        buttonText: data.content?.buttonText || 'View All Products',
+      };
+    },
+  });
+
+  const content = pageContent || {
+    navLabel: 'New In',
+    title: 'New In',
+    subtitle: 'Just Arrived',
+    description: 'Discover our latest arrivals, fresh from the runway to your wardrobe.',
+    category: '',
+    buttonText: 'View All Products',
+  };
+
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ['newProducts'],
+    queryKey: ['newProducts', content.category],
     queryFn: async () => {
       const res = await fetch('/api/products');
       if (!res.ok) throw new Error('Failed to fetch products');
       const data = await res.json();
-      return data.slice(0, 5);
+      
+      let filteredProducts = data;
+      if (content.category && content.category !== '') {
+        filteredProducts = data.filter((p: Product) => p.category === content.category);
+      }
+      
+      return filteredProducts.slice(0, 5);
     },
   });
 
@@ -38,11 +88,13 @@ export default function NewIn() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-3 sm:mb-4">Just Arrived</p>
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif mb-4 sm:mb-6 tracking-tight">New In</h1>
-            <p className="text-white/60 max-w-md mx-auto text-sm tracking-wide px-4">
-              Discover our latest arrivals, fresh from the runway to your wardrobe.
-            </p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-3 sm:mb-4">{content.subtitle}</p>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif mb-4 sm:mb-6 tracking-tight">{content.title}</h1>
+            {content.description && (
+              <p className="text-white/60 max-w-md mx-auto text-sm tracking-wide px-4">
+                {content.description}
+              </p>
+            )}
           </motion.div>
         </div>
       </section>
@@ -105,9 +157,9 @@ export default function NewIn() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="text-center mt-12 sm:mt-20"
           >
-            <Link href="/shop?filter=newin">
+            <Link href={content.category ? `/shop?category=${encodeURIComponent(content.category)}` : '/shop'}>
               <span className="inline-block border border-white/30 px-8 sm:px-10 py-3 sm:py-4 text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black active:bg-white/90 transition-all duration-300 cursor-pointer font-medium min-h-[44px]">
-                View All Products
+                {content.buttonText}
               </span>
             </Link>
           </motion.div>
