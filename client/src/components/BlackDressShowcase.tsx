@@ -341,7 +341,7 @@ export default function BlackDressShowcase() {
               {/* Scrollable Products Container */}
               <div 
                 ref={scrollContainerRef}
-                className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+                className="flex gap-6 md:gap-8 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {products.map((product, index) => (
@@ -350,24 +350,24 @@ export default function BlackDressShowcase() {
                       initial={{ opacity: 0, y: 50 }}
                       animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 50 }}
                       transition={{ duration: 0.8, delay: 1 + (index * 0.1), ease: "easeOut" }}
-                      className="group cursor-pointer flex-shrink-0 w-[calc((100%-16px)/2)] md:w-[calc((100%-64px)/5)]"
+                      className="group cursor-pointer flex-shrink-0 w-[160px] sm:w-[200px] md:w-[240px] lg:w-[280px]"
                       data-testid={`new-collection-product-${product._id}`}
                     >
-                      <div className="aspect-[3/4] overflow-hidden mb-2 sm:mb-4 bg-gradient-to-b from-neutral-800 to-neutral-900">
+                      <div className="aspect-[3/4] overflow-hidden mb-3 sm:mb-4 bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-sm">
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 
                           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
                         />
                       </div>
-                      <h3 className="text-xs sm:text-sm text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors line-clamp-2">
+                      <h3 className="text-sm sm:text-base text-white/90 font-light tracking-wide mb-2 group-hover:text-white transition-colors line-clamp-2 leading-tight">
                         {product.name}
                       </h3>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {product.compareAtPrice && product.compareAtPrice < product.price && (
-                          <span className="text-xs text-white/40 line-through">{formatPrice(product.price)}</span>
+                          <span className="text-xs sm:text-sm text-white/40 line-through">{formatPrice(product.price)}</span>
                         )}
-                        <span className="text-sm text-white/70 font-medium">{formatPrice(product.compareAtPrice && product.compareAtPrice < product.price ? product.compareAtPrice : product.price)}</span>
+                        <span className="text-sm sm:text-base text-white/70 font-medium">{formatPrice(product.compareAtPrice && product.compareAtPrice < product.price ? product.compareAtPrice : product.price)}</span>
                       </div>
                     </motion.div>
                   </Link>
