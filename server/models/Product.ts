@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IProduct extends Document {
   name: string;
   price: number;
+  compareAtPrice?: number;
   description: string;
   category: string;
   brand: string;
@@ -25,6 +26,10 @@ const productSchema = new Schema<IProduct>({
   price: {
     type: Number,
     required: true,
+  },
+  compareAtPrice: {
+    type: Number,
+    default: null,
   },
   description: {
     type: String,

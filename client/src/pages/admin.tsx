@@ -231,11 +231,13 @@ export default function AdminDashboard() {
   const [productForm, setProductForm] = useState({
     name: '',
     price: '',
+    compareAtPrice: '',
     description: '',
     category: '',
     brand: 'Lumière',
     imageUrl: '',
     images: '',
+    uploadedImages: [] as string[],
     inStock: true,
     featured: false,
     newArrival: true,
@@ -243,6 +245,7 @@ export default function AdminDashboard() {
     colors: '',
     material: '',
   });
+  const [isUploading, setIsUploading] = useState(false);
 
   const [heroContent, setHeroContent] = useState({
     title: '',
@@ -826,11 +829,13 @@ export default function AdminDashboard() {
     setProductForm({
       name: '',
       price: '',
+      compareAtPrice: '',
       description: '',
       category: '',
       brand: 'Lumière',
       imageUrl: '',
       images: '',
+      uploadedImages: [],
       inStock: true,
       featured: false,
       newArrival: true,
@@ -840,16 +845,68 @@ export default function AdminDashboard() {
     });
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    const uploadedUrls: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          uploadedUrls.push(data.url);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+      }
+    }
+
+    setProductForm(prev => ({
+      ...prev,
+      uploadedImages: [...prev.uploadedImages, ...uploadedUrls],
+      imageUrl: prev.imageUrl || uploadedUrls[0] || '',
+    }));
+    setIsUploading(false);
+  };
+
+  const removeUploadedImage = (index: number) => {
+    setProductForm(prev => {
+      const newImages = [...prev.uploadedImages];
+      const removedImage = newImages.splice(index, 1)[0];
+      return {
+        ...prev,
+        uploadedImages: newImages,
+        imageUrl: prev.imageUrl === removedImage ? (newImages[0] || '') : prev.imageUrl,
+      };
+    });
+  };
+
   const handleSubmitProduct = (e: React.FormEvent) => {
     e.preventDefault();
+    const allImages = [
+      ...productForm.uploadedImages,
+      ...(productForm.images ? productForm.images.split(',').map(s => s.trim()).filter(Boolean) : [])
+    ];
     const productData = {
       name: productForm.name,
       price: parseFloat(productForm.price),
+      compareAtPrice: productForm.compareAtPrice ? parseFloat(productForm.compareAtPrice) : null,
       description: productForm.description,
       category: productForm.category,
       brand: productForm.brand,
-      imageUrl: productForm.imageUrl,
-      images: productForm.images ? productForm.images.split(',').map(s => s.trim()) : [],
+      imageUrl: productForm.imageUrl || allImages[0] || '',
+      images: allImages,
       inStock: productForm.inStock,
       featured: productForm.featured,
       newArrival: productForm.newArrival,
@@ -870,11 +927,13 @@ export default function AdminDashboard() {
     setProductForm({
       name: product.name,
       price: product.price.toString(),
+      compareAtPrice: (product as any).compareAtPrice?.toString() || '',
       description: product.description,
       category: product.category,
       brand: product.brand || 'Lumière',
       imageUrl: product.imageUrl,
-      images: product.images?.join(', ') || '',
+      images: '',
+      uploadedImages: product.images || [],
       inStock: product.inStock,
       featured: product.featured,
       newArrival: product.newArrival || false,
@@ -1440,7 +1499,7 @@ export default function AdminDashboard() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="price">Price ($) *</Label>
+                        <Label htmlFor="price">Price (KWD) *</Label>
                         <Input
                           id="price"
                           type="number"
@@ -1448,9 +1507,22 @@ export default function AdminDashboard() {
                           value={productForm.price}
                           onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
                           required
-                          placeholder="e.g., 299.99"
+                          placeholder="e.g., 29.900"
                         />
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="compareAtPrice">Compare at Price (KWD) - Original price for discount</Label>
+                      <Input
+                        id="compareAtPrice"
+                        type="number"
+                        step="0.01"
+                        value={productForm.compareAtPrice}
+                        onChange={(e) => setProductForm({ ...productForm, compareAtPrice: e.target.value })}
+                        placeholder="e.g., 39.900 (leave empty if no discount)"
+                      />
+                      <p className="text-xs text-muted-foreground">If set, this will show as the original price with a strikethrough, and the Price above will be the sale price.</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -1489,23 +1561,65 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="imageUrl">Main Image URL *</Label>
-                      <Input
-                        id="imageUrl"
-                        value={productForm.imageUrl}
-                        onChange={(e) => setProductForm({ ...productForm, imageUrl: e.target.value })}
-                        required
-                        placeholder="https://example.com/image.jpg"
-                      />
+                      <Label>Product Images *</Label>
+                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4">
+                        <input
+                          type="file"
+                          id="imageUpload"
+                          accept="image/png,image/jpeg,image/jpg"
+                          multiple
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="imageUpload"
+                          className="flex flex-col items-center justify-center cursor-pointer py-4"
+                        >
+                          {isUploading ? (
+                            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                          ) : (
+                            <Upload className="w-8 h-8 text-muted-foreground" />
+                          )}
+                          <span className="mt-2 text-sm text-muted-foreground">
+                            {isUploading ? 'Uploading...' : 'Click to upload images (PNG, JPG)'}
+                          </span>
+                        </label>
+                      </div>
+                      
+                      {productForm.uploadedImages.length > 0 && (
+                        <div className="grid grid-cols-4 gap-2 mt-3">
+                          {productForm.uploadedImages.map((url, index) => (
+                            <div key={index} className="relative group">
+                              <img
+                                src={url}
+                                alt={`Product ${index + 1}`}
+                                className={`w-full aspect-square object-cover rounded border-2 ${productForm.imageUrl === url ? 'border-primary' : 'border-transparent'}`}
+                                onClick={() => setProductForm({ ...productForm, imageUrl: url })}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeUploadedImage(index)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                ×
+                              </button>
+                              {productForm.imageUrl === url && (
+                                <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[10px] px-1 rounded">Main</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">Click on an image to set it as the main image. First uploaded image is set as main by default.</p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="images">Additional Images (comma-separated URLs)</Label>
+                      <Label htmlFor="images">Additional Image URLs (comma-separated)</Label>
                       <Input
                         id="images"
                         value={productForm.images}
                         onChange={(e) => setProductForm({ ...productForm, images: e.target.value })}
-                        placeholder="https://url1.jpg, https://url2.jpg"
+                        placeholder="https://url1.jpg, https://url2.jpg (optional)"
                       />
                     </div>
 
@@ -1604,7 +1718,12 @@ export default function AdminDashboard() {
                         <h3 className="font-serif font-bold line-clamp-1">{product.name}</h3>
                         <p className="text-xs text-muted-foreground">{product.brand} · {product.category}</p>
                       </div>
-                      <span className="font-bold">${product.price}</span>
+                      <div className="text-right">
+                        {(product as any).compareAtPrice && (
+                          <span className="text-xs text-muted-foreground line-through block">{(product as any).compareAtPrice} KWD</span>
+                        )}
+                        <span className="font-bold">{product.price} KWD</span>
+                      </div>
                     </div>
                     <div className="flex gap-2 mt-3">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => startEdit(product)}>
