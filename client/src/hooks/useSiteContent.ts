@@ -33,6 +33,10 @@ export interface SiteContentData {
     subtitle?: string;
     buttonText?: string;
   };
+  best_sellers?: {
+    title?: string;
+    buttonText?: string;
+  };
 }
 
 export function useSiteContent() {

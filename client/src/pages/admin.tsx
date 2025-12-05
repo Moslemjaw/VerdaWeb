@@ -176,6 +176,11 @@ export default function AdminDashboard() {
     buttonText: '',
   });
 
+  const [bestSellersContent, setBestSellersContent] = useState({
+    title: '',
+    buttonText: '',
+  });
+
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
 
@@ -285,6 +290,14 @@ export default function AdminDashboard() {
           title: newsletterData.content.title || '',
           subtitle: newsletterData.content.subtitle || '',
           buttonText: newsletterData.content.buttonText || '',
+        });
+      }
+
+      const bestSellersData = siteContent.find(c => c.section === 'best_sellers');
+      if (bestSellersData?.content) {
+        setBestSellersContent({
+          title: bestSellersData.content.title || '',
+          buttonText: bestSellersData.content.buttonText || '',
         });
       }
     }
@@ -573,6 +586,16 @@ export default function AdminDashboard() {
         title: newsletterContent.title,
         subtitle: newsletterContent.subtitle,
         buttonText: newsletterContent.buttonText,
+      },
+    });
+  };
+
+  const handleSaveBestSellersContent = () => {
+    updateContentMutation.mutate({
+      section: 'best_sellers',
+      content: {
+        title: bestSellersContent.title,
+        buttonText: bestSellersContent.buttonText,
       },
     });
   };
@@ -1520,6 +1543,39 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <TrendingUp className="w-6 h-6" /> 6. Best Sellers Section
+                </CardTitle>
+                <CardDescription>The carousel showcasing your top-selling products</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="font-medium">Section Title</Label>
+                    <Input
+                      value={bestSellersContent.title}
+                      onChange={(e) => setBestSellersContent({ ...bestSellersContent, title: e.target.value })}
+                      placeholder="e.g., Best Sellers"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-medium">Button Text</Label>
+                    <Input
+                      value={bestSellersContent.buttonText}
+                      onChange={(e) => setBestSellersContent({ ...bestSellersContent, buttonText: e.target.value })}
+                      placeholder="e.g., Shop All"
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">Products displayed in this section are pulled from your product catalog. Mark products as "Best Seller" in the Products tab to feature them here.</p>
+                <Button onClick={handleSaveBestSellersContent} className="mt-6" disabled={updateContentMutation.isPending}>
+                  Save Best Sellers
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>

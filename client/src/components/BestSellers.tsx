@@ -1,11 +1,11 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useSiteContent } from "@/hooks/useSiteContent";
 import handbag from "@assets/generated_images/product_shot_of_a_black_leather_handbag.png";
 import necklace from "@assets/generated_images/close_up_of_gold_jewelry_necklace.png";
 import dress from "@assets/generated_images/fashion_model_in_a_red_silk_dress.png";
 
-// Reusing images for demo purposes, in a real app these would be different
 const products = [
   { id: 1, name: "Velvet Evening Clutch", price: "$450", image: handbag },
   { id: 2, name: "Pearl Drop Earrings", price: "$290", image: necklace },
@@ -16,14 +16,19 @@ const products = [
 
 export default function BestSellers() {
   const [emblaRef] = useEmblaCarousel({ align: "start", loop: true });
+  const { data: siteContent } = useSiteContent();
+  
+  const bestSellersContent = siteContent?.best_sellers;
+  const title = bestSellersContent?.title || "Best Sellers";
+  const buttonText = bestSellersContent?.buttonText || "Shop All";
 
   return (
     <section className="py-24 border-t border-black/5">
       <div className="container mx-auto px-6">
         <div className="flex justify-between items-end mb-12">
-          <h2 className="text-4xl font-serif text-primary">Best Sellers</h2>
+          <h2 className="text-4xl font-serif text-primary">{title}</h2>
           <div className="flex items-center space-x-2 text-sm font-medium uppercase tracking-widest cursor-pointer hover:opacity-60 transition-opacity">
-            <span>Shop All</span>
+            <span>{buttonText}</span>
             <ArrowRight className="w-4 h-4" />
           </div>
         </div>
