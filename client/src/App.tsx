@@ -11,6 +11,7 @@ import AdminDashboard from "@/pages/admin";
 import Shop from "@/pages/shop";
 import NewIn from "@/pages/new-in";
 import Explore from "@/pages/explore";
+import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import ProductDetails from "@/pages/product";
 import About from "@/pages/about";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/shop" component={Shop} />
       <Route path="/new-in" component={NewIn} />
       <Route path="/explore" component={Explore} />
+      <Route path="/cart" component={Cart} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/product/:id" component={ProductDetails} />
       <Route path="/about" component={About} />

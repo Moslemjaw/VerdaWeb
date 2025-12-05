@@ -444,7 +444,7 @@ export default function ProductDetails() {
                 </>
               )}
             </Button>
-            <Link href="/checkout">
+            <Link href="/cart">
               <Button
                 variant="outline"
                 className="h-12 w-12 p-0"
