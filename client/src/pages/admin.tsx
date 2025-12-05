@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2, MessageSquare, Copy, ExternalLink } from 'lucide-react';
+import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2, MessageSquare, Copy, ExternalLink, FolderOpen, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 function ImageUploadInput({ 
@@ -230,6 +230,28 @@ interface Popup {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+}
+
+interface Brand {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  logoUrl: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
 }
 
 const POPUP_TYPE_LABELS: Record<PopupType, string> = {
@@ -703,6 +725,208 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminPopups'] });
+    },
+  });
+
+  // Category Management State
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [categoryForm, setCategoryForm] = useState({
+    name: '',
+    description: '',
+    imageUrl: '',
+    isActive: true,
+    order: 0,
+  });
+
+  const resetCategoryForm = () => {
+    setCategoryForm({
+      name: '',
+      description: '',
+      imageUrl: '',
+      isActive: true,
+      order: 0,
+    });
+  };
+
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ['adminCategories'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/categories', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch categories');
+      return res.json();
+    },
+    enabled: isAdmin,
+  });
+
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: typeof categoryForm) => {
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to create category');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminCategories'] });
+      setIsAddCategoryOpen(false);
+      resetCategoryForm();
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<typeof categoryForm> }) => {
+      const res = await fetch(`/api/admin/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to update category');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminCategories'] });
+      setEditingCategory(null);
+      resetCategoryForm();
+    },
+  });
+
+  const toggleCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/categories/${id}/toggle`, {
+        method: 'PATCH',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to toggle category');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminCategories'] });
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/categories/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to delete category');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminCategories'] });
+    },
+  });
+
+  // Brand Management State
+  const [isAddBrandOpen, setIsAddBrandOpen] = useState(false);
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [brandForm, setBrandForm] = useState({
+    name: '',
+    description: '',
+    logoUrl: '',
+    isActive: true,
+    order: 0,
+  });
+
+  const resetBrandForm = () => {
+    setBrandForm({
+      name: '',
+      description: '',
+      logoUrl: '',
+      isActive: true,
+      order: 0,
+    });
+  };
+
+  const { data: brands = [] } = useQuery<Brand[]>({
+    queryKey: ['adminBrands'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/brands', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch brands');
+      return res.json();
+    },
+    enabled: isAdmin,
+  });
+
+  const createBrandMutation = useMutation({
+    mutationFn: async (data: typeof brandForm) => {
+      const res = await fetch('/api/admin/brands', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to create brand');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminBrands'] });
+      setIsAddBrandOpen(false);
+      resetBrandForm();
+    },
+  });
+
+  const updateBrandMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<typeof brandForm> }) => {
+      const res = await fetch(`/api/admin/brands/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to update brand');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminBrands'] });
+      setEditingBrand(null);
+      resetBrandForm();
+    },
+  });
+
+  const toggleBrandMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/brands/${id}/toggle`, {
+        method: 'PATCH',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to toggle brand');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminBrands'] });
+    },
+  });
+
+  const deleteBrandMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/brands/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to delete brand');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminBrands'] });
     },
   });
 
@@ -1199,7 +1423,7 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-8 mb-8">
+          <TabsList className="flex flex-wrap gap-1 mb-8 h-auto">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="w-4 h-4" /> Overview
             </TabsTrigger>
@@ -1208,6 +1432,12 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2">
               <ShoppingBag className="w-4 h-4" /> Products
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-2">
+              <FolderOpen className="w-4 h-4" /> Categories
+            </TabsTrigger>
+            <TabsTrigger value="brands" className="flex items-center gap-2">
+              <Award className="w-4 h-4" /> Brands
             </TabsTrigger>
             <TabsTrigger value="discounts" className="flex items-center gap-2">
               <Tag className="w-4 h-4" /> Discounts
@@ -2518,6 +2748,412 @@ export default function AdminDashboard() {
                 <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-serif text-xl mb-2">No popups created</h3>
                 <p className="text-muted-foreground mb-4">Create your first popup to engage your customers</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="categories" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-serif font-bold">Categories</h2>
+                <p className="text-muted-foreground">Manage product categories</p>
+              </div>
+              <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+                <DialogTrigger asChild>
+                  <Button data-testid="button-add-category">
+                    Add Category
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Create New Category</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    createCategoryMutation.mutate(categoryForm);
+                  }} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Category Name</Label>
+                      <Input
+                        value={categoryForm.name}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                        placeholder="e.g., Dresses"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={categoryForm.description}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                        placeholder="Optional description for this category"
+                      />
+                    </div>
+                    <ImageUploadInput
+                      value={categoryForm.imageUrl}
+                      onChange={(url) => setCategoryForm({ ...categoryForm, imageUrl: url })}
+                      label="Category Image"
+                      placeholder="Upload or paste image URL"
+                    />
+                    <div className="space-y-2">
+                      <Label>Display Order</Label>
+                      <Input
+                        type="number"
+                        value={categoryForm.order}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, order: parseInt(e.target.value) || 0 })}
+                        placeholder="0"
+                      />
+                      <p className="text-xs text-muted-foreground">Lower numbers appear first</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={categoryForm.isActive}
+                        onCheckedChange={(checked) => setCategoryForm({ ...categoryForm, isActive: checked })}
+                      />
+                      <Label>Active</Label>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={createCategoryMutation.isPending}>
+                      {createCategoryMutation.isPending ? 'Creating...' : 'Create Category'}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="p-4 text-left font-medium">Image</th>
+                      <th className="p-4 text-left font-medium">Name</th>
+                      <th className="p-4 text-left font-medium">Slug</th>
+                      <th className="p-4 text-left font-medium">Order</th>
+                      <th className="p-4 text-left font-medium">Status</th>
+                      <th className="p-4 text-left font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {categories.map((category) => (
+                      <tr key={category._id} className="border-b last:border-0 hover:bg-muted/30">
+                        <td className="p-4">
+                          {category.imageUrl ? (
+                            <img 
+                              src={category.imageUrl} 
+                              alt={category.name}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                              <FolderOpen className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4 font-medium">{category.name}</td>
+                        <td className="p-4 text-sm text-muted-foreground">{category.slug}</td>
+                        <td className="p-4 text-sm">{category.order}</td>
+                        <td className="p-4">
+                          <Switch
+                            checked={category.isActive}
+                            onCheckedChange={() => toggleCategoryMutation.mutate(category._id)}
+                          />
+                        </td>
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingCategory(category);
+                                    setCategoryForm({
+                                      name: category.name,
+                                      description: category.description,
+                                      imageUrl: category.imageUrl,
+                                      isActive: category.isActive,
+                                      order: category.order,
+                                    });
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-lg">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Category</DialogTitle>
+                                </DialogHeader>
+                                {editingCategory && (
+                                  <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    updateCategoryMutation.mutate({ id: editingCategory._id, data: categoryForm });
+                                  }} className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label>Category Name</Label>
+                                      <Input
+                                        value={categoryForm.name}
+                                        onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                                        required
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Description</Label>
+                                      <Textarea
+                                        value={categoryForm.description}
+                                        onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                                      />
+                                    </div>
+                                    <ImageUploadInput
+                                      value={categoryForm.imageUrl}
+                                      onChange={(url) => setCategoryForm({ ...categoryForm, imageUrl: url })}
+                                      label="Category Image"
+                                    />
+                                    <div className="space-y-2">
+                                      <Label>Display Order</Label>
+                                      <Input
+                                        type="number"
+                                        value={categoryForm.order}
+                                        onChange={(e) => setCategoryForm({ ...categoryForm, order: parseInt(e.target.value) || 0 })}
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Switch
+                                        checked={categoryForm.isActive}
+                                        onCheckedChange={(checked) => setCategoryForm({ ...categoryForm, isActive: checked })}
+                                      />
+                                      <Label>Active</Label>
+                                    </div>
+                                    <Button type="submit" className="w-full" disabled={updateCategoryMutation.isPending}>
+                                      {updateCategoryMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                  </form>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteCategoryMutation.mutate(category._id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            {categories.length === 0 && (
+              <Card className="p-12 text-center">
+                <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-serif text-xl mb-2">No categories created</h3>
+                <p className="text-muted-foreground mb-4">Create your first category to organize your products</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="brands" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-serif font-bold">Brands</h2>
+                <p className="text-muted-foreground">Manage product brands</p>
+              </div>
+              <Dialog open={isAddBrandOpen} onOpenChange={setIsAddBrandOpen}>
+                <DialogTrigger asChild>
+                  <Button data-testid="button-add-brand">
+                    Add Brand
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Create New Brand</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    createBrandMutation.mutate(brandForm);
+                  }} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Brand Name</Label>
+                      <Input
+                        value={brandForm.name}
+                        onChange={(e) => setBrandForm({ ...brandForm, name: e.target.value })}
+                        placeholder="e.g., Lumière"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={brandForm.description}
+                        onChange={(e) => setBrandForm({ ...brandForm, description: e.target.value })}
+                        placeholder="Optional description for this brand"
+                      />
+                    </div>
+                    <ImageUploadInput
+                      value={brandForm.logoUrl}
+                      onChange={(url) => setBrandForm({ ...brandForm, logoUrl: url })}
+                      label="Brand Logo"
+                      placeholder="Upload or paste logo URL"
+                    />
+                    <div className="space-y-2">
+                      <Label>Display Order</Label>
+                      <Input
+                        type="number"
+                        value={brandForm.order}
+                        onChange={(e) => setBrandForm({ ...brandForm, order: parseInt(e.target.value) || 0 })}
+                        placeholder="0"
+                      />
+                      <p className="text-xs text-muted-foreground">Lower numbers appear first</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={brandForm.isActive}
+                        onCheckedChange={(checked) => setBrandForm({ ...brandForm, isActive: checked })}
+                      />
+                      <Label>Active</Label>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={createBrandMutation.isPending}>
+                      {createBrandMutation.isPending ? 'Creating...' : 'Create Brand'}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="p-4 text-left font-medium">Logo</th>
+                      <th className="p-4 text-left font-medium">Name</th>
+                      <th className="p-4 text-left font-medium">Slug</th>
+                      <th className="p-4 text-left font-medium">Order</th>
+                      <th className="p-4 text-left font-medium">Status</th>
+                      <th className="p-4 text-left font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {brands.map((brand) => (
+                      <tr key={brand._id} className="border-b last:border-0 hover:bg-muted/30">
+                        <td className="p-4">
+                          {brand.logoUrl ? (
+                            <img 
+                              src={brand.logoUrl} 
+                              alt={brand.name}
+                              className="w-12 h-12 object-contain rounded"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                              <Award className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4 font-medium">{brand.name}</td>
+                        <td className="p-4 text-sm text-muted-foreground">{brand.slug}</td>
+                        <td className="p-4 text-sm">{brand.order}</td>
+                        <td className="p-4">
+                          <Switch
+                            checked={brand.isActive}
+                            onCheckedChange={() => toggleBrandMutation.mutate(brand._id)}
+                          />
+                        </td>
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingBrand(brand);
+                                    setBrandForm({
+                                      name: brand.name,
+                                      description: brand.description,
+                                      logoUrl: brand.logoUrl,
+                                      isActive: brand.isActive,
+                                      order: brand.order,
+                                    });
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-lg">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Brand</DialogTitle>
+                                </DialogHeader>
+                                {editingBrand && (
+                                  <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    updateBrandMutation.mutate({ id: editingBrand._id, data: brandForm });
+                                  }} className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label>Brand Name</Label>
+                                      <Input
+                                        value={brandForm.name}
+                                        onChange={(e) => setBrandForm({ ...brandForm, name: e.target.value })}
+                                        required
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Description</Label>
+                                      <Textarea
+                                        value={brandForm.description}
+                                        onChange={(e) => setBrandForm({ ...brandForm, description: e.target.value })}
+                                      />
+                                    </div>
+                                    <ImageUploadInput
+                                      value={brandForm.logoUrl}
+                                      onChange={(url) => setBrandForm({ ...brandForm, logoUrl: url })}
+                                      label="Brand Logo"
+                                    />
+                                    <div className="space-y-2">
+                                      <Label>Display Order</Label>
+                                      <Input
+                                        type="number"
+                                        value={brandForm.order}
+                                        onChange={(e) => setBrandForm({ ...brandForm, order: parseInt(e.target.value) || 0 })}
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Switch
+                                        checked={brandForm.isActive}
+                                        onCheckedChange={(checked) => setBrandForm({ ...brandForm, isActive: checked })}
+                                      />
+                                      <Label>Active</Label>
+                                    </div>
+                                    <Button type="submit" className="w-full" disabled={updateBrandMutation.isPending}>
+                                      {updateBrandMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                  </form>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteBrandMutation.mutate(brand._id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            {brands.length === 0 && (
+              <Card className="p-12 text-center">
+                <Award className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-serif text-xl mb-2">No brands created</h3>
+                <p className="text-muted-foreground mb-4">Create your first brand to organize your products</p>
               </Card>
             )}
           </TabsContent>
