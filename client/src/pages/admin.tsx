@@ -259,6 +259,14 @@ export default function AdminDashboard() {
     category: '',
     buttonText: '',
     buttonLink: '',
+    categories: [
+      { name: 'Dresses', image: '' },
+      { name: 'Evening Wear', image: '' },
+      { name: 'Accessories', image: '' },
+      { name: 'Outerwear', image: '' },
+      { name: 'Tops', image: '' },
+      { name: 'Bottoms', image: '' },
+    ],
   });
 
   const [newCollectionContent, setNewCollectionContent] = useState({
@@ -575,12 +583,21 @@ export default function AdminDashboard() {
       
       const featuredData = siteContent.find(c => c.section === 'featured_collection');
       if (featuredData?.content) {
+        const savedCategories = (featuredData.content as any).categories || [];
         setFeaturedContent({
           title: featuredData.content.title || '',
           subtitle: featuredData.content.subtitle || '',
           category: featuredData.content.category || '',
           buttonText: featuredData.content.buttonText || '',
           buttonLink: featuredData.content.buttonLink || '',
+          categories: savedCategories.length === 6 ? savedCategories : [
+            { name: 'Dresses', image: '' },
+            { name: 'Evening Wear', image: '' },
+            { name: 'Accessories', image: '' },
+            { name: 'Outerwear', image: '' },
+            { name: 'Tops', image: '' },
+            { name: 'Bottoms', image: '' },
+          ],
         });
       }
 
@@ -868,6 +885,7 @@ export default function AdminDashboard() {
         category: featuredContent.category,
         buttonText: featuredContent.buttonText,
         buttonLink: featuredContent.buttonLink,
+        categories: featuredContent.categories,
       },
     });
   };
@@ -2206,11 +2224,11 @@ export default function AdminDashboard() {
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <Tag className="w-6 h-6" /> 4. Collection Section
                 </CardTitle>
-                <CardDescription>The product showcase section displaying your featured items</CardDescription>
+                <CardDescription>Display 6 category cards that link to your shop. Customize each category name and image.</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label className="font-medium">Section Title</Label>
                       <Input
@@ -2219,34 +2237,6 @@ export default function AdminDashboard() {
                         placeholder="e.g., Collections"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="font-medium">Subtitle (small text above title)</Label>
-                      <Input
-                        value={featuredContent.subtitle}
-                        onChange={(e) => setFeaturedContent({ ...featuredContent, subtitle: e.target.value })}
-                        placeholder="e.g., Curated Selection"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-medium">Display Category</Label>
-                      <Select
-                        value={featuredContent.category}
-                        onValueChange={(value) => setFeaturedContent({ ...featuredContent, category: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select which category to display" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories (Featured Products)</SelectItem>
-                          {CATEGORIES.map((cat) => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground">This determines which products appear in this section</p>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
                     <div className="space-y-2">
                       <Label className="font-medium">Button Text</Label>
                       <Input
@@ -2262,6 +2252,39 @@ export default function AdminDashboard() {
                         onChange={(e) => setFeaturedContent({ ...featuredContent, buttonLink: e.target.value })}
                         placeholder="e.g., /shop"
                       />
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-6">
+                    <Label className="font-medium text-lg mb-4 block">Category Cards (6 categories)</Label>
+                    <p className="text-sm text-muted-foreground mb-4">Each category will show as a card linking to that category in your shop.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {featuredContent.categories.map((cat, index) => (
+                        <div key={index} className="border rounded-lg p-4 space-y-3">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Category {index + 1} Name</Label>
+                            <Input
+                              value={cat.name}
+                              onChange={(e) => {
+                                const newCategories = [...featuredContent.categories];
+                                newCategories[index] = { ...newCategories[index], name: e.target.value };
+                                setFeaturedContent({ ...featuredContent, categories: newCategories });
+                              }}
+                              placeholder="e.g., Dresses"
+                            />
+                          </div>
+                          <ImageUploadInput
+                            label={`Category ${index + 1} Image`}
+                            value={cat.image}
+                            onChange={(url) => {
+                              const newCategories = [...featuredContent.categories];
+                              newCategories[index] = { ...newCategories[index], image: url };
+                              setFeaturedContent({ ...featuredContent, categories: newCategories });
+                            }}
+                            placeholder="Upload or paste URL"
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
