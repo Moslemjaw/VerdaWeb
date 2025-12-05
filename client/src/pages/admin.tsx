@@ -2087,69 +2087,32 @@ export default function AdminDashboard() {
             <Card className="border-2 border-primary/20">
               <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <Tag className="w-6 h-6" /> 2. Featured Collection
+                  <TrendingUp className="w-6 h-6" /> 2. Best Sellers Section
                 </CardTitle>
-                <CardDescription>The product showcase section displaying your featured items by category</CardDescription>
+                <CardDescription>The carousel showcasing your top-selling products</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="font-medium">Section Title</Label>
-                      <Input
-                        value={featuredContent.title}
-                        onChange={(e) => setFeaturedContent({ ...featuredContent, title: e.target.value })}
-                        placeholder="e.g., Featured Collection"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-medium">Subtitle (small text above title)</Label>
-                      <Input
-                        value={featuredContent.subtitle}
-                        onChange={(e) => setFeaturedContent({ ...featuredContent, subtitle: e.target.value })}
-                        placeholder="e.g., Curated Selection"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-medium">Display Category</Label>
-                      <Select
-                        value={featuredContent.category}
-                        onValueChange={(value) => setFeaturedContent({ ...featuredContent, category: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select which category to display" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories (Featured Products)</SelectItem>
-                          {CATEGORIES.map((cat) => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground">This determines which products appear in this section</p>
-                    </div>
+                  <div className="space-y-2">
+                    <Label className="font-medium">Section Title</Label>
+                    <Input
+                      value={bestSellersContent.title}
+                      onChange={(e) => setBestSellersContent({ ...bestSellersContent, title: e.target.value })}
+                      placeholder="e.g., Best Sellers"
+                    />
                   </div>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="font-medium">Button Text</Label>
-                      <Input
-                        value={featuredContent.buttonText}
-                        onChange={(e) => setFeaturedContent({ ...featuredContent, buttonText: e.target.value })}
-                        placeholder="e.g., View All Products"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-medium">Button Link</Label>
-                      <Input
-                        value={featuredContent.buttonLink}
-                        onChange={(e) => setFeaturedContent({ ...featuredContent, buttonLink: e.target.value })}
-                        placeholder="e.g., /shop"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label className="font-medium">Button Text</Label>
+                    <Input
+                      value={bestSellersContent.buttonText}
+                      onChange={(e) => setBestSellersContent({ ...bestSellersContent, buttonText: e.target.value })}
+                      placeholder="e.g., Shop All"
+                    />
                   </div>
                 </div>
-                <Button onClick={handleSaveFeaturedContent} className="mt-6" disabled={updateContentMutation.isPending}>
-                  Save Featured Collection
+                <p className="text-sm text-muted-foreground mt-4">Products displayed in this section are pulled from your product catalog. Mark products as "Featured" in the Products tab to show them here.</p>
+                <Button onClick={handleSaveBestSellersContent} className="mt-6" disabled={updateContentMutation.isPending}>
+                  Save Best Sellers
                 </Button>
               </CardContent>
             </Card>
@@ -2238,11 +2201,81 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Tag className="w-6 h-6" /> 4. Collection Section
+                </CardTitle>
+                <CardDescription>The product showcase section displaying your featured items</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-medium">Section Title</Label>
+                      <Input
+                        value={featuredContent.title}
+                        onChange={(e) => setFeaturedContent({ ...featuredContent, title: e.target.value })}
+                        placeholder="e.g., Collections"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Subtitle (small text above title)</Label>
+                      <Input
+                        value={featuredContent.subtitle}
+                        onChange={(e) => setFeaturedContent({ ...featuredContent, subtitle: e.target.value })}
+                        placeholder="e.g., Curated Selection"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Display Category</Label>
+                      <Select
+                        value={featuredContent.category}
+                        onValueChange={(value) => setFeaturedContent({ ...featuredContent, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select which category to display" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories (Featured Products)</SelectItem>
+                          {CATEGORIES.map((cat) => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">This determines which products appear in this section</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-medium">Button Text</Label>
+                      <Input
+                        value={featuredContent.buttonText}
+                        onChange={(e) => setFeaturedContent({ ...featuredContent, buttonText: e.target.value })}
+                        placeholder="e.g., View All Products"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Button Link</Label>
+                      <Input
+                        value={featuredContent.buttonLink}
+                        onChange={(e) => setFeaturedContent({ ...featuredContent, buttonLink: e.target.value })}
+                        placeholder="e.g., /shop"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Button onClick={handleSaveFeaturedContent} className="mt-6" disabled={updateContentMutation.isPending}>
+                  Save Collection Section
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
                   <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5" /> 4. Brand Story Quote
+                    <FileText className="w-5 h-5" /> 5. Brand Story Quote
                   </CardTitle>
                   <CardDescription>The inspirational quote shown between sections</CardDescription>
                 </CardHeader>
@@ -2265,7 +2298,7 @@ export default function AdminDashboard() {
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
                   <CardTitle className="flex items-center gap-2">
-                    <Settings className="w-5 h-5" /> 5. Newsletter Section
+                    <Settings className="w-5 h-5" /> 6. Newsletter Section
                   </CardTitle>
                   <CardDescription>The email signup section at the bottom of the page</CardDescription>
                 </CardHeader>
@@ -2300,39 +2333,6 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
-
-            <Card className="border-2 border-primary/20">
-              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <TrendingUp className="w-6 h-6" /> 6. Best Sellers Section
-                </CardTitle>
-                <CardDescription>The carousel showcasing your top-selling products</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="font-medium">Section Title</Label>
-                    <Input
-                      value={bestSellersContent.title}
-                      onChange={(e) => setBestSellersContent({ ...bestSellersContent, title: e.target.value })}
-                      placeholder="e.g., Best Sellers"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="font-medium">Button Text</Label>
-                    <Input
-                      value={bestSellersContent.buttonText}
-                      onChange={(e) => setBestSellersContent({ ...bestSellersContent, buttonText: e.target.value })}
-                      placeholder="e.g., Shop All"
-                    />
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mt-4">Products displayed in this section are pulled from your product catalog. Mark products as "Best Seller" in the Products tab to feature them here.</p>
-                <Button onClick={handleSaveBestSellersContent} className="mt-6" disabled={updateContentMutation.isPending}>
-                  Save Best Sellers
-                </Button>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </main>
