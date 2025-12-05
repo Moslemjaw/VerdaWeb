@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
+import { Link } from 'wouter';
 import Navbar from '@/components/Navbar';
-import { ShoppingBag, X, RotateCcw } from 'lucide-react';
+import { ShoppingBag, X, RotateCcw, ArrowLeft } from 'lucide-react';
 
 interface Product {
   _id: string;
@@ -152,9 +153,16 @@ export default function Explore() {
       
       <div className="pt-24 px-6 pb-6 h-screen flex flex-col">
         <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-2xl font-serif text-white">Explore</h1>
-            <p className="text-white/60 text-sm">Swipe right to add, left to skip</p>
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <span className="bg-white/10 hover:bg-white/20 transition-colors rounded-full p-3 flex items-center justify-center cursor-pointer">
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </span>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-serif text-white">Explore</h1>
+              <p className="text-white/60 text-sm">Swipe right to add, left to skip</p>
+            </div>
           </div>
           <button 
             onClick={() => setShowCart(!showCart)}
