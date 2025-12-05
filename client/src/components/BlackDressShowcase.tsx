@@ -20,6 +20,15 @@ interface Product {
   category: string;
 }
 
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  imageUrl: string;
+  isActive: boolean;
+  order: number;
+}
+
 const defaultImages = [model1, model2, model3, model4, model5];
 
 export default function BlackDressShowcase() {
@@ -54,7 +63,16 @@ export default function BlackDressShowcase() {
   const heading = (newCollectionContent as any)?.heading || "DESIGNED\nTO MAKE\nAN ENTRANCE";
   const buttonText = newCollectionContent?.buttonText || "View All Products";
   const selectedCategory = (newCollectionContent as any)?.category || "";
-  const cmsImages = (newCollectionContent as any)?.images || [];
+  
+  // Fetch categories to use their images for the hero section
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await fetch('/api/categories');
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
   
   const { data: apiProducts = [] } = useQuery<Product[]>({
     queryKey: ['newCollectionProducts', selectedCategory],
@@ -70,10 +88,45 @@ export default function BlackDressShowcase() {
     },
   });
 
-  const validCmsImages = cmsImages.filter((img: string) => img && img.trim() !== '');
-  const baseImages = validCmsImages.length === 5 
-    ? validCmsImages 
-    : defaultImages;
+  // Use category images for the hero section based on selected category
+  const getCategoryImages = () => {
+    // If a specific category is selected, prioritize it
+    if (selectedCategory && selectedCategory !== 'all') {
+      // Match by name (case-insensitive) or slug
+      const selectedCat = categories.find(cat => 
+        cat.name.toLowerCase() === selectedCategory.toLowerCase() ||
+        cat.slug === selectedCategory.toLowerCase()
+      );
+      
+      if (selectedCat && selectedCat.imageUrl && selectedCat.imageUrl.trim() !== '') {
+        // Selected category has an image - use it first, then fill with defaults
+        // (keeping it pure to the selected category rather than mixing with others)
+        return [
+          selectedCat.imageUrl,
+          ...defaultImages.slice(0, 4)
+        ];
+      }
+      
+      // Selected category exists but has no image, or category not found - use defaults
+      return defaultImages;
+    }
+    
+    // For "all" or no selection, use first 5 categories with images (sorted by display order)
+    // API returns sorted data, but we add defensive sort to guarantee order
+    const categoryImages = [...categories]
+      .sort((a, b) => a.order - b.order)
+      .filter(cat => cat.imageUrl && cat.imageUrl.trim() !== '')
+      .map(cat => cat.imageUrl)
+      .slice(0, 5);
+    
+    return categoryImages.length >= 5 
+      ? categoryImages 
+      : categoryImages.length > 0 
+        ? [...categoryImages, ...defaultImages.slice(categoryImages.length)]
+        : defaultImages;
+  };
+  
+  const baseImages = getCategoryImages();
 
   const heroImages = [
     baseImages[(0 + rotationIndex) % 5],

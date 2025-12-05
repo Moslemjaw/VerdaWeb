@@ -320,11 +320,6 @@ export default function AdminDashboard() {
     heading: '',
     buttonText: '',
     category: '',
-    image1: '',
-    image2: '',
-    image3: '',
-    image4: '',
-    image5: '',
   });
 
   const [brandStoryContent, setBrandStoryContent] = useState({
@@ -966,17 +961,11 @@ export default function AdminDashboard() {
 
       const newCollectionData = siteContent.find(c => c.section === 'new_collection');
       if (newCollectionData?.content) {
-        const images = (newCollectionData.content as any).images || [];
         setNewCollectionContent({
           seasonText: (newCollectionData.content as any).seasonText || '',
           heading: (newCollectionData.content as any).heading || '',
           buttonText: newCollectionData.content.buttonText || '',
           category: (newCollectionData.content as any).category || '',
-          image1: images[0] || '',
-          image2: images[1] || '',
-          image3: images[2] || '',
-          image4: images[3] || '',
-          image5: images[4] || '',
         });
       }
 
@@ -1323,14 +1312,6 @@ export default function AdminDashboard() {
   };
 
   const handleSaveNewCollectionContent = () => {
-    const images = [
-      newCollectionContent.image1,
-      newCollectionContent.image2,
-      newCollectionContent.image3,
-      newCollectionContent.image4,
-      newCollectionContent.image5,
-    ].filter(img => img.trim() !== '');
-    
     updateContentMutation.mutate({
       section: 'new_collection',
       content: {
@@ -1338,7 +1319,6 @@ export default function AdminDashboard() {
         heading: newCollectionContent.heading,
         buttonText: newCollectionContent.buttonText,
         category: newCollectionContent.category,
-        images,
       },
     });
   };
@@ -3394,41 +3374,16 @@ export default function AdminDashboard() {
                   </div>
                   
                   <div className="border-t pt-4">
-                    <Label className="font-medium text-lg mb-4 block">Gallery Images (5 images)</Label>
-                    <p className="text-sm text-muted-foreground mb-4">Enter URLs for 5 model images. They will display in a fanning animation.</p>
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                      <ImageUploadInput
-                        label="Image 1 (far left)"
-                        value={newCollectionContent.image1}
-                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image1: url })}
-                        placeholder="Upload or paste URL"
-                      />
-                      <ImageUploadInput
-                        label="Image 2 (mid left)"
-                        value={newCollectionContent.image2}
-                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image2: url })}
-                        placeholder="Upload or paste URL"
-                      />
-                      <ImageUploadInput
-                        label="Image 3 (center)"
-                        value={newCollectionContent.image3}
-                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image3: url })}
-                        placeholder="Upload or paste URL"
-                      />
-                      <ImageUploadInput
-                        label="Image 4 (mid right)"
-                        value={newCollectionContent.image4}
-                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image4: url })}
-                        placeholder="Upload or paste URL"
-                      />
-                      <ImageUploadInput
-                        label="Image 5 (far right)"
-                        value={newCollectionContent.image5}
-                        onChange={(url) => setNewCollectionContent({ ...newCollectionContent, image5: url })}
-                        placeholder="Upload or paste URL"
-                      />
+                    <Label className="font-medium text-lg mb-4 block">Gallery Images</Label>
+                    <div className="bg-muted/50 rounded-lg p-4 border">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Images are automatically loaded from your Categories.</strong> Go to the <span className="font-medium text-foreground">Categories</span> tab to add or update category images.
+                      </p>
+                      <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside space-y-1">
+                        <li><strong>Specific category selected:</strong> That category's image is featured. If no image exists, default images are used.</li>
+                        <li><strong>"All Categories" selected:</strong> The first 5 categories with images (by display order) are shown.</li>
+                      </ul>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">Upload all 5 images for custom gallery, or leave empty to use defaults</p>
                   </div>
                 </div>
                 <Button onClick={handleSaveNewCollectionContent} className="mt-6" disabled={updateContentMutation.isPending}>
