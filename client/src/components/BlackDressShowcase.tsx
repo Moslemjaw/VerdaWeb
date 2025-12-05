@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useSiteContent } from "@/hooks/useSiteContent";
@@ -21,7 +21,15 @@ const defaultImages = [model1, model2, model3, model4, model5];
 
 export default function BlackDressShowcase() {
   const [animationPhase, setAnimationPhase] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const { data: siteContent } = useSiteContent();
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const newCollectionContent = siteContent?.new_collection;
   
@@ -105,36 +113,36 @@ export default function BlackDressShowcase() {
               <>
                 <motion.div
                   initial={{ x: 0, opacity: 0, scale: 0.8 }}
-                  animate={{ x: "-220%", opacity: 1, scale: 0.9 }}
+                  animate={{ x: isMobile ? "-90%" : "-220%", opacity: 1, scale: isMobile ? 0.7 : 0.9 }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-                  className="absolute z-10 h-[60%] md:h-[70%] aspect-[3/4] shadow-xl"
+                  className="absolute z-10 h-[50%] md:h-[70%] aspect-[3/4] shadow-xl"
                 >
                    <img src={heroImages[0]} alt="Model 1" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
                   initial={{ x: 0, opacity: 0, scale: 0.85 }}
-                  animate={{ x: "-110%", opacity: 1, scale: 0.95 }}
+                  animate={{ x: isMobile ? "-45%" : "-110%", opacity: 1, scale: isMobile ? 0.8 : 0.95 }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-                  className="absolute z-20 h-[65%] md:h-[75%] aspect-[3/4] shadow-xl"
+                  className="absolute z-20 h-[55%] md:h-[75%] aspect-[3/4] shadow-xl"
                 >
                    <img src={heroImages[1]} alt="Model 2" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
                   initial={{ x: 0, opacity: 0, scale: 0.85 }}
-                  animate={{ x: "110%", opacity: 1, scale: 0.95 }}
+                  animate={{ x: isMobile ? "45%" : "110%", opacity: 1, scale: isMobile ? 0.8 : 0.95 }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-                  className="absolute z-20 h-[65%] md:h-[75%] aspect-[3/4] shadow-xl"
+                  className="absolute z-20 h-[55%] md:h-[75%] aspect-[3/4] shadow-xl"
                 >
                    <img src={heroImages[3]} alt="Model 4" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
                   initial={{ x: 0, opacity: 0, scale: 0.8 }}
-                  animate={{ x: "220%", opacity: 1, scale: 0.9 }}
+                  animate={{ x: isMobile ? "90%" : "220%", opacity: 1, scale: isMobile ? 0.7 : 0.9 }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-                  className="absolute z-10 h-[60%] md:h-[70%] aspect-[3/4] shadow-xl"
+                  className="absolute z-10 h-[50%] md:h-[70%] aspect-[3/4] shadow-xl"
                 >
                    <img src={heroImages[4]} alt="Model 5" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
                 </motion.div>
