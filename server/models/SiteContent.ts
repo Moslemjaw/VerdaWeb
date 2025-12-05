@@ -14,6 +14,8 @@ export interface ISiteContent extends Document {
     seasonText?: string;
     heading?: string;
     navLabel?: string;
+    useCategoryImages?: boolean;
+    heroImages?: string[];
     categories?: Array<{
       name: string;
       image: string;
@@ -49,6 +51,8 @@ const SiteContentSchema = new Schema<ISiteContent>(
       seasonText: String,
       heading: String,
       navLabel: String,
+      useCategoryImages: Boolean,
+      heroImages: [String],
       categories: [{
         name: String,
         image: String,

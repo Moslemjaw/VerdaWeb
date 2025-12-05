@@ -319,6 +319,8 @@ export default function AdminDashboard() {
     heading: '',
     buttonText: '',
     category: '',
+    useCategoryImages: true,
+    heroImages: ['', '', '', '', ''] as string[],
   });
 
   const [brandStoryContent, setBrandStoryContent] = useState({
@@ -962,11 +964,14 @@ export default function AdminDashboard() {
 
       const newCollectionData = siteContent.find(c => c.section === 'new_collection');
       if (newCollectionData?.content) {
+        const savedHeroImages = (newCollectionData.content as any).heroImages || [];
         setNewCollectionContent({
           seasonText: (newCollectionData.content as any).seasonText || '',
           heading: (newCollectionData.content as any).heading || '',
           buttonText: newCollectionData.content.buttonText || '',
           category: (newCollectionData.content as any).category || '',
+          useCategoryImages: (newCollectionData.content as any).useCategoryImages !== false,
+          heroImages: savedHeroImages.length === 5 ? savedHeroImages : ['', '', '', '', ''],
         });
       }
 
@@ -1322,6 +1327,8 @@ export default function AdminDashboard() {
         heading: newCollectionContent.heading,
         buttonText: newCollectionContent.buttonText,
         category: newCollectionContent.category,
+        useCategoryImages: newCollectionContent.useCategoryImages,
+        heroImages: newCollectionContent.heroImages,
       },
     });
   };
@@ -3406,16 +3413,50 @@ export default function AdminDashboard() {
                   </div>
                   
                   <div className="border-t pt-4">
-                    <Label className="font-medium text-lg mb-4 block">Gallery Images</Label>
-                    <div className="bg-muted/50 rounded-lg p-4 border">
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Images are automatically loaded from your Categories.</strong> Go to the <span className="font-medium text-foreground">Categories</span> tab to add or update category images.
-                      </p>
-                      <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside space-y-1">
-                        <li><strong>Specific category selected:</strong> That category's image is featured. If no image exists, default images are used.</li>
-                        <li><strong>"All Categories" selected:</strong> The first 5 categories with images (by display order) are shown.</li>
-                      </ul>
+                    <Label className="font-medium text-lg mb-4 block">Hero Gallery Images (5 images)</Label>
+                    
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Switch
+                        id="useCategoryImages"
+                        checked={newCollectionContent.useCategoryImages}
+                        onCheckedChange={(checked) => setNewCollectionContent({ ...newCollectionContent, useCategoryImages: checked })}
+                      />
+                      <Label htmlFor="useCategoryImages" className="cursor-pointer">
+                        Use category images automatically
+                      </Label>
                     </div>
+                    
+                    {newCollectionContent.useCategoryImages ? (
+                      <div className="bg-muted/50 rounded-lg p-4 border">
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Images are automatically loaded from your Categories.</strong> Go to the <span className="font-medium text-foreground">Categories</span> tab to add or update category images.
+                        </p>
+                        <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside space-y-1">
+                          <li><strong>Specific category selected:</strong> That category's image is featured. If no image exists, default images are used.</li>
+                          <li><strong>"All Categories" selected:</strong> The first 5 categories with images (by display order) are shown.</li>
+                        </ul>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">Upload 5 custom images for the hero gallery. These will rotate in the animated display.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                          {[0, 1, 2, 3, 4].map((index) => (
+                            <div key={index} className="space-y-2">
+                              <ImageUploadInput
+                                label={`Image ${index + 1}`}
+                                value={newCollectionContent.heroImages[index] || ''}
+                                onChange={(url) => {
+                                  const newImages = [...newCollectionContent.heroImages];
+                                  newImages[index] = url;
+                                  setNewCollectionContent({ ...newCollectionContent, heroImages: newImages });
+                                }}
+                                placeholder="Upload or paste URL"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <Button onClick={handleSaveNewCollectionContent} className="mt-6" disabled={updateContentMutation.isPending}>

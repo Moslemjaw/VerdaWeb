@@ -63,6 +63,8 @@ export default function BlackDressShowcase() {
   const heading = (newCollectionContent as any)?.heading || "DESIGNED\nTO MAKE\nAN ENTRANCE";
   const buttonText = newCollectionContent?.buttonText || "View All Products";
   const selectedCategory = (newCollectionContent as any)?.category || "";
+  const useCategoryImages = (newCollectionContent as any)?.useCategoryImages !== false;
+  const customHeroImages = (newCollectionContent as any)?.heroImages || [];
   
   // Fetch categories to use their images for the hero section
   const { data: categories = [] } = useQuery<Category[]>({
@@ -88,8 +90,22 @@ export default function BlackDressShowcase() {
     },
   });
 
-  // Use category images for the hero section based on selected category
-  const getCategoryImages = () => {
+  // Use category images for the hero section based on selected category or custom uploads
+  const getHeroImages = () => {
+    // If using custom images (toggle is OFF), use the uploaded images
+    if (!useCategoryImages) {
+      // Filter out empty strings and fill with defaults if needed
+      const validCustomImages = customHeroImages.filter((img: string) => img && img.trim() !== '');
+      if (validCustomImages.length >= 5) {
+        return validCustomImages.slice(0, 5);
+      }
+      // Fill remaining slots with defaults
+      return validCustomImages.length > 0
+        ? [...validCustomImages, ...defaultImages.slice(validCustomImages.length)]
+        : defaultImages;
+    }
+    
+    // Using category images (toggle is ON)
     // If a specific category is selected, prioritize it
     if (selectedCategory && selectedCategory !== 'all') {
       // Match by name (case-insensitive) or slug
@@ -126,7 +142,7 @@ export default function BlackDressShowcase() {
         : defaultImages;
   };
   
-  const baseImages = getCategoryImages();
+  const baseImages = getHeroImages();
 
   const heroImages = [
     baseImages[(0 + rotationIndex) % 5],
