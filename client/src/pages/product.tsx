@@ -579,15 +579,15 @@ function ProductInfo({
 
       {/* Add to Cart Button */}
       <div className="mt-8 flex gap-3">
-        <Button
-          variant="outline"
-          onClick={handleAddToCart}
-          disabled={!product.inStock}
-          className="h-14 w-14 p-0 flex-shrink-0"
-          data-testid="button-cart-icon"
-        >
-          <ShoppingBag className="w-5 h-5" />
-        </Button>
+        <Link href="/checkout">
+          <Button
+            variant="outline"
+            className="h-14 w-14 p-0 flex-shrink-0"
+            data-testid="button-cart-icon"
+          >
+            <ShoppingBag className="w-5 h-5" />
+          </Button>
+        </Link>
         <Button
           onClick={handleAddToCart}
           disabled={!product.inStock}
