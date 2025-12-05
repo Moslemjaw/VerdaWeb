@@ -82,38 +82,35 @@ export default function FeaturedCollection() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 lg:gap-6">
           {products.map((product, index) => (
-            <Link href={`/shop?category=${encodeURIComponent(product.category)}`} key={product._id}>
+            <Link href={`/product/${product._id}`} key={product._id}>
               <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
                 className="group cursor-pointer"
-                data-testid={`card-collection-${product._id}`}
+                data-testid={`card-product-${product._id}`}
               >
-                <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6">
+                <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4">
                   <img 
                     src={product.imageUrl} 
-                    alt={product.category} 
+                    alt={product.name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                   <div 
-                    className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium text-center"
+                    className="absolute bottom-0 left-0 right-0 bg-white text-black py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium text-center"
                   >
-                    Shop {product.category}
+                    View Product
                   </div>
                 </div>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{product.category}</p>
-                    <h3 className="text-xl font-serif text-primary group-hover:underline decoration-1 underline-offset-4 transition-all">
-                      {product.name}
-                    </h3>
-                  </div>
-                  <span className="text-lg font-serif">{product.price} KWD</span>
+                <div>
+                  <h3 className="text-sm font-medium text-primary group-hover:underline decoration-1 underline-offset-4 transition-all line-clamp-1">
+                    {product.name}
+                  </h3>
+                  <span className="text-sm font-medium">{product.price} KWD</span>
                 </div>
               </motion.div>
             </Link>
