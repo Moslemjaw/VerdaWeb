@@ -9,7 +9,7 @@ import Signup from "@/pages/signup";
 import AdminDashboard from "@/pages/admin";
 import Shop from "@/pages/shop";
 import NewIn from "@/pages/new-in";
-import BestSellers from "@/pages/best";
+import Explore from "@/pages/explore";
 import About from "@/pages/about";
 import NotFound from "@/pages/not-found";
 
@@ -22,7 +22,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/shop" component={Shop} />
       <Route path="/new-in" component={NewIn} />
-      <Route path="/best" component={BestSellers} />
+      <Route path="/explore" component={Explore} />
       <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>
