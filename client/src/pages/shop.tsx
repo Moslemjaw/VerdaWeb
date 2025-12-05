@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Input } from '@/components/ui/input';
@@ -367,47 +367,45 @@ export default function Shop() {
             ) : (
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
                 {filteredProducts.map((product, index) => (
-                  <motion.div
-                    key={product._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="group cursor-pointer"
-                    data-testid={`card-product-${product._id}`}
-                  >
-                    <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-2 sm:mb-4 rounded-lg">
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      {!product.inStock && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <span className="text-white text-sm uppercase tracking-wider">Out of Stock</span>
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
-                      {product.inStock && (
-                        <button 
-                          className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium"
-                          data-testid={`button-add-to-cart-${product._id}`}
+                  <Link href={`/product/${product._id}`} key={product._id}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
+                      className="group cursor-pointer"
+                      data-testid={`card-product-${product._id}`}
+                    >
+                      <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-2 sm:mb-4 rounded-lg">
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        {!product.inStock && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <span className="text-white text-sm uppercase tracking-wider">Out of Stock</span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+                        <div 
+                          className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium text-center"
                         >
-                          Add to Cart
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1 hidden sm:block">
-                          {product.category}
-                        </p>
-                        <h3 className="font-serif text-sm sm:text-lg group-hover:underline decoration-1 underline-offset-4 line-clamp-2">
-                          {product.name}
-                        </h3>
+                          View Details
+                        </div>
                       </div>
-                      <span className="text-sm sm:text-lg font-serif sm:flex-shrink-0">{product.price} KWD</span>
-                    </div>
-                  </motion.div>
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1 hidden sm:block">
+                            {product.category}
+                          </p>
+                          <h3 className="font-serif text-sm sm:text-lg group-hover:underline decoration-1 underline-offset-4 line-clamp-2">
+                            {product.name}
+                          </h3>
+                        </div>
+                        <span className="text-sm sm:text-lg font-serif sm:flex-shrink-0">{product.price} KWD</span>
+                      </div>
+                    </motion.div>
+                  </Link>
                 ))}
               </div>
             )}

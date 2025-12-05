@@ -87,20 +87,21 @@ export default function BestSellers() {
           <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
           <div className="flex gap-3 pb-4">
             {products.map((product, index) => (
-              <motion.div
-                key={product._id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="flex-shrink-0 w-[140px] group cursor-pointer"
-              >
-                <div className="aspect-[3/4] bg-gray-100 mb-2 overflow-hidden rounded-lg">
-                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                </div>
-                <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
-                <p className="text-sm font-medium text-black">{product.price} KWD</p>
-              </motion.div>
+              <Link href={`/product/${product._id}`} key={product._id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className="flex-shrink-0 w-[140px] group cursor-pointer"
+                >
+                  <div className="aspect-[3/4] bg-gray-100 mb-2 overflow-hidden rounded-lg">
+                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                  </div>
+                  <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
+                  <p className="text-sm font-medium text-black">{product.price} KWD</p>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </div>
@@ -151,20 +152,21 @@ export default function BestSellers() {
           >
             <div className="flex gap-5 pb-4">
               {products.map((product, index) => (
-                <motion.div
-                  key={product._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="flex-shrink-0 w-[200px] group cursor-pointer"
-                >
-                  <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden">
-                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  </div>
-                  <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
-                  <p className="text-sm font-medium text-black">{product.price} KWD</p>
-                </motion.div>
+                <Link href={`/product/${product._id}`} key={product._id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    className="flex-shrink-0 w-[200px] group cursor-pointer"
+                  >
+                    <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden">
+                      <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    </div>
+                    <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
+                    <p className="text-sm font-medium text-black">{product.price} KWD</p>
+                  </motion.div>
+                </Link>
               ))}
             </div>
           </div>

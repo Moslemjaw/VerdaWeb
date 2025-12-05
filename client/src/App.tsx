@@ -12,6 +12,7 @@ import Shop from "@/pages/shop";
 import NewIn from "@/pages/new-in";
 import Explore from "@/pages/explore";
 import Checkout from "@/pages/checkout";
+import ProductDetails from "@/pages/product";
 import About from "@/pages/about";
 import NotFound from "@/pages/not-found";
 
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/new-in" component={NewIn} />
       <Route path="/explore" component={Explore} />
       <Route path="/checkout" component={Checkout} />
+      <Route path="/product/:id" component={ProductDetails} />
       <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>

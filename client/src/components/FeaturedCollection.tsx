@@ -87,39 +87,39 @@ export default function FeaturedCollection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           {products.map((product, index) => (
-            <motion.div
-              key={product._id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              className="group cursor-pointer"
-              data-testid={`card-featured-product-${product._id}`}
-            >
-              <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6">
-                <img 
-                  src={product.imageUrl} 
-                  alt={product.name} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
-                <button 
-                  className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium"
-                  data-testid={`button-add-cart-${product._id}`}
-                >
-                  Add to Cart
-                </button>
-              </div>
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{product.category}</p>
-                  <h3 className="text-xl font-serif text-primary group-hover:underline decoration-1 underline-offset-4 transition-all">
-                    {product.name}
-                  </h3>
+            <Link href={`/product/${product._id}`} key={product._id}>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                className="group cursor-pointer"
+                data-testid={`card-featured-product-${product._id}`}
+              >
+                <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6">
+                  <img 
+                    src={product.imageUrl} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+                  <div 
+                    className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium text-center"
+                  >
+                    View Details
+                  </div>
                 </div>
-                <span className="text-lg font-serif">{product.price} KWD</span>
-              </div>
-            </motion.div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{product.category}</p>
+                    <h3 className="text-xl font-serif text-primary group-hover:underline decoration-1 underline-offset-4 transition-all">
+                      {product.name}
+                    </h3>
+                  </div>
+                  <span className="text-lg font-serif">{product.price} KWD</span>
+                </div>
+              </motion.div>
+            </Link>
           ))}
         </div>
       </div>

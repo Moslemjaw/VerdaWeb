@@ -69,30 +69,31 @@ export default function NewIn() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-6 md:gap-8">
               {products.map((product, index) => (
-                <motion.div
-                  key={product._id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="group cursor-pointer"
-                  data-testid={`card-product-${product._id}`}
-                >
-                  <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-b from-neutral-800 to-neutral-900 mb-2 sm:mb-4 rounded-lg sm:rounded-none">
-                    <img 
-                      src={product.imageUrl} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm md:text-base text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-white/70 font-medium">{product.price} KWD</p>
-                  </div>
-                </motion.div>
+                <Link href={`/product/${product._id}`} key={product._id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    className="group cursor-pointer"
+                    data-testid={`card-product-${product._id}`}
+                  >
+                    <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-b from-neutral-800 to-neutral-900 mb-2 sm:mb-4 rounded-lg sm:rounded-none">
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs sm:text-sm md:text-base text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-white/70 font-medium">{product.price} KWD</p>
+                    </div>
+                  </motion.div>
+                </Link>
               ))}
             </div>
           )}
