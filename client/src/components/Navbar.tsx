@@ -18,6 +18,9 @@ export default function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [location, setLocation] = useLocation();
 
+  const darkPages = ['/', '/new-in'];
+  const isOnDarkPage = darkPages.includes(location);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -43,8 +46,10 @@ export default function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
         isScrolled
-          ? "bg-background/80 backdrop-blur-md py-4 border-b"
-          : "bg-transparent py-6 text-white"
+          ? "bg-background/80 backdrop-blur-md py-4 border-b text-foreground"
+          : isOnDarkPage
+            ? "bg-transparent py-6 text-white"
+            : "bg-transparent py-6 text-foreground"
       )}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
