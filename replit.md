@@ -222,6 +222,25 @@ The checkout system supports three payment methods:
 - Tracks customer info, shipping address, items, and payment status
 - Status progression: pending → processing → shipped → delivered
 
-### Currency
-- All prices displayed in Kuwaiti Dinar (KWD)
-- Free shipping for orders over 50 KWD
+### Multi-Currency System
+- **Base Currency**: Kuwaiti Dinar (KWD) - all prices stored in database in KWD
+- **Supported Currencies**: KWD, USD, EUR, GBP, SAR, AED, BHD, OMR, QAR
+- **Auto-Detection**: Currency detected via IP-based geolocation on first visit
+- **Manual Override**: Users can select preferred currency from navbar dropdown
+- **Exchange Rates**: Fetched from server with 1-hour caching
+- **User Preference**: Selected currency stored in localStorage for persistence
+
+#### CurrencyContext
+- Global context provider wraps entire application (`CurrencyContext.tsx`)
+- `useCurrency()` hook provides:
+  - `currency`: Current currency object with code, symbol, name
+  - `setCurrency(code)`: Function to change currency
+  - `formatPrice(priceInKWD)`: Converts KWD amount to selected currency and formats
+  - `availableCurrencies`: List of all supported currencies
+
+#### Technical Details
+- Exchange rates fetched via `/api/currency/rates` with sensible fallback defaults
+- Geolocation via `/api/currency/detect` returns country and suggested currency
+- All price displays use `formatPrice()` helper for consistent currency conversion
+- Admin dashboard uses KWD for all inputs/labels (base currency for management)
+- Free shipping threshold: 50 KWD (approximately $163 USD)
