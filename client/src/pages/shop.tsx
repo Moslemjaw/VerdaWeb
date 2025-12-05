@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Percent } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
@@ -17,6 +17,7 @@ interface Product {
   _id: string;
   name: string;
   price: number;
+  compareAtPrice?: number;
   description: string;
   category: string;
   imageUrl: string;
@@ -33,6 +34,7 @@ export default function Shop() {
   const [showInStockOnly, setShowInStockOnly] = useState(false);
   const [showBestSellersOnly, setShowBestSellersOnly] = useState(false);
   const [showNewInOnly, setShowNewInOnly] = useState(false);
+  const [showOnSaleOnly, setShowOnSaleOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high' | 'name'>('newest');
 
   // Check for filters from URL
@@ -109,6 +111,11 @@ export default function Shop() {
         return true;
       }
 
+      // On Sale filter - only show products with compareAtPrice greater than current price
+      if (showOnSaleOnly && (!product.compareAtPrice || product.compareAtPrice <= product.price)) {
+        return false;
+      }
+
       return true;
     });
 
@@ -129,7 +136,7 @@ export default function Shop() {
     }
 
     return result;
-  }, [products, searchQuery, selectedCategories, priceRange, showInStockOnly, sortBy]);
+  }, [products, searchQuery, selectedCategories, priceRange, showInStockOnly, showBestSellersOnly, showNewInOnly, showOnSaleOnly, sortBy]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
@@ -146,12 +153,13 @@ export default function Shop() {
     setShowInStockOnly(false);
     setShowBestSellersOnly(false);
     setShowNewInOnly(false);
+    setShowOnSaleOnly(false);
     setSortBy('newest');
     // Clear URL params
     window.history.replaceState({}, '', '/shop');
   };
 
-  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 5000 || showInStockOnly || showBestSellersOnly || showNewInOnly;
+  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 5000 || showInStockOnly || showBestSellersOnly || showNewInOnly || showOnSaleOnly;
 
   const FilterContent = () => (
     <div className="space-y-8">
@@ -223,6 +231,20 @@ export default function Shop() {
         />
         <Label htmlFor="bestSellers" className="text-sm cursor-pointer">
           Best Sellers Only
+        </Label>
+      </div>
+
+      {/* On Sale */}
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="onSale"
+          checked={showOnSaleOnly}
+          onCheckedChange={(checked) => setShowOnSaleOnly(checked === true)}
+          data-testid="filter-on-sale"
+        />
+        <Label htmlFor="onSale" className="text-sm cursor-pointer flex items-center gap-1">
+          <Percent className="w-3 h-3" />
+          On Sale
         </Label>
       </div>
 
@@ -389,6 +411,13 @@ export default function Shop() {
                           alt={product.name} 
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
+                        {/* Sale Badge */}
+                        {product.compareAtPrice && product.compareAtPrice > product.price && (
+                          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-red-500 text-white px-2 py-1 rounded-sm text-xs font-bold flex items-center gap-1">
+                            <Percent className="w-3 h-3" />
+                            <span>SALE</span>
+                          </div>
+                        )}
                         {!product.inStock && (
                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                             <span className="text-white text-sm uppercase tracking-wider">Out of Stock</span>
@@ -410,7 +439,16 @@ export default function Shop() {
                             {product.name}
                           </h3>
                         </div>
-                        <span className="text-sm sm:text-lg font-serif sm:flex-shrink-0">{formatPrice(product.price)}</span>
+                        <div className="flex flex-col items-end sm:flex-shrink-0">
+                          {product.compareAtPrice && product.compareAtPrice > product.price ? (
+                            <>
+                              <span className="text-xs text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</span>
+                              <span className="text-sm sm:text-lg font-serif text-red-600">{formatPrice(product.price)}</span>
+                            </>
+                          ) : (
+                            <span className="text-sm sm:text-lg font-serif">{formatPrice(product.price)}</span>
+                          )}
+                        </div>
                       </div>
                     </motion.div>
                   </Link>

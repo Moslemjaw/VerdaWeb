@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ShoppingBag, Heart, Check, Minus, Plus, Share2, ZoomIn, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Heart, Check, Minus, Plus, Share2, ZoomIn, X, ChevronLeft, ChevronRight, Percent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +12,7 @@ interface Product {
   _id: string;
   name: string;
   price: number;
+  compareAtPrice?: number;
   description: string;
   category: string;
   brand: string;
@@ -520,9 +521,20 @@ function ProductInfo({
         </button>
       </div>
 
-      <p className="text-2xl sm:text-3xl font-medium mt-4" data-testid="text-product-price">
-        {formatPrice(product.price)}
-      </p>
+      <div className="mt-4" data-testid="text-product-price">
+        {product.compareAtPrice && product.compareAtPrice > product.price ? (
+          <div className="flex items-center gap-3">
+            <span className="text-lg text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</span>
+            <span className="text-2xl sm:text-3xl font-medium text-red-600">{formatPrice(product.price)}</span>
+            <span className="bg-red-500 text-white px-2 py-1 rounded-sm text-xs font-bold flex items-center gap-1">
+              <Percent className="w-3 h-3" />
+              {Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)}% OFF
+            </span>
+          </div>
+        ) : (
+          <p className="text-2xl sm:text-3xl font-medium">{formatPrice(product.price)}</p>
+        )}
+      </div>
 
       <p className="text-muted-foreground mt-4 text-sm sm:text-base leading-relaxed" data-testid="text-product-description">
         {product.description}
