@@ -3487,42 +3487,54 @@ export default function AdminDashboard() {
 
                   <div className="border-t pt-6">
                     <Label className="font-medium text-lg mb-4 block">Category Cards (6 categories)</Label>
-                    <p className="text-sm text-muted-foreground mb-4">Each category will show as a card linking to that category in your shop.</p>
+                    <div className="bg-muted/50 rounded-lg p-4 border mb-4">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Images are automatically loaded from your Categories.</strong> Go to the <span className="font-medium text-foreground">Categories</span> tab to add or update category images.
+                      </p>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {featuredContent.categories.map((cat, index) => (
-                        <div key={index} className="border rounded-lg p-4 space-y-3">
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium">Category {index + 1}</Label>
-                            <Select
-                              value={cat.name}
-                              onValueChange={(value) => {
-                                const newCategories = [...featuredContent.categories];
-                                newCategories[index] = { ...newCategories[index], name: value };
-                                setFeaturedContent({ ...featuredContent, categories: newCategories });
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a category" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {categories.filter(cat => cat.isActive).map((cat) => (
-                                  <SelectItem key={cat._id} value={cat.name}>{cat.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                      {featuredContent.categories.map((cat, index) => {
+                        const selectedCategory = categories.find(c => c.name === cat.name);
+                        return (
+                          <div key={index} className="border rounded-lg p-4 space-y-3">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Category {index + 1}</Label>
+                              <Select
+                                value={cat.name}
+                                onValueChange={(value) => {
+                                  const newCategories = [...featuredContent.categories];
+                                  newCategories[index] = { ...newCategories[index], name: value };
+                                  setFeaturedContent({ ...featuredContent, categories: newCategories });
+                                }}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {categories.filter(cat => cat.isActive).map((cat) => (
+                                    <SelectItem key={cat._id} value={cat.name}>{cat.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            {selectedCategory?.imageUrl && (
+                              <div className="aspect-[4/3] relative rounded overflow-hidden bg-gray-100">
+                                <img 
+                                  src={selectedCategory.imageUrl} 
+                                  alt={cat.name} 
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-2 py-1">
+                                  From Categories
+                                </div>
+                              </div>
+                            )}
+                            {!selectedCategory?.imageUrl && cat.name && (
+                              <p className="text-xs text-muted-foreground italic">No image set for this category</p>
+                            )}
                           </div>
-                          <ImageUploadInput
-                            label={`Category ${index + 1} Image`}
-                            value={cat.image}
-                            onChange={(url) => {
-                              const newCategories = [...featuredContent.categories];
-                              newCategories[index] = { ...newCategories[index], image: url };
-                              setFeaturedContent({ ...featuredContent, categories: newCategories });
-                            }}
-                            placeholder="Upload or paste URL"
-                          />
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

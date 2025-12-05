@@ -53,7 +53,7 @@ export default function FeaturedCollection() {
   
   const cmsCategories: CMSCategory[] = (collectionSettings as any)?.categories || [];
   
-  // Build display categories: use CMS names but look up images from DB categories
+  // Build display categories: use CMS names but always get images from DB categories
   const categories: DisplayCategory[] = cmsCategories.length > 0 
     ? cmsCategories.map(cmsCat => {
         // Find matching category in database (case-insensitive)
@@ -61,12 +61,10 @@ export default function FeaturedCollection() {
           db => db.name.toLowerCase() === cmsCat.name.toLowerCase() && db.isActive
         );
         
-        // Priority: 1. CMS image if set, 2. DB category image, 3. default image by name, 4. placeholder
-        const image = cmsCat.image && cmsCat.image.trim() !== '' 
-          ? cmsCat.image 
-          : dbCat?.imageUrl && dbCat.imageUrl.trim() !== ''
-            ? dbCat.imageUrl
-            : defaultImages[cmsCat.name] || defaultPlaceholder;
+        // Always use DB category image, fallback to default image by name, then placeholder
+        const image = dbCat?.imageUrl && dbCat.imageUrl.trim() !== ''
+          ? dbCat.imageUrl
+          : defaultImages[cmsCat.name] || defaultPlaceholder;
         
         return { name: cmsCat.name, image };
       })
