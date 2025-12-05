@@ -9,6 +9,8 @@ import { Discount, IDiscount } from "./models/Discount";
 import { ShippingSettings, getShippingSettings } from "./models/ShippingSettings";
 import { ShippingCountry, initializeDefaultCountries } from "./models/ShippingCountry";
 import { Popup, IPopup } from "./models/Popup";
+import { Category, ICategory } from "./models/Category";
+import { Brand, IBrand } from "./models/Brand";
 import { requireAuth, requireAdmin, AuthRequest } from "./middleware/auth";
 import { Request, Response } from "express";
 import multer from "multer";
@@ -1153,6 +1155,278 @@ export async function registerRoutes(
     } catch (error) {
       console.error('Delete popup error:', error);
       res.status(500).json({ error: "Failed to delete popup" });
+    }
+  });
+
+  // CATEGORY ROUTES
+
+  // Public: Get all active categories
+  app.get("/api/categories", async (req: Request, res: Response) => {
+    try {
+      const categories = await Category.find({ isActive: true }).sort({ order: 1, name: 1 });
+      res.json(categories);
+    } catch (error) {
+      console.error('Get categories error:', error);
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  // Admin: Get all categories
+  app.get("/api/admin/categories", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const categories = await Category.find().sort({ order: 1, name: 1 });
+      res.json(categories);
+    } catch (error) {
+      console.error('Get admin categories error:', error);
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  // Admin: Create category
+  app.post("/api/admin/categories", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { name, description, imageUrl, isActive, order } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ error: "Category name is required" });
+      }
+
+      const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
+      const existingCategory = await Category.findOne({ 
+        $or: [{ name }, { slug }] 
+      });
+      
+      if (existingCategory) {
+        return res.status(400).json({ error: "A category with this name already exists" });
+      }
+
+      const category = new Category({
+        name,
+        slug,
+        description: description || '',
+        imageUrl: imageUrl || '',
+        isActive: isActive !== false,
+        order: order || 0,
+      });
+
+      await category.save();
+      res.status(201).json(category);
+    } catch (error) {
+      console.error('Create category error:', error);
+      res.status(500).json({ error: "Failed to create category" });
+    }
+  });
+
+  // Admin: Update category
+  app.put("/api/admin/categories/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name, description, imageUrl, isActive, order } = req.body;
+      
+      const category = await Category.findById(id);
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+
+      if (name && name !== category.name) {
+        const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const existingCategory = await Category.findOne({ 
+          _id: { $ne: id },
+          $or: [{ name }, { slug }] 
+        });
+        
+        if (existingCategory) {
+          return res.status(400).json({ error: "A category with this name already exists" });
+        }
+        
+        category.name = name;
+        category.slug = slug;
+      }
+
+      if (description !== undefined) category.description = description;
+      if (imageUrl !== undefined) category.imageUrl = imageUrl;
+      if (isActive !== undefined) category.isActive = isActive;
+      if (order !== undefined) category.order = order;
+
+      await category.save();
+      res.json(category);
+    } catch (error) {
+      console.error('Update category error:', error);
+      res.status(500).json({ error: "Failed to update category" });
+    }
+  });
+
+  // Admin: Toggle category active status
+  app.patch("/api/admin/categories/:id/toggle", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const category = await Category.findById(id);
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+
+      category.isActive = !category.isActive;
+      await category.save();
+      res.json(category);
+    } catch (error) {
+      console.error('Toggle category error:', error);
+      res.status(500).json({ error: "Failed to toggle category" });
+    }
+  });
+
+  // Admin: Delete category
+  app.delete("/api/admin/categories/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const category = await Category.findById(id);
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+
+      await Category.findByIdAndDelete(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Delete category error:', error);
+      res.status(500).json({ error: "Failed to delete category" });
+    }
+  });
+
+  // BRAND ROUTES
+
+  // Public: Get all active brands
+  app.get("/api/brands", async (req: Request, res: Response) => {
+    try {
+      const brands = await Brand.find({ isActive: true }).sort({ order: 1, name: 1 });
+      res.json(brands);
+    } catch (error) {
+      console.error('Get brands error:', error);
+      res.status(500).json({ error: "Failed to fetch brands" });
+    }
+  });
+
+  // Admin: Get all brands
+  app.get("/api/admin/brands", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const brands = await Brand.find().sort({ order: 1, name: 1 });
+      res.json(brands);
+    } catch (error) {
+      console.error('Get admin brands error:', error);
+      res.status(500).json({ error: "Failed to fetch brands" });
+    }
+  });
+
+  // Admin: Create brand
+  app.post("/api/admin/brands", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { name, description, logoUrl, isActive, order } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ error: "Brand name is required" });
+      }
+
+      const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
+      const existingBrand = await Brand.findOne({ 
+        $or: [{ name }, { slug }] 
+      });
+      
+      if (existingBrand) {
+        return res.status(400).json({ error: "A brand with this name already exists" });
+      }
+
+      const brand = new Brand({
+        name,
+        slug,
+        description: description || '',
+        logoUrl: logoUrl || '',
+        isActive: isActive !== false,
+        order: order || 0,
+      });
+
+      await brand.save();
+      res.status(201).json(brand);
+    } catch (error) {
+      console.error('Create brand error:', error);
+      res.status(500).json({ error: "Failed to create brand" });
+    }
+  });
+
+  // Admin: Update brand
+  app.put("/api/admin/brands/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name, description, logoUrl, isActive, order } = req.body;
+      
+      const brand = await Brand.findById(id);
+      if (!brand) {
+        return res.status(404).json({ error: "Brand not found" });
+      }
+
+      if (name && name !== brand.name) {
+        const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const existingBrand = await Brand.findOne({ 
+          _id: { $ne: id },
+          $or: [{ name }, { slug }] 
+        });
+        
+        if (existingBrand) {
+          return res.status(400).json({ error: "A brand with this name already exists" });
+        }
+        
+        brand.name = name;
+        brand.slug = slug;
+      }
+
+      if (description !== undefined) brand.description = description;
+      if (logoUrl !== undefined) brand.logoUrl = logoUrl;
+      if (isActive !== undefined) brand.isActive = isActive;
+      if (order !== undefined) brand.order = order;
+
+      await brand.save();
+      res.json(brand);
+    } catch (error) {
+      console.error('Update brand error:', error);
+      res.status(500).json({ error: "Failed to update brand" });
+    }
+  });
+
+  // Admin: Toggle brand active status
+  app.patch("/api/admin/brands/:id/toggle", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const brand = await Brand.findById(id);
+      if (!brand) {
+        return res.status(404).json({ error: "Brand not found" });
+      }
+
+      brand.isActive = !brand.isActive;
+      await brand.save();
+      res.json(brand);
+    } catch (error) {
+      console.error('Toggle brand error:', error);
+      res.status(500).json({ error: "Failed to toggle brand" });
+    }
+  });
+
+  // Admin: Delete brand
+  app.delete("/api/admin/brands/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const brand = await Brand.findById(id);
+      if (!brand) {
+        return res.status(404).json({ error: "Brand not found" });
+      }
+
+      await Brand.findByIdAndDelete(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Delete brand error:', error);
+      res.status(500).json({ error: "Failed to delete brand" });
     }
   });
 
