@@ -6,6 +6,7 @@ import { Product, IProduct } from "./models/Product";
 import { SiteContent, ISiteContent } from "./models/SiteContent";
 import { Order, IOrder } from "./models/Order";
 import { Discount, IDiscount } from "./models/Discount";
+import { ShippingSettings, getShippingSettings } from "./models/ShippingSettings";
 import { requireAuth, requireAdmin, AuthRequest } from "./middleware/auth";
 import { Request, Response } from "express";
 import multer from "multer";
@@ -724,6 +725,67 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to use discount" });
+    }
+  });
+
+  // ============================================
+  // SHIPPING SETTINGS ROUTES
+  // ============================================
+
+  app.get("/api/shipping", async (req: Request, res: Response) => {
+    try {
+      const settings = await getShippingSettings();
+      res.json({
+        baseRate: settings.baseRate,
+        freeThreshold: settings.freeThreshold,
+        enableFreeThreshold: settings.enableFreeThreshold,
+      });
+    } catch (error) {
+      console.error('Get shipping settings error:', error);
+      res.status(500).json({ error: "Failed to get shipping settings" });
+    }
+  });
+
+  app.get("/api/admin/shipping", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const settings = await getShippingSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error('Get admin shipping settings error:', error);
+      res.status(500).json({ error: "Failed to get shipping settings" });
+    }
+  });
+
+  app.put("/api/admin/shipping", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { baseRate, freeThreshold, enableFreeThreshold } = req.body;
+
+      if (typeof baseRate !== 'number' || baseRate < 0) {
+        return res.status(400).json({ error: "Base rate must be a non-negative number" });
+      }
+
+      if (enableFreeThreshold && (typeof freeThreshold !== 'number' || freeThreshold < 0)) {
+        return res.status(400).json({ error: "Free threshold must be a non-negative number" });
+      }
+
+      let settings = await ShippingSettings.findOne();
+      if (!settings) {
+        settings = new ShippingSettings({
+          baseRate,
+          freeThreshold: freeThreshold || 50,
+          enableFreeThreshold: enableFreeThreshold ?? true,
+        });
+      } else {
+        settings.baseRate = baseRate;
+        settings.freeThreshold = freeThreshold || settings.freeThreshold;
+        settings.enableFreeThreshold = enableFreeThreshold ?? settings.enableFreeThreshold;
+      }
+
+      await settings.save();
+      res.json(settings);
+    } catch (error) {
+      console.error('Update shipping settings error:', error);
+      res.status(500).json({ error: "Failed to update shipping settings" });
     }
   });
 
