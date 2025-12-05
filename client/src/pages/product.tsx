@@ -421,15 +421,20 @@ export default function ProductDetails() {
 
       {/* Fixed Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t p-4 safe-area-inset">
-        <div className="container mx-auto flex items-center gap-4">
-          <div className="flex-1">
-            <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-xl font-bold">{product.price * quantity} KWD</p>
-          </div>
+        <div className="container mx-auto flex items-center gap-3">
+          <Link href="/checkout">
+            <Button
+              variant="outline"
+              className="h-14 w-14 p-0 flex-shrink-0"
+              data-testid="button-cart-icon"
+            >
+              <ShoppingBag className="w-5 h-5" />
+            </Button>
+          </Link>
           <Button
             onClick={handleAddToCart}
             disabled={!product.inStock}
-            className="h-14 px-8 text-base font-medium gap-2"
+            className="flex-1 h-14 text-base font-medium gap-2"
             data-testid="button-add-to-cart"
           >
             {isInCart ? (
@@ -439,7 +444,6 @@ export default function ProductDetails() {
               </>
             ) : (
               <>
-                <ShoppingBag className="w-5 h-5" />
                 Add to Cart
               </>
             )}
@@ -596,36 +600,6 @@ function ProductInfo({
             <Plus className="w-4 h-4" />
           </button>
         </div>
-      </div>
-
-      {/* Add to Cart Button */}
-      <div className="mt-8 flex gap-3">
-        <Link href="/checkout">
-          <Button
-            variant="outline"
-            className="h-14 w-14 p-0 flex-shrink-0"
-            data-testid="button-cart-icon"
-          >
-            <ShoppingBag className="w-5 h-5" />
-          </Button>
-        </Link>
-        <Button
-          onClick={handleAddToCart}
-          disabled={!product.inStock}
-          className="flex-1 h-14 text-base font-medium gap-2"
-          data-testid="button-add-to-cart-main"
-        >
-          {isInCart ? (
-            <>
-              <Check className="w-5 h-5" />
-              Add More
-            </>
-          ) : (
-            <>
-              Add to Cart
-            </>
-          )}
-        </Button>
       </div>
 
       {/* Product Details */}
