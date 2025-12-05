@@ -252,10 +252,10 @@ export default function BlackDressShowcase() {
                       {product.name}
                     </h3>
                     <div className="flex items-center gap-2">
-                      {product.compareAtPrice && product.compareAtPrice > product.price && (
-                        <span className="text-xs text-white/40 line-through">{formatPrice(product.compareAtPrice)}</span>
+                      {product.compareAtPrice && product.compareAtPrice < product.price && (
+                        <span className="text-xs text-white/40 line-through">{formatPrice(product.price)}</span>
                       )}
-                      <span className="text-sm text-white/70 font-medium">{formatPrice(product.price)}</span>
+                      <span className="text-sm text-white/70 font-medium">{formatPrice(product.compareAtPrice && product.compareAtPrice < product.price ? product.compareAtPrice : product.price)}</span>
                     </div>
                   </motion.div>
                 </Link>

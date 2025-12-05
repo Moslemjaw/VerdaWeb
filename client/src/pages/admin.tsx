@@ -1858,7 +1858,7 @@ export default function AdminDashboard() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="price">Price (KWD) *</Label>
+                        <Label htmlFor="price">Regular Price (KWD) *</Label>
                         <Input
                           id="price"
                           type="number"
@@ -1866,22 +1866,22 @@ export default function AdminDashboard() {
                           value={productForm.price}
                           onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
                           required
-                          placeholder="e.g., 29.900"
+                          placeholder="e.g., 39.900"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="compareAtPrice">Compare at Price (KWD) - Original price for discount</Label>
+                      <Label htmlFor="compareAtPrice">Sale Price (KWD) - Discounted price</Label>
                       <Input
                         id="compareAtPrice"
                         type="number"
                         step="0.01"
                         value={productForm.compareAtPrice}
                         onChange={(e) => setProductForm({ ...productForm, compareAtPrice: e.target.value })}
-                        placeholder="e.g., 39.900 (leave empty if no discount)"
+                        placeholder="e.g., 29.900 (leave empty if no discount)"
                       />
-                      <p className="text-xs text-muted-foreground">If set, this will show as the original price with a strikethrough, and the Price above will be the sale price.</p>
+                      <p className="text-xs text-muted-foreground">If set, this will be the price customers pay. The Regular Price above will show with a strikethrough.</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -3639,7 +3639,7 @@ export default function AdminDashboard() {
                           <SelectValue placeholder="Select category (or leave empty for all products)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Products</SelectItem>
+                          <SelectItem value="all">All Products</SelectItem>
                           <SelectItem value="Dresses">Dresses</SelectItem>
                           <SelectItem value="Evening Wear">Evening Wear</SelectItem>
                           <SelectItem value="Tops">Tops</SelectItem>

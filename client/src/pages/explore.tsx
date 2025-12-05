@@ -10,6 +10,7 @@ interface Product {
   _id: string;
   name: string;
   price: number;
+  compareAtPrice?: number;
   description: string;
   category: string;
   imageUrl: string;
@@ -102,7 +103,16 @@ function ProductCard({
           <p className="text-xs sm:text-sm uppercase tracking-widest opacity-70 mb-1 sm:mb-2">{product.category}</p>
           <h2 className="text-xl sm:text-3xl font-serif mb-1 sm:mb-2">{product.name}</h2>
           <p className="text-sm sm:text-lg opacity-80 mb-2 sm:mb-4 line-clamp-2">{product.description}</p>
-          <p className="text-xl sm:text-2xl font-bold">{formatPrice(product.price)}</p>
+          <div className="flex items-center gap-3">
+            {product.compareAtPrice && product.compareAtPrice < product.price ? (
+              <>
+                <span className="text-lg opacity-60 line-through">{formatPrice(product.price)}</span>
+                <span className="text-xl sm:text-2xl font-bold text-red-400">{formatPrice(product.compareAtPrice)}</span>
+              </>
+            ) : (
+              <p className="text-xl sm:text-2xl font-bold">{formatPrice(product.price)}</p>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

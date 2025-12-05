@@ -111,8 +111,8 @@ export default function Shop() {
         return true;
       }
 
-      // On Sale filter - only show products with compareAtPrice greater than current price
-      if (showOnSaleOnly && (!product.compareAtPrice || product.compareAtPrice <= product.price)) {
+      // On Sale filter - only show products with sale price (compareAtPrice) less than regular price
+      if (showOnSaleOnly && (!product.compareAtPrice || product.compareAtPrice >= product.price)) {
         return false;
       }
 
@@ -412,7 +412,7 @@ export default function Shop() {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         {/* Sale Badge */}
-                        {product.compareAtPrice && product.compareAtPrice > product.price && (
+                        {product.compareAtPrice && product.compareAtPrice < product.price && (
                           <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-red-500 text-white px-2 py-1 rounded-sm text-xs font-bold flex items-center gap-1">
                             <Percent className="w-3 h-3" />
                             <span>SALE</span>
@@ -440,10 +440,10 @@ export default function Shop() {
                           </h3>
                         </div>
                         <div className="flex flex-col items-end sm:flex-shrink-0">
-                          {product.compareAtPrice && product.compareAtPrice > product.price ? (
+                          {product.compareAtPrice && product.compareAtPrice < product.price ? (
                             <>
-                              <span className="text-xs text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</span>
-                              <span className="text-sm sm:text-lg font-serif text-red-600">{formatPrice(product.price)}</span>
+                              <span className="text-xs text-muted-foreground line-through">{formatPrice(product.price)}</span>
+                              <span className="text-sm sm:text-lg font-serif text-red-600">{formatPrice(product.compareAtPrice)}</span>
                             </>
                           ) : (
                             <span className="text-sm sm:text-lg font-serif">{formatPrice(product.price)}</span>

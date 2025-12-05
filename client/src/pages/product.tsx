@@ -522,13 +522,13 @@ function ProductInfo({
       </div>
 
       <div className="mt-4" data-testid="text-product-price">
-        {product.compareAtPrice && product.compareAtPrice > product.price ? (
+        {product.compareAtPrice && product.compareAtPrice < product.price ? (
           <div className="flex items-center gap-3">
-            <span className="text-lg text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</span>
-            <span className="text-2xl sm:text-3xl font-medium text-red-600">{formatPrice(product.price)}</span>
+            <span className="text-lg text-muted-foreground line-through">{formatPrice(product.price)}</span>
+            <span className="text-2xl sm:text-3xl font-medium text-red-600">{formatPrice(product.compareAtPrice)}</span>
             <span className="bg-red-500 text-white px-2 py-1 rounded-sm text-xs font-bold flex items-center gap-1">
               <Percent className="w-3 h-3" />
-              {Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)}% OFF
+              {Math.round(((product.price - product.compareAtPrice) / product.price) * 100)}% OFF
             </span>
           </div>
         ) : (
