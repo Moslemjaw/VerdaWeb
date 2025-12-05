@@ -163,7 +163,8 @@ export default function Checkout() {
       subtotal: totalPrice,
       shipping: shippingCost,
       tax: 0,
-      discount: 0,
+      discount: discountAmount,
+      discountCode: appliedDiscount?.code || null,
       total: finalTotal,
       paymentMethod,
       paymentStatus: 'unpaid',
@@ -190,7 +191,17 @@ export default function Checkout() {
       throw new Error('Failed to create order');
     }
 
-    return response.json();
+    const order = await response.json();
+
+    if (appliedDiscount) {
+      await fetch('/api/discounts/use', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: appliedDiscount.code }),
+      });
+    }
+
+    return order;
   };
 
   const handlePlaceOrder = async () => {

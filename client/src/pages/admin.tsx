@@ -193,6 +193,19 @@ interface SiteContent {
   isActive: boolean;
 }
 
+interface Discount {
+  _id: string;
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  minOrderAmount: number;
+  maxUses: number;
+  usedCount: number;
+  expiresAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
 const CATEGORIES = ['Dresses', 'Evening Wear', 'Accessories', 'Outerwear', 'Tops', 'Bottoms', 'Shoes'];
 const BRANDS = ['Lumière', 'Maison Élégance', 'Atelier Noir', 'Belle Couture', 'Chic Parisien'];
 
@@ -266,6 +279,15 @@ export default function AdminDashboard() {
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
+  const [isAddDiscountOpen, setIsAddDiscountOpen] = useState(false);
+  const [discountForm, setDiscountForm] = useState({
+    code: '',
+    type: 'percentage' as 'percentage' | 'fixed',
+    value: '',
+    minOrderAmount: '',
+    maxUses: '',
+    expiresAt: '',
+  });
 
   const { data: statsData } = useQuery<{ stats: Stats; recentUsers: User[]; recentProducts: Product[]; recentOrders: Order[] }>({
     queryKey: ['adminStats'],
@@ -319,6 +341,81 @@ export default function AdminDashboard() {
   });
 
   const orders = ordersData?.orders || [];
+
+  const { data: discounts = [] } = useQuery<Discount[]>({
+    queryKey: ['adminDiscounts'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/discounts', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch discounts');
+      return res.json();
+    },
+    enabled: isAdmin,
+  });
+
+  const createDiscountMutation = useMutation({
+    mutationFn: async (data: typeof discountForm) => {
+      const res = await fetch('/api/admin/discounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          code: data.code,
+          type: data.type,
+          value: Number(data.value),
+          minOrderAmount: data.minOrderAmount ? Number(data.minOrderAmount) : 0,
+          maxUses: data.maxUses ? Number(data.maxUses) : 0,
+          expiresAt: data.expiresAt || null,
+        }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to create discount');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminDiscounts'] });
+      setIsAddDiscountOpen(false);
+      setDiscountForm({
+        code: '',
+        type: 'percentage',
+        value: '',
+        minOrderAmount: '',
+        maxUses: '',
+        expiresAt: '',
+      });
+    },
+  });
+
+  const toggleDiscountMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const res = await fetch(`/api/admin/discounts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ isActive }),
+      });
+      if (!res.ok) throw new Error('Failed to update discount');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminDiscounts'] });
+    },
+  });
+
+  const deleteDiscountMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/discounts/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to delete discount');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminDiscounts'] });
+    },
+  });
 
   useEffect(() => {
     if (siteContent.length > 0) {
@@ -719,7 +816,7 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsList className="grid w-full grid-cols-6 mb-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="w-4 h-4" /> Overview
             </TabsTrigger>
@@ -728,6 +825,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2">
               <ShoppingBag className="w-4 h-4" /> Products
+            </TabsTrigger>
+            <TabsTrigger value="discounts" className="flex items-center gap-2">
+              <Tag className="w-4 h-4" /> Discounts
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" /> Users
@@ -1323,6 +1423,159 @@ export default function AdminDashboard() {
                 <Package className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-serif text-xl mb-2">No products yet</h3>
                 <p className="text-muted-foreground mb-4">Add your first product to get started</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="discounts" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-serif font-bold">Discount Codes</h2>
+                <p className="text-muted-foreground">Create and manage promotional discount codes</p>
+              </div>
+              <Dialog open={isAddDiscountOpen} onOpenChange={setIsAddDiscountOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Tag className="w-4 h-4 mr-2" />
+                    Create Discount
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Create New Discount Code</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => { e.preventDefault(); createDiscountMutation.mutate(discountForm); }} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Discount Code *</Label>
+                      <Input
+                        value={discountForm.code}
+                        onChange={(e) => setDiscountForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+                        placeholder="e.g. SAVE20"
+                        className="uppercase"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Type *</Label>
+                        <Select value={discountForm.type} onValueChange={(v: 'percentage' | 'fixed') => setDiscountForm(prev => ({ ...prev, type: v }))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="percentage">Percentage (%)</SelectItem>
+                            <SelectItem value="fixed">Fixed Amount (KWD)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Value *</Label>
+                        <Input
+                          type="number"
+                          value={discountForm.value}
+                          onChange={(e) => setDiscountForm(prev => ({ ...prev, value: e.target.value }))}
+                          placeholder={discountForm.type === 'percentage' ? 'e.g. 20' : 'e.g. 5'}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Min Order Amount (KWD)</Label>
+                        <Input
+                          type="number"
+                          value={discountForm.minOrderAmount}
+                          onChange={(e) => setDiscountForm(prev => ({ ...prev, minOrderAmount: e.target.value }))}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Max Uses (0 = unlimited)</Label>
+                        <Input
+                          type="number"
+                          value={discountForm.maxUses}
+                          onChange={(e) => setDiscountForm(prev => ({ ...prev, maxUses: e.target.value }))}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Expires At (optional)</Label>
+                      <Input
+                        type="datetime-local"
+                        value={discountForm.expiresAt}
+                        onChange={(e) => setDiscountForm(prev => ({ ...prev, expiresAt: e.target.value }))}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={createDiscountMutation.isPending}>
+                      {createDiscountMutation.isPending ? 'Creating...' : 'Create Discount Code'}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="p-4 text-left font-medium">Code</th>
+                      <th className="p-4 text-left font-medium">Type</th>
+                      <th className="p-4 text-left font-medium">Value</th>
+                      <th className="p-4 text-left font-medium">Min Order</th>
+                      <th className="p-4 text-left font-medium">Usage</th>
+                      <th className="p-4 text-left font-medium">Expires</th>
+                      <th className="p-4 text-left font-medium">Status</th>
+                      <th className="p-4 text-left font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {discounts.map((discount) => (
+                      <tr key={discount._id} className="border-b last:border-0 hover:bg-muted/30">
+                        <td className="p-4">
+                          <span className="font-mono font-bold bg-muted px-2 py-1 rounded">{discount.code}</span>
+                        </td>
+                        <td className="p-4 capitalize">{discount.type}</td>
+                        <td className="p-4">
+                          {discount.type === 'percentage' ? `${discount.value}%` : `${discount.value} KWD`}
+                        </td>
+                        <td className="p-4">
+                          {discount.minOrderAmount > 0 ? `${discount.minOrderAmount} KWD` : '-'}
+                        </td>
+                        <td className="p-4">
+                          {discount.usedCount}{discount.maxUses > 0 ? `/${discount.maxUses}` : ''}
+                        </td>
+                        <td className="p-4">
+                          {discount.expiresAt ? new Date(discount.expiresAt).toLocaleDateString() : 'Never'}
+                        </td>
+                        <td className="p-4">
+                          <Switch
+                            checked={discount.isActive}
+                            onCheckedChange={(checked) => toggleDiscountMutation.mutate({ id: discount._id, isActive: checked })}
+                          />
+                        </td>
+                        <td className="p-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteDiscountMutation.mutate(discount._id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            {discounts.length === 0 && (
+              <Card className="p-12 text-center">
+                <Tag className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-serif text-xl mb-2">No discount codes yet</h3>
+                <p className="text-muted-foreground mb-4">Create your first discount code to offer promotions</p>
               </Card>
             )}
           </TabsContent>
