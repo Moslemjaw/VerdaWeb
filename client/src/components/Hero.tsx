@@ -52,7 +52,7 @@ export default function Hero() {
             initial={{ y: 150 }}
             animate={{ y: 0 }}
             transition={{ duration: 1, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.7 }}
-            className="text-6xl md:text-8xl lg:text-9xl font-serif font-medium tracking-tight"
+            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-serif font-medium tracking-tight leading-tight"
           >
             {title}
           </motion.h1>
@@ -63,7 +63,7 @@ export default function Hero() {
             initial={{ y: 150 }}
             animate={{ y: 0 }}
             transition={{ duration: 1, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.9 }}
-            className="text-6xl md:text-8xl lg:text-9xl font-serif italic font-medium tracking-tight"
+            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-serif italic font-medium tracking-tight leading-tight"
           >
             {subtitle}
           </motion.h1>
@@ -76,7 +76,7 @@ export default function Hero() {
           className="mt-12"
         >
           <Link href={buttonLink}>
-            <span className="px-8 py-4 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold cursor-pointer inline-block">
+            <span className="px-6 sm:px-8 py-3 sm:py-4 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold cursor-pointer inline-block min-h-[44px] flex items-center justify-center">
               {buttonText}
             </span>
           </Link>

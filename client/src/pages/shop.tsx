@@ -250,12 +250,12 @@ export default function Shop() {
       <Navbar />
       
       {/* Header */}
-      <section className="pt-32 pb-12 px-6 bg-secondary/30">
+      <section className="pt-24 sm:pt-32 pb-8 sm:pb-12 px-4 sm:px-6 bg-secondary/30">
         <div className="container mx-auto">
-          <h1 className="text-4xl md:text-5xl font-serif text-center mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-center mb-3 sm:mb-4">
             {showNewInOnly ? 'New Arrivals' : showBestSellersOnly ? 'Best Sellers' : 'Shop All'}
           </h1>
-          <p className="text-center text-muted-foreground max-w-xl mx-auto">
+          <p className="text-center text-muted-foreground max-w-xl mx-auto text-sm sm:text-base px-4">
             {showNewInOnly 
               ? 'Discover our latest arrivals, fresh from the runway to your wardrobe.'
               : showBestSellersOnly 
@@ -266,7 +266,7 @@ export default function Shop() {
         </div>
       </section>
 
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="flex flex-col lg:flex-row gap-12">
           {/* Desktop Sidebar Filters */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
@@ -279,7 +279,7 @@ export default function Shop() {
           {/* Main Content */}
           <main className="flex-1">
             {/* Search and Sort Bar */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
               {/* Search */}
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -288,52 +288,54 @@ export default function Shop() {
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11 sm:h-10 text-base"
                   data-testid="input-search"
                 />
                 {searchQuery && (
                   <button 
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
                   >
                     <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
                   </button>
                 )}
               </div>
 
-              {/* Sort */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="px-4 py-2 border rounded-md bg-background"
-                data-testid="select-sort"
-              >
-                <option value="newest">Newest</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name">Name: A-Z</option>
-              </select>
+              <div className="flex gap-3">
+                {/* Sort */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="flex-1 sm:flex-none px-4 py-2 h-11 sm:h-10 border rounded-md bg-background text-base sm:text-sm"
+                  data-testid="select-sort"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="name">Name: A-Z</option>
+                </select>
 
-              {/* Mobile Filter Button */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="lg:hidden" data-testid="button-mobile-filters">
-                    <SlidersHorizontal className="w-4 h-4 mr-2" />
-                    Filters
-                    {hasActiveFilters && (
-                      <span className="ml-2 w-2 h-2 bg-primary rounded-full" />
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-[300px]">
-                  <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <FilterContent />
-                  </div>
-                </SheetContent>
-              </Sheet>
+                {/* Mobile Filter Button */}
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" className="lg:hidden h-11 sm:h-10 min-w-[44px]" data-testid="button-mobile-filters">
+                      <SlidersHorizontal className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Filters</span>
+                      {hasActiveFilters && (
+                        <span className="ml-1 sm:ml-2 w-2 h-2 bg-primary rounded-full" />
+                      )}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[85vw] max-w-[320px]">
+                    <SheetHeader>
+                      <SheetTitle>Filters</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      <FilterContent />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
             </div>
 
             {/* Results Count */}
@@ -344,26 +346,26 @@ export default function Shop() {
 
             {/* Products Grid */}
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="aspect-[3/4] bg-muted rounded-lg mb-4" />
-                    <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                    <div className="h-4 bg-muted rounded w-1/2" />
+                    <div className="aspect-[3/4] bg-muted rounded-lg mb-3 sm:mb-4" />
+                    <div className="h-3 sm:h-4 bg-muted rounded w-3/4 mb-2" />
+                    <div className="h-3 sm:h-4 bg-muted rounded w-1/2" />
                   </div>
                 ))}
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-lg text-muted-foreground mb-4">No products found</p>
+              <div className="text-center py-12 sm:py-16">
+                <p className="text-base sm:text-lg text-muted-foreground mb-4">No products found</p>
                 {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters}>
+                  <Button variant="outline" onClick={clearFilters} className="h-11">
                     Clear Filters
                   </Button>
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
                 {filteredProducts.map((product, index) => (
                   <motion.div
                     key={product._id}
@@ -373,7 +375,7 @@ export default function Shop() {
                     className="group cursor-pointer"
                     data-testid={`card-product-${product._id}`}
                   >
-                    <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4 rounded-lg">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-2 sm:mb-4 rounded-lg">
                       <img 
                         src={product.imageUrl} 
                         alt={product.name} 
@@ -394,16 +396,16 @@ export default function Shop() {
                         </button>
                       )}
                     </div>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1 hidden sm:block">
                           {product.category}
                         </p>
-                        <h3 className="font-serif text-lg group-hover:underline decoration-1 underline-offset-4">
+                        <h3 className="font-serif text-sm sm:text-lg group-hover:underline decoration-1 underline-offset-4 line-clamp-2">
                           {product.name}
                         </h3>
                       </div>
-                      <span className="text-lg font-serif">{product.price} KWD</span>
+                      <span className="text-sm sm:text-lg font-serif sm:flex-shrink-0">{product.price} KWD</span>
                     </div>
                   </motion.div>
                 ))}

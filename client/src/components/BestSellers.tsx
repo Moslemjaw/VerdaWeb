@@ -65,40 +65,27 @@ export default function BestSellers() {
   }, []);
 
   return (
-    <section className="py-16 bg-white">
-      <div className="flex items-center">
-        {/* Left Side - Static Content (25-30% width) */}
+    <section className="py-12 md:py-16 bg-white">
+      {/* Mobile Layout */}
+      <div className="md:hidden px-4">
         <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-[28%] flex-shrink-0 px-6 text-center flex flex-col items-center justify-center"
+          className="text-center mb-6"
         >
-          <h2 className="text-3xl font-bold tracking-tight text-black mb-3">{title}</h2>
-          <p className="text-gray-500 text-sm mb-8">Shop our bestselling styles.</p>
-          <Link href="/shop?filter=bestsellers">
-            <span className="inline-block border border-black text-black px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition-all cursor-pointer">
-              {buttonText}
-            </span>
-          </Link>
+          <h2 className="text-2xl font-bold tracking-tight text-black mb-2">{title}</h2>
+          <p className="text-gray-500 text-sm mb-4">Shop our bestselling styles.</p>
         </motion.div>
 
-        {/* Right Side - Scrollable Product List (70-75% width) */}
         <div 
           ref={scrollRef}
-          className="w-[72%] overflow-x-auto scroll-smooth pr-8 hide-scrollbar"
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-          }}
+          className="overflow-x-auto scroll-smooth hide-scrollbar -mx-4 px-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          <style>{`
-            .hide-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
-          <div className="flex gap-5 pb-4">
+          <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+          <div className="flex gap-3 pb-4">
             {products.map((product, index) => (
               <motion.div
                 key={product._id}
@@ -106,14 +93,10 @@ export default function BestSellers() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="flex-shrink-0 w-[200px] group cursor-pointer"
+                className="flex-shrink-0 w-[140px] group cursor-pointer"
               >
-                <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden">
-                  <img 
-                    src={product.imageUrl} 
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                  />
+                <div className="aspect-[3/4] bg-gray-100 mb-2 overflow-hidden rounded-lg">
+                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
                 <p className="text-sm font-medium text-black">{product.price} KWD</p>
@@ -121,18 +104,77 @@ export default function BestSellers() {
             ))}
           </div>
         </div>
+
+        <div className="mt-4 mb-4">
+          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-black rounded-full transition-all duration-150 ease-out"
+              style={{ width: `${Math.max(20, scrollProgress * 100)}%`, marginLeft: `${scrollProgress * (100 - Math.max(20, scrollProgress * 100))}%` }} />
+          </div>
+        </div>
+
+        <div className="text-center">
+          <Link href="/shop?filter=bestsellers">
+            <span className="inline-block border border-black text-black px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition-all cursor-pointer min-h-[44px]">
+              {buttonText}
+            </span>
+          </Link>
+        </div>
       </div>
 
-      {/* Scroll Progress Bar */}
-      <div className="mt-8 px-8">
-        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+      {/* Desktop Layout */}
+      <div className="hidden md:block">
+        <div className="flex items-center">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="w-[28%] flex-shrink-0 px-6 text-center flex flex-col items-center justify-center"
+          >
+            <h2 className="text-3xl font-bold tracking-tight text-black mb-3">{title}</h2>
+            <p className="text-gray-500 text-sm mb-8">Shop our bestselling styles.</p>
+            <Link href="/shop?filter=bestsellers">
+              <span className="inline-block border border-black text-black px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition-all cursor-pointer">
+                {buttonText}
+              </span>
+            </Link>
+          </motion.div>
+
           <div 
-            className="h-full bg-black rounded-full transition-all duration-150 ease-out"
-            style={{ 
-              width: `${Math.max(15, scrollProgress * 100)}%`,
-              marginLeft: `${scrollProgress * (100 - Math.max(15, scrollProgress * 100))}%`
+            className="w-[72%] overflow-x-auto scroll-smooth pr-8 hide-scrollbar"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            onScroll={(e) => {
+              const el = e.target as HTMLDivElement;
+              const progress = el.scrollLeft / (el.scrollWidth - el.clientWidth);
+              setScrollProgress(Math.max(0, Math.min(1, progress)));
             }}
-          />
+          >
+            <div className="flex gap-5 pb-4">
+              {products.map((product, index) => (
+                <motion.div
+                  key={product._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className="flex-shrink-0 w-[200px] group cursor-pointer"
+                >
+                  <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden">
+                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  </div>
+                  <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
+                  <p className="text-sm font-medium text-black">{product.price} KWD</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 px-8">
+          <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-black rounded-full transition-all duration-150 ease-out"
+              style={{ width: `${Math.max(15, scrollProgress * 100)}%`, marginLeft: `${scrollProgress * (100 - Math.max(15, scrollProgress * 100))}%` }} />
+          </div>
         </div>
       </div>
     </section>

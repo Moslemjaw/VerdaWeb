@@ -76,17 +76,16 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4 md:space-x-6">
           <Link href="/shop">
-            <Search 
-              className="w-5 h-5 cursor-pointer hover:opacity-70 transition-opacity" 
-              data-testid="nav-search-icon"
-            />
+            <span className="p-2 -m-2 cursor-pointer hover:opacity-70 transition-opacity inline-flex" data-testid="nav-search-icon">
+              <Search className="w-5 h-5" />
+            </span>
           </Link>
           <Link href="/shop">
-            <div className="relative cursor-pointer hover:opacity-70 transition-opacity" data-testid="nav-cart-icon">
+            <span className="relative p-2 -m-2 cursor-pointer hover:opacity-70 transition-opacity inline-flex" data-testid="nav-cart-icon">
               <ShoppingBag className="w-5 h-5" />
-            </div>
+            </span>
           </Link>
 
           {isAuthenticated ? (
@@ -134,14 +133,14 @@ export default function Navbar() {
                 <Menu className="w-5 h-5 cursor-pointer" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col space-y-6 mt-10 text-lg font-serif">
+            <SheetContent side="right" className="w-[85vw] max-w-[400px]">
+              <div className="flex flex-col space-y-4 mt-10 text-xl font-serif">
                 {navLinks.map((link) => (
                   <button
                     key={link.href}
                     onClick={() => handleNavClick(link.href)}
                     className={cn(
-                      "text-left hover:text-muted-foreground transition-colors",
+                      "text-left py-2 hover:text-muted-foreground transition-colors min-h-[44px]",
                       location === link.href && "underline underline-offset-4"
                     )}
                     data-testid={`mobile-nav-${link.label.toLowerCase().replace(' ', '-')}`}

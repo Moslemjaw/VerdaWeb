@@ -31,26 +31,26 @@ export default function NewIn() {
     <div className="min-h-screen bg-black text-white">
       <Navbar />
       
-      <section className="pt-32 pb-12 px-6">
+      <section className="pt-24 sm:pt-32 pb-8 sm:pb-12 px-4 sm:px-6">
         <div className="container mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-4">Just Arrived</p>
-            <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-tight">New In</h1>
-            <p className="text-white/60 max-w-md mx-auto text-sm tracking-wide">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-3 sm:mb-4">Just Arrived</p>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif mb-4 sm:mb-6 tracking-tight">New In</h1>
+            <p className="text-white/60 max-w-md mx-auto text-sm tracking-wide px-4">
               Discover our latest arrivals, fresh from the runway to your wardrobe.
             </p>
           </motion.div>
         </div>
       </section>
 
-      <section className="py-16 px-6">
+      <section className="py-8 sm:py-16 px-4 sm:px-6">
         <div className="container mx-auto">
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-6">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-[3/4] bg-white/10 mb-4" />
@@ -67,7 +67,7 @@ export default function NewIn() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-6 md:gap-8">
               {products.map((product, index) => (
                 <motion.div
                   key={product._id}
@@ -78,7 +78,7 @@ export default function NewIn() {
                   className="group cursor-pointer"
                   data-testid={`card-product-${product._id}`}
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-b from-neutral-800 to-neutral-900 mb-4">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-b from-neutral-800 to-neutral-900 mb-2 sm:mb-4 rounded-lg sm:rounded-none">
                     <img 
                       src={product.imageUrl} 
                       alt={product.name} 
@@ -87,7 +87,7 @@ export default function NewIn() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
                   <div>
-                    <h3 className="text-sm md:text-base text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors">
+                    <h3 className="text-xs sm:text-sm md:text-base text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors line-clamp-2">
                       {product.name}
                     </h3>
                     <p className="text-sm text-white/70 font-medium">{product.price} KWD</p>
@@ -102,10 +102,10 @@ export default function NewIn() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-center mt-20"
+            className="text-center mt-12 sm:mt-20"
           >
             <Link href="/shop?filter=newin">
-              <span className="inline-block border border-white/30 px-10 py-4 text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all duration-300 cursor-pointer font-medium">
+              <span className="inline-block border border-white/30 px-8 sm:px-10 py-3 sm:py-4 text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black active:bg-white/90 transition-all duration-300 cursor-pointer font-medium min-h-[44px]">
                 View All Products
               </span>
             </Link>

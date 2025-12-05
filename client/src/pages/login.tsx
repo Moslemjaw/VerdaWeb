@@ -27,16 +27,19 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+      <div className="w-full max-w-md space-y-6 sm:space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-serif font-bold mb-2">Welcome Back</h1>
-          <p className="text-muted-foreground">Sign in to your account</p>
+          <Link href="/">
+            <span className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">Lumière</span>
+          </Link>
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold mb-2 mt-6">Welcome Back</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Sign in to your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-sm font-medium">Email</Label>
             <Input
               id="email"
               type="email"
@@ -45,11 +48,12 @@ export default function Login() {
               required
               placeholder="you@example.com"
               data-testid="input-email"
+              className="h-12 text-base"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-sm font-medium">Password</Label>
             <Input
               id="password"
               type="password"
@@ -58,16 +62,17 @@ export default function Login() {
               required
               placeholder="••••••••"
               data-testid="input-password"
+              className="h-12 text-base"
             />
           </div>
 
           {loginError && (
-            <div className="text-sm text-red-600" data-testid="error-message">
+            <div className="text-sm text-red-600 p-3 bg-red-50 rounded-lg" data-testid="error-message">
               {loginError.message}
             </div>
           )}
 
-          <Button type="submit" className="w-full" data-testid="button-login">
+          <Button type="submit" className="w-full h-12 text-base font-medium" data-testid="button-login">
             Sign In
           </Button>
         </form>
