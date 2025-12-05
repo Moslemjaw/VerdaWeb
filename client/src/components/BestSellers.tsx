@@ -1,6 +1,5 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +12,15 @@ interface Product {
   category: string;
 }
 
+const sampleProducts = [
+  { _id: 's1', name: 'Poncho with Draped Collar', price: 93, imageUrl: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=800&q=80', category: 'Outerwear' },
+  { _id: 's2', name: 'Faux Fur Embellished Poncho', price: 62, imageUrl: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80', category: 'Outerwear' },
+  { _id: 's3', name: 'Fleece Shawl Poncho', price: 149, imageUrl: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800&q=80', category: 'Outerwear' },
+  { _id: 's4', name: 'Double Face Faux Fur Shawl', price: 85, imageUrl: 'https://images.unsplash.com/photo-1548624313-0396c75e4b1a?w=800&q=80', category: 'Accessories' },
+  { _id: 's5', name: 'Solid Midi Belted Coat', price: 159, imageUrl: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80', category: 'Outerwear' },
+  { _id: 's6', name: 'Contrast Double-Faced Jacket', price: 145, imageUrl: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80', category: 'Outerwear' },
+];
+
 export default function BestSellers() {
   const [emblaRef] = useEmblaCarousel({ align: "start", loop: false, dragFree: true });
   const { data: siteContent } = useSiteContent();
@@ -21,7 +29,7 @@ export default function BestSellers() {
   const title = bestSellersContent?.title || "BEST SELLERS";
   const buttonText = bestSellersContent?.buttonText || "SHOP BEST SELLERS";
 
-  const { data: products = [] } = useQuery<Product[]>({
+  const { data: apiProducts = [] } = useQuery<Product[]>({
     queryKey: ['featuredProducts'],
     queryFn: async () => {
       const res = await fetch('/api/products/featured');
@@ -29,6 +37,10 @@ export default function BestSellers() {
       return res.json();
     },
   });
+
+  const products = apiProducts.length > 0 
+    ? [...apiProducts, ...sampleProducts.slice(0, Math.max(0, 8 - apiProducts.length))]
+    : sampleProducts;
 
   return (
     <section className="py-16 bg-background">
@@ -58,8 +70,8 @@ export default function BestSellers() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="flex-[0_0_160px] md:flex-[0_0_200px] min-w-0 group cursor-pointer"
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  className="flex-[0_0_160px] md:flex-[0_0_180px] min-w-0 group cursor-pointer"
                 >
                   <div className="aspect-[3/4] bg-secondary/50 mb-3 overflow-hidden">
                     <img 
