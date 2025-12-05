@@ -1,4 +1,4 @@
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 
 export default function Cart() {
   const { items, totalPrice, updateQuantity, removeItem } = useCart();
+  const [, setLocation] = useLocation();
 
   const shippingCost = totalPrice >= 50 ? 0 : 3;
   const finalTotal = totalPrice + shippingCost;
@@ -16,7 +17,7 @@ export default function Cart() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b">
           <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
             <button 
-              onClick={() => window.history.back()}
+              onClick={() => setLocation('/')}
               className="p-2 -ml-2 hover:bg-secondary rounded-full transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               data-testid="button-back"
             >
@@ -46,7 +47,7 @@ export default function Cart() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
           <button 
-            onClick={() => window.history.back()}
+            onClick={() => setLocation('/')}
             className="p-2 -ml-2 hover:bg-secondary rounded-full transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             data-testid="button-back"
           >
