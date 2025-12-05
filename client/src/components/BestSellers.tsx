@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useQuery } from "@tanstack/react-query";
+import { useRef, useState, useEffect } from "react";
 
 interface Product {
   _id: string;
@@ -26,6 +27,8 @@ const bestSellerProducts: Product[] = [
 
 export default function BestSellers() {
   const { data: siteContent } = useSiteContent();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
   
   const bestSellersContent = siteContent?.best_sellers;
   const title = bestSellersContent?.title || "BEST SELLERS";
@@ -43,6 +46,23 @@ export default function BestSellers() {
   const products = apiProducts.length >= 10 
     ? apiProducts.slice(0, 10)
     : [...apiProducts, ...bestSellerProducts].slice(0, 10);
+
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollElement;
+      const maxScroll = scrollWidth - clientWidth;
+      const progress = maxScroll > 0 ? scrollLeft / maxScroll : 0;
+      setScrollProgress(progress);
+    };
+
+    scrollElement.addEventListener('scroll', handleScroll);
+    handleScroll();
+
+    return () => scrollElement.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <section className="py-16 bg-white">
@@ -66,7 +86,8 @@ export default function BestSellers() {
 
         {/* Right Side - Scrollable Product List (70-75% width) */}
         <div 
-          className="w-[72%] overflow-x-auto scroll-smooth pr-8"
+          ref={scrollRef}
+          className="w-[72%] overflow-x-auto scroll-smooth pr-8 hide-scrollbar"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -77,7 +98,7 @@ export default function BestSellers() {
               display: none;
             }
           `}</style>
-          <div className="flex gap-5 hide-scrollbar pb-4">
+          <div className="flex gap-5 pb-4">
             {products.map((product, index) => (
               <motion.div
                 key={product._id}
@@ -99,6 +120,19 @@ export default function BestSellers() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Scroll Progress Bar */}
+      <div className="mt-8 px-8">
+        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-black rounded-full transition-all duration-150 ease-out"
+            style={{ 
+              width: `${Math.max(15, scrollProgress * 100)}%`,
+              marginLeft: `${scrollProgress * (100 - Math.max(15, scrollProgress * 100))}%`
+            }}
+          />
         </div>
       </div>
     </section>
