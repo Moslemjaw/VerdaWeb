@@ -2283,16 +2283,24 @@ export default function AdminDashboard() {
                       {featuredContent.categories.map((cat, index) => (
                         <div key={index} className="border rounded-lg p-4 space-y-3">
                           <div className="space-y-2">
-                            <Label className="text-sm font-medium">Category {index + 1} Name</Label>
-                            <Input
+                            <Label className="text-sm font-medium">Category {index + 1}</Label>
+                            <Select
                               value={cat.name}
-                              onChange={(e) => {
+                              onValueChange={(value) => {
                                 const newCategories = [...featuredContent.categories];
-                                newCategories[index] = { ...newCategories[index], name: e.target.value };
+                                newCategories[index] = { ...newCategories[index], name: value };
                                 setFeaturedContent({ ...featuredContent, categories: newCategories });
                               }}
-                              placeholder="e.g., Dresses"
-                            />
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CATEGORIES.map((category) => (
+                                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                           <ImageUploadInput
                             label={`Category ${index + 1} Image`}
