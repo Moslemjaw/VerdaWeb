@@ -130,7 +130,7 @@ export default function Navbar() {
           ) : (
             <Link href="/login">
               <span 
-                className="text-sm tracking-widest uppercase font-medium hover:opacity-70 transition-opacity cursor-pointer ml-2"
+                className="text-sm tracking-widest uppercase font-medium hover:opacity-70 transition-opacity cursor-pointer ml-2 inline-flex items-center h-5"
                 data-testid="nav-login-link"
               >
                 Login
