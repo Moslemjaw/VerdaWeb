@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
-import Navbar from '@/components/Navbar';
 import { ShoppingBag, X, RotateCcw, ArrowLeft } from 'lucide-react';
 
 interface Product {
@@ -149,9 +148,7 @@ export default function Explore() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navbar />
-      
-      <div className="pt-24 px-6 pb-6 h-screen flex flex-col">
+      <div className="pt-6 px-6 pb-6 h-screen flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-4">
             <Link href="/">
