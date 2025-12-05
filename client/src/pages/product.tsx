@@ -46,17 +46,23 @@ export default function ProductDetails() {
 
   const isInCart = items.some(item => item._id === id);
 
+  const [sizeError, setSizeError] = useState(false);
+
   const handleAddToCart = () => {
     if (!product) return;
     
     if (product.sizes?.length > 0 && !selectedSize) {
+      setSizeError(true);
       toast({
         title: 'Please select a size',
+        description: 'You must choose a size before adding to cart',
         variant: 'destructive',
       });
       return;
     }
 
+    setSizeError(false);
+    
     for (let i = 0; i < quantity; i++) {
       addItem({
         _id: product._id,
@@ -308,6 +314,8 @@ export default function ProductDetails() {
                   setIsWishlisted={setIsWishlisted}
                   handleAddToCart={handleAddToCart}
                   isInCart={isInCart}
+                  sizeError={sizeError}
+                  setSizeError={setSizeError}
                 />
               </div>
             </div>
@@ -404,6 +412,8 @@ export default function ProductDetails() {
               setIsWishlisted={setIsWishlisted}
               handleAddToCart={handleAddToCart}
               isInCart={isInCart}
+              sizeError={sizeError}
+              setSizeError={setSizeError}
             />
           </div>
         </div>
@@ -451,6 +461,8 @@ interface ProductInfoProps {
   setIsWishlisted: (val: boolean) => void;
   handleAddToCart: () => void;
   isInCart: boolean;
+  sizeError: boolean;
+  setSizeError: (val: boolean) => void;
 }
 
 function ProductInfo({
@@ -463,6 +475,8 @@ function ProductInfo({
   setIsWishlisted,
   handleAddToCart,
   isInCart,
+  sizeError,
+  setSizeError,
 }: ProductInfoProps) {
   return (
     <motion.div
@@ -533,16 +547,23 @@ function ProductInfo({
       {/* Size Selection */}
       {product.sizes && product.sizes.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-sm font-medium mb-3">Size</h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-medium">Size</h3>
+            {sizeError && !selectedSize && (
+              <span className="text-xs text-red-500">* Please select a size</span>
+            )}
+          </div>
+          <div className={`flex flex-wrap gap-2 ${sizeError && !selectedSize ? 'ring-2 ring-red-500 ring-offset-2 rounded-lg p-1' : ''}`}>
             {product.sizes.map(size => (
               <button
                 key={size}
-                onClick={() => setSelectedSize(size)}
+                onClick={() => { setSelectedSize(size); setSizeError(false); }}
                 className={`min-w-[44px] h-11 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
                   selectedSize === size 
                     ? 'border-primary bg-primary text-primary-foreground' 
-                    : 'border-border hover:border-primary'
+                    : sizeError && !selectedSize
+                      ? 'border-red-300 hover:border-primary'
+                      : 'border-border hover:border-primary'
                 }`}
                 data-testid={`button-size-${size}`}
               >
