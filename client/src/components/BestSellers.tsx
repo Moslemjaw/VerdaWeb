@@ -13,19 +13,6 @@ interface Product {
   category: string;
 }
 
-const bestSellerProducts: Product[] = [
-  { _id: 'bs1', name: 'Poncho with Draped Collar', price: 93, imageUrl: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=800&q=80', category: 'Outerwear' },
-  { _id: 'bs2', name: 'Faux Fur Embellished Poncho', price: 62, imageUrl: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80', category: 'Outerwear' },
-  { _id: 'bs3', name: 'Fleece Shawl Poncho', price: 149, imageUrl: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800&q=80', category: 'Outerwear' },
-  { _id: 'bs4', name: 'Double Face Faux Fur Shawl', price: 85, imageUrl: 'https://images.unsplash.com/photo-1548624313-0396c75e4b1a?w=800&q=80', category: 'Accessories' },
-  { _id: 'bs5', name: 'Solid Midi Belted Coat', price: 159, imageUrl: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80', category: 'Outerwear' },
-  { _id: 'bs6', name: 'Contrast Double-Faced Jacket', price: 145, imageUrl: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80', category: 'Outerwear' },
-  { _id: 'bs7', name: 'Wool Blend Oversized Coat', price: 189, imageUrl: 'https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?w=800&q=80', category: 'Outerwear' },
-  { _id: 'bs8', name: 'Cashmere Wrap Cardigan', price: 125, imageUrl: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=800&q=80', category: 'Tops' },
-  { _id: 'bs9', name: 'Quilted Puffer Jacket', price: 175, imageUrl: 'https://images.unsplash.com/photo-1544923246-77307dd628b8?w=800&q=80', category: 'Outerwear' },
-  { _id: 'bs10', name: 'Leather Trim Blazer', price: 210, imageUrl: 'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=800&q=80', category: 'Outerwear' },
-];
-
 export default function BestSellers() {
   const { data: siteContent } = useSiteContent();
   const { formatPrice } = useCurrency();
@@ -59,10 +46,8 @@ export default function BestSellers() {
     },
   });
 
-  // Only use static fallback if no real products exist at all
-  const products = apiProducts.length > 0 
-    ? apiProducts.slice(0, 10)
-    : bestSellerProducts.slice(0, 10);
+  // Use API products only - no fallback to static data
+  const products = apiProducts.slice(0, 10);
 
   useEffect(() => {
     const scrollElement = scrollRef.current;
@@ -96,25 +81,31 @@ export default function BestSellers() {
           <p className="text-gray-500 text-sm mb-4">{description}</p>
         </motion.div>
 
-        <div className="grid grid-cols-2 gap-3">
-          {products.slice(0, 4).map((product, index) => (
-            <Link href={`/product/${product._id}`} key={product._id}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="group cursor-pointer"
-              >
-                <div className="aspect-[3/4] bg-gray-100 mb-2 overflow-hidden rounded-lg">
-                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                </div>
-                <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
-                <p className="text-sm font-medium text-black">{formatPrice(product.price)}</p>
-              </motion.div>
-            </Link>
-          ))}
-        </div>
+        {products.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3">
+            {products.slice(0, 4).map((product, index) => (
+              <Link href={`/product/${product._id}`} key={product._id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className="group cursor-pointer"
+                >
+                  <div className="aspect-[3/4] bg-gray-100 mb-2 overflow-hidden rounded-lg">
+                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                  </div>
+                  <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
+                  <p className="text-sm font-medium text-black">{formatPrice(product.price)}</p>
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500 text-sm">No products available in this category</p>
+          </div>
+        )}
 
         <div className="mt-6 text-center">
           <Link href={shopLink}>
@@ -144,43 +135,51 @@ export default function BestSellers() {
             </Link>
           </motion.div>
 
-          <div 
-            className="w-[72%] overflow-x-auto scroll-smooth pr-8 hide-scrollbar"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            onScroll={(e) => {
-              const el = e.target as HTMLDivElement;
-              const progress = el.scrollLeft / (el.scrollWidth - el.clientWidth);
-              setScrollProgress(Math.max(0, Math.min(1, progress)));
-            }}
-          >
-            <div className="flex gap-5 pb-4">
-              {products.map((product, index) => (
-                <Link href={`/product/${product._id}`} key={product._id}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="flex-shrink-0 w-[200px] group cursor-pointer"
-                  >
-                    <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden">
-                      <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    </div>
-                    <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
-                    <p className="text-sm font-medium text-black">{formatPrice(product.price)}</p>
-                  </motion.div>
-                </Link>
-              ))}
+          {products.length > 0 ? (
+            <div 
+              className="w-[72%] overflow-x-auto scroll-smooth pr-8 hide-scrollbar"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              onScroll={(e) => {
+                const el = e.target as HTMLDivElement;
+                const progress = el.scrollLeft / (el.scrollWidth - el.clientWidth);
+                setScrollProgress(Math.max(0, Math.min(1, progress)));
+              }}
+            >
+              <div className="flex gap-5 pb-4">
+                {products.map((product, index) => (
+                  <Link href={`/product/${product._id}`} key={product._id}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
+                      className="flex-shrink-0 w-[200px] group cursor-pointer"
+                    >
+                      <div className="aspect-[3/4] bg-gray-100 mb-3 overflow-hidden">
+                        <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      </div>
+                      <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
+                      <p className="text-sm font-medium text-black">{formatPrice(product.price)}</p>
+                    </motion.div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="w-[72%] flex items-center justify-center py-16">
+              <p className="text-gray-500 text-sm">No products available in this category</p>
+            </div>
+          )}
         </div>
 
-        <div className="mt-8 px-8">
-          <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-black rounded-full transition-all duration-150 ease-out"
-              style={{ width: `${Math.max(15, scrollProgress * 100)}%`, marginLeft: `${scrollProgress * (100 - Math.max(15, scrollProgress * 100))}%` }} />
+        {products.length > 0 && (
+          <div className="mt-8 px-8">
+            <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-full bg-black rounded-full transition-all duration-150 ease-out"
+                style={{ width: `${Math.max(15, scrollProgress * 100)}%`, marginLeft: `${scrollProgress * (100 - Math.max(15, scrollProgress * 100))}%` }} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
