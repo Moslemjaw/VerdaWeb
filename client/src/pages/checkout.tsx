@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag, User } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 
 type PaymentMethod = 'cod' | 'whatsapp' | 'card';
+type CheckoutMode = 'guest' | 'create-account';
 
 interface CheckoutFormData {
   customerName: string;
@@ -22,17 +24,21 @@ interface CheckoutFormData {
   area: string;
   notes: string;
   isGift: boolean;
+  password: string;
+  confirmPassword: string;
 }
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
   
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>('cod');
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [checkoutMode, setCheckoutMode] = useState<CheckoutMode>('guest');
   
   const [formData, setFormData] = useState<CheckoutFormData>({
     customerName: '',
@@ -45,6 +51,8 @@ export default function Checkout() {
     area: '',
     notes: '',
     isGift: false,
+    password: '',
+    confirmPassword: '',
   });
 
   const shippingCost = totalPrice >= 50 ? 0 : 3;
@@ -79,6 +87,16 @@ export default function Checkout() {
     if (!formData.street.trim()) {
       toast({ title: 'Please enter your street', variant: 'destructive' });
       return false;
+    }
+    if (!isAuthenticated && checkoutMode === 'create-account') {
+      if (!formData.password || formData.password.length < 6) {
+        toast({ title: 'Password must be at least 6 characters', variant: 'destructive' });
+        return false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        toast({ title: 'Passwords do not match', variant: 'destructive' });
+        return false;
+      }
     }
     return true;
   };
@@ -143,6 +161,36 @@ export default function Checkout() {
     setIsProcessing(true);
 
     try {
+      if (!isAuthenticated && checkoutMode === 'create-account') {
+        const registerResponse = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: formData.customerEmail,
+            password: formData.password,
+            name: formData.customerName,
+          }),
+        });
+
+        if (!registerResponse.ok) {
+          const errorData = await registerResponse.json();
+          toast({
+            title: 'Account Creation Failed',
+            description: errorData.error || 'Could not create account. You can still checkout as guest.',
+            variant: 'destructive',
+          });
+          setCheckoutMode('guest');
+          setIsProcessing(false);
+          return;
+        }
+
+        toast({
+          title: 'Account Created!',
+          description: 'Your account has been created successfully.',
+        });
+      }
+
       if (selectedPayment === 'cod') {
         const order = await createOrder('cod');
         setOrderNumber(order.orderNumber);
@@ -268,6 +316,63 @@ export default function Checkout() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
+            {!isAuthenticated && (
+              <section className="border border-border rounded-lg p-6 bg-card">
+                <h2 className="font-serif text-lg mb-4">Account Options</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setCheckoutMode('guest')}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      checkoutMode === 'guest'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-muted-foreground/50'
+                    }`}
+                    data-testid="button-guest-checkout"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        checkoutMode === 'guest' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                      }`}>
+                        <ShoppingBag className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Guest Checkout</p>
+                        <p className="text-xs text-muted-foreground">Continue without account</p>
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCheckoutMode('create-account')}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      checkoutMode === 'create-account'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-muted-foreground/50'
+                    }`}
+                    data-testid="button-create-account"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        checkoutMode === 'create-account' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                      }`}>
+                        <User className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Create Account</p>
+                        <p className="text-xs text-muted-foreground">Save info for future orders</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  {checkoutMode === 'guest' 
+                    ? 'You can still track your order via email confirmation.'
+                    : 'Create an account to track orders and save your preferences.'}
+                </p>
+              </section>
+            )}
+
             <section className="border border-border rounded-lg p-6 bg-card">
               <h2 className="font-serif text-lg mb-4">Customer Information</h2>
               <div className="space-y-4">
@@ -312,6 +417,40 @@ export default function Checkout() {
                     />
                   </div>
                 </div>
+
+                {!isAuthenticated && checkoutMode === 'create-account' && (
+                  <div className="pt-4 border-t border-border space-y-4">
+                    <p className="text-sm text-muted-foreground">Create a password for your account</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="password" className="text-xs uppercase tracking-wide text-muted-foreground">Password *</Label>
+                        <Input
+                          id="password"
+                          name="password"
+                          type="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          placeholder=""
+                          className="h-11 bg-background border-border"
+                          data-testid="input-password"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword" className="text-xs uppercase tracking-wide text-muted-foreground">Confirm Password *</Label>
+                        <Input
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          placeholder=""
+                          className="h-11 bg-background border-border"
+                          data-testid="input-confirm-password"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
 
