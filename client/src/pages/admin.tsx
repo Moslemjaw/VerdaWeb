@@ -155,6 +155,27 @@ export default function AdminDashboard() {
     buttonLink: '',
   });
 
+  const [newCollectionContent, setNewCollectionContent] = useState({
+    seasonText: '',
+    heading: '',
+    buttonText: '',
+    image1: '',
+    image2: '',
+    image3: '',
+    image4: '',
+    image5: '',
+  });
+
+  const [brandStoryContent, setBrandStoryContent] = useState({
+    description: '',
+  });
+
+  const [newsletterContent, setNewsletterContent] = useState({
+    title: '',
+    subtitle: '',
+    buttonText: '',
+  });
+
   if (!isLoading && (!user || !isAdmin)) {
     setLocation('/');
     return null;
@@ -238,6 +259,37 @@ export default function AdminDashboard() {
           category: featuredData.content.category || '',
           buttonText: featuredData.content.buttonText || '',
           buttonLink: featuredData.content.buttonLink || '',
+        });
+      }
+
+      const newCollectionData = siteContent.find(c => c.section === 'new_collection');
+      if (newCollectionData?.content) {
+        const images = (newCollectionData.content as any).images || [];
+        setNewCollectionContent({
+          seasonText: (newCollectionData.content as any).seasonText || '',
+          heading: (newCollectionData.content as any).heading || '',
+          buttonText: newCollectionData.content.buttonText || '',
+          image1: images[0] || '',
+          image2: images[1] || '',
+          image3: images[2] || '',
+          image4: images[3] || '',
+          image5: images[4] || '',
+        });
+      }
+
+      const brandStoryData = siteContent.find(c => c.section === 'brand_story');
+      if (brandStoryData?.content) {
+        setBrandStoryContent({
+          description: brandStoryData.content.description || '',
+        });
+      }
+
+      const newsletterData = siteContent.find(c => c.section === 'newsletter');
+      if (newsletterData?.content) {
+        setNewsletterContent({
+          title: newsletterData.content.title || '',
+          subtitle: newsletterData.content.subtitle || '',
+          buttonText: newsletterData.content.buttonText || '',
         });
       }
     }
@@ -480,6 +532,46 @@ export default function AdminDashboard() {
         category: featuredContent.category,
         buttonText: featuredContent.buttonText,
         buttonLink: featuredContent.buttonLink,
+      },
+    });
+  };
+
+  const handleSaveNewCollectionContent = () => {
+    const images = [
+      newCollectionContent.image1,
+      newCollectionContent.image2,
+      newCollectionContent.image3,
+      newCollectionContent.image4,
+      newCollectionContent.image5,
+    ].filter(img => img.trim() !== '');
+    
+    updateContentMutation.mutate({
+      section: 'new_collection',
+      content: {
+        seasonText: newCollectionContent.seasonText,
+        heading: newCollectionContent.heading,
+        buttonText: newCollectionContent.buttonText,
+        images,
+      },
+    });
+  };
+
+  const handleSaveBrandStoryContent = () => {
+    updateContentMutation.mutate({
+      section: 'brand_story',
+      content: {
+        description: brandStoryContent.description,
+      },
+    });
+  };
+
+  const handleSaveNewsletterContent = () => {
+    updateContentMutation.mutate({
+      section: 'newsletter',
+      content: {
+        title: newsletterContent.title,
+        subtitle: newsletterContent.subtitle,
+        buttonText: newsletterContent.buttonText,
       },
     });
   };
@@ -1122,169 +1214,307 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="content" className="space-y-6">
+          <TabsContent value="content" className="space-y-8">
             <div>
               <h2 className="text-2xl font-serif font-bold">Website Content</h2>
-              <p className="text-muted-foreground">Customize your homepage sections</p>
+              <p className="text-muted-foreground">Customize all sections of your homepage. Changes appear immediately after saving.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Image className="w-5 h-5" /> Hero Section
-                  </CardTitle>
-                  <CardDescription>Edit the main banner on your homepage</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Title</Label>
-                    <Input
-                      value={heroContent.title}
-                      onChange={(e) => setHeroContent({ ...heroContent, title: e.target.value })}
-                      placeholder="e.g., The Black Dress Collection"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Subtitle</Label>
-                    <Input
-                      value={heroContent.subtitle}
-                      onChange={(e) => setHeroContent({ ...heroContent, subtitle: e.target.value })}
-                      placeholder="e.g., REDEFINED"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Season Text (small text above title)</Label>
-                    <Input
-                      value={heroContent.description}
-                      onChange={(e) => setHeroContent({ ...heroContent, description: e.target.value })}
-                      placeholder="e.g., Spring / Summer 2025"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Button Text</Label>
-                    <Input
-                      value={heroContent.buttonText}
-                      onChange={(e) => setHeroContent({ ...heroContent, buttonText: e.target.value })}
-                      placeholder="e.g., Explore Collection"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Button Link</Label>
-                    <Input
-                      value={heroContent.buttonLink}
-                      onChange={(e) => setHeroContent({ ...heroContent, buttonLink: e.target.value })}
-                      placeholder="e.g., /shop"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Background Image URL</Label>
-                    <Input
-                      value={heroContent.imageUrl}
-                      onChange={(e) => setHeroContent({ ...heroContent, imageUrl: e.target.value })}
-                      placeholder="https://example.com/hero-image.jpg"
-                    />
-                    <p className="text-xs text-muted-foreground">Leave empty to use default image</p>
-                  </div>
-                  <Button onClick={handleSaveHeroContent} className="w-full" disabled={updateContentMutation.isPending}>
-                    Save Hero Content
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="w-5 h-5" /> Featured Collection
-                  </CardTitle>
-                  <CardDescription>Edit the featured products section</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Section Title</Label>
-                    <Input
-                      value={featuredContent.title}
-                      onChange={(e) => setFeaturedContent({ ...featuredContent, title: e.target.value })}
-                      placeholder="e.g., Featured Collection"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Subtitle</Label>
-                    <Input
-                      value={featuredContent.subtitle}
-                      onChange={(e) => setFeaturedContent({ ...featuredContent, subtitle: e.target.value })}
-                      placeholder="e.g., Curated just for you"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Featured Category</Label>
-                    <Select
-                      value={featuredContent.category}
-                      onValueChange={(value) => setFeaturedContent({ ...featuredContent, category: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category to feature" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Button Text</Label>
-                    <Input
-                      value={featuredContent.buttonText}
-                      onChange={(e) => setFeaturedContent({ ...featuredContent, buttonText: e.target.value })}
-                      placeholder="e.g., View All Products"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Button Link</Label>
-                    <Input
-                      value={featuredContent.buttonLink}
-                      onChange={(e) => setFeaturedContent({ ...featuredContent, buttonLink: e.target.value })}
-                      placeholder="e.g., /shop"
-                    />
-                  </div>
-                  <Button onClick={handleSaveFeaturedContent} className="w-full" disabled={updateContentMutation.isPending}>
-                    Save Featured Content
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Saved Content</CardTitle>
-                <CardDescription>View all saved content sections</CardDescription>
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Image className="w-6 h-6" /> 1. Hero Section
+                </CardTitle>
+                <CardDescription>The main banner visitors see first - your hero section with background image and text</CardDescription>
               </CardHeader>
-              <CardContent>
-                {siteContent.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No content saved yet. Use the forms above to add content.</p>
-                ) : (
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    {siteContent.map((content) => (
-                      <div key={content._id} className="p-4 border rounded-lg">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium capitalize">{content.section.replace('_', ' ')}</h4>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {content.content.title && `Title: ${content.content.title}`}
-                            </p>
-                          </div>
-                          <span className={`text-xs px-2 py-1 rounded ${content.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                            {content.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                    <div className="space-y-2">
+                      <Label className="font-medium">Main Title</Label>
+                      <Input
+                        value={heroContent.title}
+                        onChange={(e) => setHeroContent({ ...heroContent, title: e.target.value })}
+                        placeholder="e.g., ELEGANCE"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Subtitle (italic text below title)</Label>
+                      <Input
+                        value={heroContent.subtitle}
+                        onChange={(e) => setHeroContent({ ...heroContent, subtitle: e.target.value })}
+                        placeholder="e.g., REDEFINED"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Season Text (small text above title)</Label>
+                      <Input
+                        value={heroContent.description}
+                        onChange={(e) => setHeroContent({ ...heroContent, description: e.target.value })}
+                        placeholder="e.g., Spring / Summer 2025"
+                      />
+                    </div>
                   </div>
-                )}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-medium">Button Text</Label>
+                      <Input
+                        value={heroContent.buttonText}
+                        onChange={(e) => setHeroContent({ ...heroContent, buttonText: e.target.value })}
+                        placeholder="e.g., Explore Collection"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Button Link</Label>
+                      <Input
+                        value={heroContent.buttonLink}
+                        onChange={(e) => setHeroContent({ ...heroContent, buttonLink: e.target.value })}
+                        placeholder="e.g., /shop"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Background Image URL</Label>
+                      <Input
+                        value={heroContent.imageUrl}
+                        onChange={(e) => setHeroContent({ ...heroContent, imageUrl: e.target.value })}
+                        placeholder="Paste image URL here"
+                      />
+                      <p className="text-xs text-muted-foreground">Paste a URL to an image (e.g., from Unsplash or your image hosting)</p>
+                    </div>
+                  </div>
+                </div>
+                <Button onClick={handleSaveHeroContent} className="mt-6" disabled={updateContentMutation.isPending}>
+                  Save Hero Section
+                </Button>
               </CardContent>
             </Card>
+
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Tag className="w-6 h-6" /> 2. Featured Collection
+                </CardTitle>
+                <CardDescription>The product showcase section displaying your featured items by category</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-medium">Section Title</Label>
+                      <Input
+                        value={featuredContent.title}
+                        onChange={(e) => setFeaturedContent({ ...featuredContent, title: e.target.value })}
+                        placeholder="e.g., Featured Collection"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Subtitle (small text above title)</Label>
+                      <Input
+                        value={featuredContent.subtitle}
+                        onChange={(e) => setFeaturedContent({ ...featuredContent, subtitle: e.target.value })}
+                        placeholder="e.g., Curated Selection"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Display Category</Label>
+                      <Select
+                        value={featuredContent.category}
+                        onValueChange={(value) => setFeaturedContent({ ...featuredContent, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select which category to display" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories (Featured Products)</SelectItem>
+                          {CATEGORIES.map((cat) => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">This determines which products appear in this section</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-medium">Button Text</Label>
+                      <Input
+                        value={featuredContent.buttonText}
+                        onChange={(e) => setFeaturedContent({ ...featuredContent, buttonText: e.target.value })}
+                        placeholder="e.g., View All Products"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Button Link</Label>
+                      <Input
+                        value={featuredContent.buttonLink}
+                        onChange={(e) => setFeaturedContent({ ...featuredContent, buttonLink: e.target.value })}
+                        placeholder="e.g., /shop"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Button onClick={handleSaveFeaturedContent} className="mt-6" disabled={updateContentMutation.isPending}>
+                  Save Featured Collection
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <ShoppingBag className="w-6 h-6" /> 3. New Collection Gallery
+                </CardTitle>
+                <CardDescription>The dramatic black section with 5 model images and "DESIGNED TO MAKE AN ENTRANCE" text</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label className="font-medium">Season Text (left side)</Label>
+                      <Textarea
+                        value={newCollectionContent.seasonText}
+                        onChange={(e) => setNewCollectionContent({ ...newCollectionContent, seasonText: e.target.value })}
+                        placeholder="New Collection&#10;Fall / Winter 2025&#10;Limited Edition"
+                        rows={3}
+                      />
+                      <p className="text-xs text-muted-foreground">Each line appears on a new line</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Main Heading (right side)</Label>
+                      <Textarea
+                        value={newCollectionContent.heading}
+                        onChange={(e) => setNewCollectionContent({ ...newCollectionContent, heading: e.target.value })}
+                        placeholder="DESIGNED&#10;TO MAKE&#10;AN ENTRANCE"
+                        rows={3}
+                      />
+                      <p className="text-xs text-muted-foreground">Each line appears on a new line</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Button Text</Label>
+                      <Input
+                        value={newCollectionContent.buttonText}
+                        onChange={(e) => setNewCollectionContent({ ...newCollectionContent, buttonText: e.target.value })}
+                        placeholder="e.g., View All Products"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-4">
+                    <Label className="font-medium text-lg mb-4 block">Gallery Images (5 images)</Label>
+                    <p className="text-sm text-muted-foreground mb-4">Enter URLs for 5 model images. They will display in a fanning animation.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm">Image 1 (far left)</Label>
+                        <Input
+                          value={newCollectionContent.image1}
+                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image1: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Image 2 (mid left)</Label>
+                        <Input
+                          value={newCollectionContent.image2}
+                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image2: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Image 3 (center)</Label>
+                        <Input
+                          value={newCollectionContent.image3}
+                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image3: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Image 4 (mid right)</Label>
+                        <Input
+                          value={newCollectionContent.image4}
+                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image4: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Image 5 (far right)</Label>
+                        <Input
+                          value={newCollectionContent.image5}
+                          onChange={(e) => setNewCollectionContent({ ...newCollectionContent, image5: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">Leave empty to use default images</p>
+                  </div>
+                </div>
+                <Button onClick={handleSaveNewCollectionContent} className="mt-6" disabled={updateContentMutation.isPending}>
+                  Save New Collection
+                </Button>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="border-2 border-primary/20">
+                <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" /> 4. Brand Story Quote
+                  </CardTitle>
+                  <CardDescription>The inspirational quote shown between sections</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="font-medium">Quote Text</Label>
+                    <Textarea
+                      value={brandStoryContent.description}
+                      onChange={(e) => setBrandStoryContent({ ...brandStoryContent, description: e.target.value })}
+                      placeholder="Lumière creates timeless pieces for the modern woman. Merging classic silhouettes with contemporary attitude."
+                      rows={4}
+                    />
+                  </div>
+                  <Button onClick={handleSaveBrandStoryContent} className="w-full" disabled={updateContentMutation.isPending}>
+                    Save Brand Story
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-primary/20">
+                <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" /> 5. Newsletter Section
+                  </CardTitle>
+                  <CardDescription>The email signup section at the bottom of the page</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="font-medium">Title</Label>
+                    <Input
+                      value={newsletterContent.title}
+                      onChange={(e) => setNewsletterContent({ ...newsletterContent, title: e.target.value })}
+                      placeholder="e.g., Join the World of Lumière"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-medium">Subtitle</Label>
+                    <Input
+                      value={newsletterContent.subtitle}
+                      onChange={(e) => setNewsletterContent({ ...newsletterContent, subtitle: e.target.value })}
+                      placeholder="e.g., Subscribe to receive updates..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-medium">Button Text</Label>
+                    <Input
+                      value={newsletterContent.buttonText}
+                      onChange={(e) => setNewsletterContent({ ...newsletterContent, buttonText: e.target.value })}
+                      placeholder="e.g., Subscribe"
+                    />
+                  </div>
+                  <Button onClick={handleSaveNewsletterContent} className="w-full" disabled={updateContentMutation.isPending}>
+                    Save Newsletter
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
