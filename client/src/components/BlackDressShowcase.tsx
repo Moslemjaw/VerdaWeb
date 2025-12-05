@@ -63,8 +63,10 @@ export default function BlackDressShowcase() {
   const heading = (newCollectionContent as any)?.heading || "DESIGNED\nTO MAKE\nAN ENTRANCE";
   const buttonText = newCollectionContent?.buttonText || "View All Products";
   const selectedCategory = (newCollectionContent as any)?.category || "";
-  const useCategoryImages = (newCollectionContent as any)?.useCategoryImages !== false;
-  const customHeroImages = (newCollectionContent as any)?.heroImages || [];
+  // Support both heroImages (new field) and images (legacy field) for backward compatibility
+  const heroImagesField = (newCollectionContent as any)?.heroImages || [];
+  const imagesField = (newCollectionContent as any)?.images || [];
+  const customHeroImages = heroImagesField.length > 0 ? heroImagesField : imagesField;
   
   // Fetch categories to use their images for the hero section
   const { data: categories = [] } = useQuery<Category[]>({
@@ -90,56 +92,17 @@ export default function BlackDressShowcase() {
     },
   });
 
-  // Use category images for the hero section based on selected category or custom uploads
+  // Use custom uploaded hero images, falling back to defaults if not enough images
   const getHeroImages = () => {
-    // If using custom images (toggle is OFF), use the uploaded images
-    if (!useCategoryImages) {
-      // Filter out empty strings and fill with defaults if needed
-      const validCustomImages = customHeroImages.filter((img: string) => img && img.trim() !== '');
-      if (validCustomImages.length >= 5) {
-        return validCustomImages.slice(0, 5);
-      }
-      // Fill remaining slots with defaults
-      return validCustomImages.length > 0
-        ? [...validCustomImages, ...defaultImages.slice(validCustomImages.length)]
-        : defaultImages;
+    // Filter out empty strings and fill with defaults if needed
+    const validCustomImages = customHeroImages.filter((img: string) => img && img.trim() !== '');
+    if (validCustomImages.length >= 5) {
+      return validCustomImages.slice(0, 5);
     }
-    
-    // Using category images (toggle is ON)
-    // If a specific category is selected, prioritize it
-    if (selectedCategory && selectedCategory !== 'all') {
-      // Match by name (case-insensitive) or slug
-      const selectedCat = categories.find(cat => 
-        cat.name.toLowerCase() === selectedCategory.toLowerCase() ||
-        cat.slug === selectedCategory.toLowerCase()
-      );
-      
-      if (selectedCat && selectedCat.imageUrl && selectedCat.imageUrl.trim() !== '') {
-        // Selected category has an image - use it first, then fill with defaults
-        // (keeping it pure to the selected category rather than mixing with others)
-        return [
-          selectedCat.imageUrl,
-          ...defaultImages.slice(0, 4)
-        ];
-      }
-      
-      // Selected category exists but has no image, or category not found - use defaults
-      return defaultImages;
-    }
-    
-    // For "all" or no selection, use first 5 categories with images (sorted by display order)
-    // API returns sorted data, but we add defensive sort to guarantee order
-    const categoryImages = [...categories]
-      .sort((a, b) => a.order - b.order)
-      .filter(cat => cat.imageUrl && cat.imageUrl.trim() !== '')
-      .map(cat => cat.imageUrl)
-      .slice(0, 5);
-    
-    return categoryImages.length >= 5 
-      ? categoryImages 
-      : categoryImages.length > 0 
-        ? [...categoryImages, ...defaultImages.slice(categoryImages.length)]
-        : defaultImages;
+    // Fill remaining slots with defaults
+    return validCustomImages.length > 0
+      ? [...validCustomImages, ...defaultImages.slice(validCustomImages.length)]
+      : defaultImages;
   };
   
   const baseImages = getHeroImages();
