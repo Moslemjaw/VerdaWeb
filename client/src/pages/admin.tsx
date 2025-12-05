@@ -296,6 +296,15 @@ export default function AdminDashboard() {
     buttonText: '',
   });
 
+  const [newInContent, setNewInContent] = useState({
+    navLabel: 'New In',
+    title: 'New In',
+    subtitle: 'Just Arrived',
+    description: '',
+    category: '',
+    buttonText: 'View All Products',
+  });
+
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
@@ -641,6 +650,18 @@ export default function AdminDashboard() {
           buttonText: bestSellersData.content.buttonText || '',
         });
       }
+
+      const newInData = siteContent.find(c => c.section === 'new_in');
+      if (newInData?.content) {
+        setNewInContent({
+          navLabel: (newInData.content as any).navLabel || 'New In',
+          title: newInData.content.title || 'New In',
+          subtitle: newInData.content.subtitle || 'Just Arrived',
+          description: newInData.content.description || '',
+          category: newInData.content.category || '',
+          buttonText: newInData.content.buttonText || 'View All Products',
+        });
+      }
     }
   }, [siteContent]);
 
@@ -939,6 +960,20 @@ export default function AdminDashboard() {
       content: {
         title: bestSellersContent.title,
         buttonText: bestSellersContent.buttonText,
+      },
+    });
+  };
+
+  const handleSaveNewInContent = () => {
+    updateContentMutation.mutate({
+      section: 'new_in',
+      content: {
+        navLabel: newInContent.navLabel,
+        title: newInContent.title,
+        subtitle: newInContent.subtitle,
+        description: newInContent.description,
+        category: newInContent.category,
+        buttonText: newInContent.buttonText,
       },
     });
   };
@@ -2385,6 +2420,89 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <ShoppingBag className="w-6 h-6" /> 7. New In Page
+                </CardTitle>
+                <CardDescription>Configure the "New In" page - change the navigation label, page title, text, and product category</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-medium">Navigation Label</Label>
+                      <Input
+                        value={newInContent.navLabel}
+                        onChange={(e) => setNewInContent({ ...newInContent, navLabel: e.target.value })}
+                        placeholder="e.g., New In, New Arrivals, Fresh Drops"
+                      />
+                      <p className="text-xs text-muted-foreground">This is what appears in the navigation bar</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Page Title</Label>
+                      <Input
+                        value={newInContent.title}
+                        onChange={(e) => setNewInContent({ ...newInContent, title: e.target.value })}
+                        placeholder="e.g., New In"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Subtitle (Small text above title)</Label>
+                      <Input
+                        value={newInContent.subtitle}
+                        onChange={(e) => setNewInContent({ ...newInContent, subtitle: e.target.value })}
+                        placeholder="e.g., Just Arrived"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-medium">Description</Label>
+                      <Textarea
+                        value={newInContent.description}
+                        onChange={(e) => setNewInContent({ ...newInContent, description: e.target.value })}
+                        placeholder="e.g., Discover our latest arrivals, fresh from the runway to your wardrobe."
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Product Category</Label>
+                      <Select
+                        value={newInContent.category}
+                        onValueChange={(value) => setNewInContent({ ...newInContent, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category (or leave empty for all products)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Products</SelectItem>
+                          <SelectItem value="Dresses">Dresses</SelectItem>
+                          <SelectItem value="Evening Wear">Evening Wear</SelectItem>
+                          <SelectItem value="Tops">Tops</SelectItem>
+                          <SelectItem value="Bottoms">Bottoms</SelectItem>
+                          <SelectItem value="Outerwear">Outerwear</SelectItem>
+                          <SelectItem value="Accessories">Accessories</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">Products from this category will be shown on the New In page</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Button Text</Label>
+                      <Input
+                        value={newInContent.buttonText}
+                        onChange={(e) => setNewInContent({ ...newInContent, buttonText: e.target.value })}
+                        placeholder="e.g., View All Products"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Button onClick={handleSaveNewInContent} className="mt-6" disabled={updateContentMutation.isPending}>
+                  Save New In Page
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>
