@@ -28,8 +28,7 @@ export default function FeaturedCollection() {
     },
   });
 
-  const sectionTitle = featuredSettings?.title || "Featured Collection";
-  const sectionSubtitle = featuredSettings?.subtitle || "Curated Selection";
+  const sectionTitle = featuredSettings?.title || "Collections";
   const buttonText = featuredSettings?.buttonText || "View All Products";
   const buttonLink = featuredSettings?.buttonLink || "/shop";
 
@@ -57,12 +56,11 @@ export default function FeaturedCollection() {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16">
             <div>
-              <h3 className="text-sm font-sans uppercase tracking-widest text-muted-foreground mb-2">{sectionSubtitle}</h3>
               <h2 className="text-4xl md:text-5xl font-serif text-primary">{sectionTitle}</h2>
             </div>
           </div>
           <div className="text-center text-muted-foreground py-12">
-            <p className="text-lg">No featured products yet. Check back soon!</p>
+            <p className="text-lg">No collections yet. Check back soon!</p>
             <p className="text-sm mt-2">Admins can add products from the admin dashboard.</p>
           </div>
         </div>
@@ -75,7 +73,6 @@ export default function FeaturedCollection() {
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16">
           <div>
-            <h3 className="text-sm font-sans uppercase tracking-widest text-muted-foreground mb-2">{sectionSubtitle}</h3>
             <h2 className="text-4xl md:text-5xl font-serif text-primary">{sectionTitle}</h2>
           </div>
           <Link href={buttonLink}>
@@ -87,26 +84,26 @@ export default function FeaturedCollection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           {products.map((product, index) => (
-            <Link href={`/product/${product._id}`} key={product._id}>
+            <Link href={`/shop?category=${encodeURIComponent(product.category)}`} key={product._id}>
               <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.8, delay: index * 0.2 }}
                 className="group cursor-pointer"
-                data-testid={`card-featured-product-${product._id}`}
+                data-testid={`card-collection-${product._id}`}
               >
                 <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6">
                   <img 
                     src={product.imageUrl} 
-                    alt={product.name} 
+                    alt={product.category} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                   <div 
                     className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium text-center"
                   >
-                    View Details
+                    Shop {product.category}
                   </div>
                 </div>
                 <div className="flex justify-between items-start">

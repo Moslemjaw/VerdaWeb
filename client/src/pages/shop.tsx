@@ -37,12 +37,18 @@ export default function Shop() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const filter = params.get('filter');
+    const categoryParam = params.get('category');
+    
     if (filter === 'bestsellers') {
       setShowBestSellersOnly(true);
       setShowNewInOnly(false);
     } else if (filter === 'newin') {
       setShowNewInOnly(true);
       setShowBestSellersOnly(false);
+    }
+    
+    if (categoryParam) {
+      setSelectedCategories([decodeURIComponent(categoryParam)]);
     }
   }, [location]);
 
