@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Product {
   _id: string;
@@ -30,10 +31,13 @@ export default function BestSellers() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     align: "start", 
     loop: false, 
-    dragFree: true,
-    containScroll: "trimSnaps"
+    dragFree: false,
+    containScroll: "trimSnaps",
+    slidesToScroll: 1
   });
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(true);
   const { data: siteContent } = useSiteContent();
   
   const bestSellersContent = siteContent?.best_sellers;
@@ -57,6 +61,8 @@ export default function BestSellers() {
     if (!emblaApi) return;
     const progress = Math.max(0, Math.min(1, emblaApi.scrollProgress()));
     setScrollProgress(progress);
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
   }, [emblaApi]);
 
   useEffect(() => {
@@ -64,11 +70,16 @@ export default function BestSellers() {
     onScroll();
     emblaApi.on('scroll', onScroll);
     emblaApi.on('reInit', onScroll);
+    emblaApi.on('select', onScroll);
     return () => {
       emblaApi.off('scroll', onScroll);
       emblaApi.off('reInit', onScroll);
+      emblaApi.off('select', onScroll);
     };
   }, [emblaApi, onScroll]);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
     <section className="py-16 bg-background">
@@ -90,30 +101,47 @@ export default function BestSellers() {
             </Link>
           </motion.div>
 
-          <div className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
-            <div className="flex gap-4">
-              {products.map((product, index) => (
-                <motion.div
-                  key={product._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.03 }}
-                  className="flex-[0_0_140px] md:flex-[0_0_160px] lg:flex-[0_0_170px] min-w-0 group cursor-pointer select-none"
-                >
-                  <div className="aspect-[3/4] bg-secondary/50 mb-3 overflow-hidden">
-                    <img 
-                      src={product.imageUrl} 
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" 
-                      draggable={false}
-                    />
-                  </div>
-                  <h3 className="text-xs uppercase tracking-wide text-foreground/80 mb-1 truncate">{product.name}</h3>
-                  <p className="text-sm font-medium">{product.price} KWD</p>
-                </motion.div>
-              ))}
+          <div className="flex-1 relative">
+            <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
+              <div className="flex">
+                {products.map((product, index) => (
+                  <motion.div
+                    key={product._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.03 }}
+                    className="flex-[0_0_20%] min-w-0 px-2 group cursor-pointer select-none"
+                  >
+                    <div className="aspect-[3/4] bg-secondary/50 mb-3 overflow-hidden">
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" 
+                        draggable={false}
+                      />
+                    </div>
+                    <h3 className="text-xs uppercase tracking-wide text-foreground/80 mb-1 truncate">{product.name}</h3>
+                    <p className="text-sm font-medium">{product.price} KWD</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
+
+            <button 
+              onClick={scrollPrev}
+              disabled={!canScrollPrev}
+              className={`absolute left-0 top-1/3 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-background border border-foreground/20 flex items-center justify-center transition-opacity ${canScrollPrev ? 'opacity-100 hover:bg-foreground hover:text-background' : 'opacity-0 pointer-events-none'}`}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={scrollNext}
+              disabled={!canScrollNext}
+              className={`absolute right-0 top-1/3 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-background border border-foreground/20 flex items-center justify-center transition-opacity ${canScrollNext ? 'opacity-100 hover:bg-foreground hover:text-background' : 'opacity-0 pointer-events-none'}`}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
