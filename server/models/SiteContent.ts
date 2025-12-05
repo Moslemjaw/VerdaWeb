@@ -13,6 +13,7 @@ export interface ISiteContent extends Document {
     category?: string;
     seasonText?: string;
     heading?: string;
+    navLabel?: string;
     categories?: Array<{
       name: string;
       image: string;
@@ -34,7 +35,7 @@ const SiteContentSchema = new Schema<ISiteContent>(
       type: String,
       required: true,
       unique: true,
-      enum: ['hero', 'featured_collection', 'brand_story', 'newsletter', 'categories', 'new_collection', 'best_sellers'],
+      enum: ['hero', 'featured_collection', 'brand_story', 'newsletter', 'categories', 'new_collection', 'best_sellers', 'new_in'],
     },
     content: {
       title: String,
@@ -47,6 +48,7 @@ const SiteContentSchema = new Schema<ISiteContent>(
       category: String,
       seasonText: String,
       heading: String,
+      navLabel: String,
       categories: [{
         name: String,
         image: String,
