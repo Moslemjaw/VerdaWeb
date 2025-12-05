@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2 } from 'lucide-react';
+import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2, MessageSquare, Copy, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 function ImageUploadInput({ 
@@ -216,6 +216,27 @@ interface ShippingCountry {
   isActive: boolean;
   isDefault: boolean;
 }
+
+type PopupType = 'global_discount' | 'new_account_discount' | 'announcement';
+
+interface Popup {
+  _id: string;
+  type: PopupType;
+  title: string;
+  description: string;
+  discountCode?: string;
+  linkUrl?: string;
+  linkText?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const POPUP_TYPE_LABELS: Record<PopupType, string> = {
+  global_discount: 'Discount for All',
+  new_account_discount: 'New Account Discount',
+  announcement: 'Announcement',
+};
 
 const CATEGORIES = ['Dresses', 'Evening Wear', 'Accessories', 'Outerwear', 'Tops', 'Bottoms', 'Shoes'];
 const BRANDS = ['Lumière', 'Maison Élégance', 'Atelier Noir', 'Belle Couture', 'Chic Parisien'];
@@ -577,6 +598,111 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminShippingCountries'] });
+    },
+  });
+
+  // Popup Management State
+  const [isAddPopupOpen, setIsAddPopupOpen] = useState(false);
+  const [editingPopup, setEditingPopup] = useState<Popup | null>(null);
+  const [popupForm, setPopupForm] = useState({
+    type: 'global_discount' as PopupType,
+    title: '',
+    description: '',
+    discountCode: '',
+    linkUrl: '',
+    linkText: 'Learn More',
+    isActive: true,
+  });
+
+  const resetPopupForm = () => {
+    setPopupForm({
+      type: 'global_discount',
+      title: '',
+      description: '',
+      discountCode: '',
+      linkUrl: '',
+      linkText: 'Learn More',
+      isActive: true,
+    });
+  };
+
+  const { data: popups = [] } = useQuery<Popup[]>({
+    queryKey: ['adminPopups'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/popups', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch popups');
+      return res.json();
+    },
+    enabled: isAdmin,
+  });
+
+  const createPopupMutation = useMutation({
+    mutationFn: async (data: typeof popupForm) => {
+      const res = await fetch('/api/admin/popups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to create popup');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminPopups'] });
+      setIsAddPopupOpen(false);
+      resetPopupForm();
+    },
+  });
+
+  const updatePopupMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<typeof popupForm> }) => {
+      const res = await fetch(`/api/admin/popups/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to update popup');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminPopups'] });
+      setEditingPopup(null);
+      resetPopupForm();
+    },
+  });
+
+  const togglePopupMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/popups/${id}/toggle`, {
+        method: 'PATCH',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to toggle popup');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminPopups'] });
+    },
+  });
+
+  const deletePopupMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/popups/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to delete popup');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminPopups'] });
     },
   });
 
@@ -1073,7 +1199,7 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7 mb-8">
+          <TabsList className="grid w-full grid-cols-8 mb-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="w-4 h-4" /> Overview
             </TabsTrigger>
@@ -1088,6 +1214,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="shipping" className="flex items-center gap-2">
               <Truck className="w-4 h-4" /> Shipping
+            </TabsTrigger>
+            <TabsTrigger value="popups" className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" /> Popups
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" /> Users
@@ -2111,6 +2240,284 @@ export default function AdminDashboard() {
                 <Truck className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-serif text-xl mb-2">No countries configured</h3>
                 <p className="text-muted-foreground mb-4">Add your first shipping country to get started</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="popups" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-serif font-bold">Popups</h2>
+                <p className="text-muted-foreground">Manage promotional popups and announcements</p>
+              </div>
+              <Dialog open={isAddPopupOpen} onOpenChange={setIsAddPopupOpen}>
+                <DialogTrigger asChild>
+                  <Button data-testid="button-add-popup">
+                    Add Popup
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Create New Popup</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    createPopupMutation.mutate(popupForm);
+                  }} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Popup Type</Label>
+                      <Select
+                        value={popupForm.type}
+                        onValueChange={(value: PopupType) => setPopupForm({ ...popupForm, type: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="global_discount">Discount for All Visitors</SelectItem>
+                          <SelectItem value="new_account_discount">Discount for New Accounts</SelectItem>
+                          <SelectItem value="announcement">Announcement</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        {popupForm.type === 'global_discount' && 'Shows to all visitors with a discount code'}
+                        {popupForm.type === 'new_account_discount' && 'Shows only to users after they create an account'}
+                        {popupForm.type === 'announcement' && 'Shows an announcement with a link to a page'}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Title</Label>
+                      <Input
+                        value={popupForm.title}
+                        onChange={(e) => setPopupForm({ ...popupForm, title: e.target.value })}
+                        placeholder="e.g., Welcome! Get 20% Off"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={popupForm.description}
+                        onChange={(e) => setPopupForm({ ...popupForm, description: e.target.value })}
+                        placeholder="e.g., Use code WELCOME20 at checkout to save on your first order!"
+                        required
+                      />
+                    </div>
+                    {(popupForm.type === 'global_discount' || popupForm.type === 'new_account_discount') && (
+                      <div className="space-y-2">
+                        <Label>Discount Code</Label>
+                        <Input
+                          value={popupForm.discountCode}
+                          onChange={(e) => setPopupForm({ ...popupForm, discountCode: e.target.value.toUpperCase() })}
+                          placeholder="e.g., WELCOME20"
+                          required
+                        />
+                      </div>
+                    )}
+                    {popupForm.type === 'announcement' && (
+                      <>
+                        <div className="space-y-2">
+                          <Label>Link URL</Label>
+                          <Input
+                            value={popupForm.linkUrl}
+                            onChange={(e) => setPopupForm({ ...popupForm, linkUrl: e.target.value })}
+                            placeholder="e.g., /shop or https://example.com"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Button Text</Label>
+                          <Input
+                            value={popupForm.linkText}
+                            onChange={(e) => setPopupForm({ ...popupForm, linkText: e.target.value })}
+                            placeholder="e.g., Learn More"
+                          />
+                        </div>
+                      </>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={popupForm.isActive}
+                        onCheckedChange={(checked) => setPopupForm({ ...popupForm, isActive: checked })}
+                      />
+                      <Label>Active</Label>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={createPopupMutation.isPending}>
+                      {createPopupMutation.isPending ? 'Creating...' : 'Create Popup'}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="p-4 text-left font-medium">Type</th>
+                      <th className="p-4 text-left font-medium">Title</th>
+                      <th className="p-4 text-left font-medium">Content</th>
+                      <th className="p-4 text-left font-medium">Status</th>
+                      <th className="p-4 text-left font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {popups.map((popup) => (
+                      <tr key={popup._id} className="border-b last:border-0 hover:bg-muted/30">
+                        <td className="p-4">
+                          <Badge variant={popup.type === 'announcement' ? 'secondary' : 'default'}>
+                            {POPUP_TYPE_LABELS[popup.type]}
+                          </Badge>
+                        </td>
+                        <td className="p-4 font-medium">{popup.title}</td>
+                        <td className="p-4 text-sm text-muted-foreground max-w-xs truncate">
+                          {popup.type === 'announcement' ? (
+                            <span className="flex items-center gap-1">
+                              <ExternalLink className="w-3 h-3" />
+                              {popup.linkUrl}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              <Tag className="w-3 h-3" />
+                              {popup.discountCode}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <Switch
+                            checked={popup.isActive}
+                            onCheckedChange={() => togglePopupMutation.mutate(popup._id)}
+                          />
+                        </td>
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingPopup(popup);
+                                    setPopupForm({
+                                      type: popup.type,
+                                      title: popup.title,
+                                      description: popup.description,
+                                      discountCode: popup.discountCode || '',
+                                      linkUrl: popup.linkUrl || '',
+                                      linkText: popup.linkText || 'Learn More',
+                                      isActive: popup.isActive,
+                                    });
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-lg">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Popup</DialogTitle>
+                                </DialogHeader>
+                                {editingPopup && (
+                                  <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    updatePopupMutation.mutate({ id: editingPopup._id, data: popupForm });
+                                  }} className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label>Popup Type</Label>
+                                      <Select
+                                        value={popupForm.type}
+                                        onValueChange={(value: PopupType) => setPopupForm({ ...popupForm, type: value })}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="global_discount">Discount for All Visitors</SelectItem>
+                                          <SelectItem value="new_account_discount">Discount for New Accounts</SelectItem>
+                                          <SelectItem value="announcement">Announcement</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Title</Label>
+                                      <Input
+                                        value={popupForm.title}
+                                        onChange={(e) => setPopupForm({ ...popupForm, title: e.target.value })}
+                                        required
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Description</Label>
+                                      <Textarea
+                                        value={popupForm.description}
+                                        onChange={(e) => setPopupForm({ ...popupForm, description: e.target.value })}
+                                        required
+                                      />
+                                    </div>
+                                    {(popupForm.type === 'global_discount' || popupForm.type === 'new_account_discount') && (
+                                      <div className="space-y-2">
+                                        <Label>Discount Code</Label>
+                                        <Input
+                                          value={popupForm.discountCode}
+                                          onChange={(e) => setPopupForm({ ...popupForm, discountCode: e.target.value.toUpperCase() })}
+                                          required
+                                        />
+                                      </div>
+                                    )}
+                                    {popupForm.type === 'announcement' && (
+                                      <>
+                                        <div className="space-y-2">
+                                          <Label>Link URL</Label>
+                                          <Input
+                                            value={popupForm.linkUrl}
+                                            onChange={(e) => setPopupForm({ ...popupForm, linkUrl: e.target.value })}
+                                            required
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label>Button Text</Label>
+                                          <Input
+                                            value={popupForm.linkText}
+                                            onChange={(e) => setPopupForm({ ...popupForm, linkText: e.target.value })}
+                                          />
+                                        </div>
+                                      </>
+                                    )}
+                                    <div className="flex items-center gap-2">
+                                      <Switch
+                                        checked={popupForm.isActive}
+                                        onCheckedChange={(checked) => setPopupForm({ ...popupForm, isActive: checked })}
+                                      />
+                                      <Label>Active</Label>
+                                    </div>
+                                    <Button type="submit" className="w-full" disabled={updatePopupMutation.isPending}>
+                                      {updatePopupMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                  </form>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deletePopupMutation.mutate(popup._id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            {popups.length === 0 && (
+              <Card className="p-12 text-center">
+                <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-serif text-xl mb-2">No popups created</h3>
+                <p className="text-muted-foreground mb-4">Create your first popup to engage your customers</p>
               </Card>
             )}
           </TabsContent>
