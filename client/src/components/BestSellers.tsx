@@ -1,62 +1,84 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { Link } from "wouter";
 import { useSiteContent } from "@/hooks/useSiteContent";
-import handbag from "@assets/generated_images/product_shot_of_a_black_leather_handbag.png";
-import necklace from "@assets/generated_images/close_up_of_gold_jewelry_necklace.png";
-import dress from "@assets/generated_images/fashion_model_in_a_red_silk_dress.png";
+import { useQuery } from "@tanstack/react-query";
 
-const products = [
-  { id: 1, name: "Velvet Evening Clutch", price: "450 KWD", image: handbag },
-  { id: 2, name: "Pearl Drop Earrings", price: "290 KWD", image: necklace },
-  { id: 3, name: "Cashmere Wrap", price: "890 KWD", image: dress },
-  { id: 4, name: "Leather Crossbody", price: "550 KWD", image: handbag },
-  { id: 5, name: "Silk Scarf", price: "180 KWD", image: dress },
-];
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+}
 
 export default function BestSellers() {
-  const [emblaRef] = useEmblaCarousel({ align: "start", loop: true });
+  const [emblaRef] = useEmblaCarousel({ align: "start", loop: false, dragFree: true });
   const { data: siteContent } = useSiteContent();
   
   const bestSellersContent = siteContent?.best_sellers;
-  const title = bestSellersContent?.title || "Best Sellers";
-  const buttonText = bestSellersContent?.buttonText || "Shop All";
+  const title = bestSellersContent?.title || "BEST SELLERS";
+  const buttonText = bestSellersContent?.buttonText || "SHOP BEST SELLERS";
+
+  const { data: products = [] } = useQuery<Product[]>({
+    queryKey: ['featuredProducts'],
+    queryFn: async () => {
+      const res = await fetch('/api/products/featured');
+      if (!res.ok) throw new Error('Failed to fetch products');
+      return res.json();
+    },
+  });
 
   return (
-    <section className="py-24 border-t border-black/5">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-6">
-        <div className="flex justify-between items-end mb-12">
-          <h2 className="text-4xl font-serif text-primary">{title}</h2>
-          <div className="flex items-center space-x-2 text-sm font-medium uppercase tracking-widest cursor-pointer hover:opacity-60 transition-opacity">
-            <span>{buttonText}</span>
-            <ArrowRight className="w-4 h-4" />
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="lg:w-64 flex-shrink-0"
+          >
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">{title}</h2>
+            <p className="text-muted-foreground text-sm mb-6">Shop our bestselling styles.</p>
+            <Link href="/best">
+              <span className="inline-block border border-foreground px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-foreground hover:text-background transition-all cursor-pointer">
+                {buttonText}
+              </span>
+            </Link>
+          </motion.div>
+
+          <div className="flex-1 overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-4">
+              {products.map((product, index) => (
+                <motion.div
+                  key={product._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="flex-[0_0_160px] md:flex-[0_0_200px] min-w-0 group cursor-pointer"
+                >
+                  <div className="aspect-[3/4] bg-secondary/50 mb-3 overflow-hidden">
+                    <img 
+                      src={product.imageUrl} 
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                    />
+                  </div>
+                  <h3 className="text-xs uppercase tracking-wide text-foreground/80 mb-1 truncate">{product.name}</h3>
+                  <p className="text-sm font-medium">{product.price} KWD</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex -ml-6">
-            {products.map((product) => (
-              <div className="flex-[0_0_80%] md:flex-[0_0_40%] lg:flex-[0_0_25%] min-w-0 pl-6" key={product.id}>
-                <motion.div 
-                  whileHover={{ y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="group cursor-pointer"
-                >
-                  <div className="aspect-[3/4] bg-secondary mb-4 overflow-hidden relative">
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                    />
-                    <div className="absolute top-4 left-4 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
-                      Best Seller
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-serif">{product.name}</h3>
-                  <p className="text-muted-foreground">{product.price}</p>
-                </motion.div>
-              </div>
-            ))}
+        <div className="mt-8 flex justify-center lg:justify-end">
+          <div className="w-full max-w-md lg:max-w-xl h-1 bg-muted rounded-full overflow-hidden">
+            <div className="h-full w-1/3 bg-foreground rounded-full"></div>
           </div>
         </div>
       </div>
