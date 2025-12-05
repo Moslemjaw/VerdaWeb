@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { ShoppingBag, X, RotateCcw, ArrowLeft, Heart } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 
 interface Product {
   _id: string;
@@ -107,9 +108,12 @@ function ProductCard({
 
 export default function Explore() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [cart, setCart] = useState<Product[]>([]);
+  const [localCart, setLocalCart] = useState<Product[]>([]);
   const [skipped, setSkipped] = useState<Product[]>([]);
   const [showCart, setShowCart] = useState(false);
+  const [, setLocation] = useLocation();
+  
+  const { addItem, items: globalCartItems, totalPrice: globalCartTotal } = useCart();
 
   const { data: apiProducts = [] } = useQuery<Product[]>({
     queryKey: ['allProducts'],
@@ -126,8 +130,15 @@ export default function Explore() {
   const isComplete = currentIndex >= products.length;
 
   const handleSwipe = (direction: 'left' | 'right') => {
-    if (direction === 'right') {
-      setCart(prev => [...prev, currentProduct]);
+    if (direction === 'right' && currentProduct) {
+      setLocalCart(prev => [...prev, currentProduct]);
+      addItem({
+        _id: currentProduct._id,
+        name: currentProduct.name,
+        price: currentProduct.price,
+        imageUrl: currentProduct.imageUrl,
+        category: currentProduct.category,
+      });
     } else {
       setSkipped(prev => [...prev, currentProduct]);
     }
@@ -140,11 +151,15 @@ export default function Explore() {
 
   const resetExplore = () => {
     setCurrentIndex(0);
-    setCart([]);
+    setLocalCart([]);
     setSkipped([]);
   };
+  
+  const handleCheckout = () => {
+    setLocation('/checkout');
+  };
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
+  const cartTotal = localCart.reduce((sum, item) => sum + item.price, 0);
 
   return (
     <div className="min-h-screen bg-black fixed inset-0">
@@ -165,26 +180,27 @@ export default function Explore() {
           <button 
             onClick={() => setShowCart(!showCart)}
             className="relative bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors rounded-full p-2.5 sm:p-3 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            data-testid="button-cart"
           >
             <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            {cart.length > 0 && (
+            {localCart.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-white text-black w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold">
-                {cart.length}
+                {localCart.length}
               </span>
             )}
           </button>
         </div>
 
         {/* Cart Panel */}
-        {showCart && cart.length > 0 && (
+        {showCart && localCart.length > 0 && (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-3 sm:mb-4"
           >
-            <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Your Cart ({cart.length} items)</h3>
+            <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Your Cart ({localCart.length} items)</h3>
             <div className="space-y-1.5 sm:space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
-              {cart.map((item, i) => (
+              {localCart.map((item, i) => (
                 <div key={i} className="flex justify-between text-white/80 text-xs sm:text-sm">
                   <span className="truncate flex-1 mr-2">{item.name}</span>
                   <span>{item.price} KWD</span>
@@ -210,11 +226,15 @@ export default function Explore() {
                 <h2 className="text-2xl sm:text-3xl font-serif text-white mb-3 sm:mb-4">All Done!</h2>
                 <p className="text-white/70 mb-4 sm:mb-6 text-sm sm:text-base">
                   You've explored all products.<br />
-                  {cart.length > 0 ? `${cart.length} items in your cart` : 'Your cart is empty'}
+                  {localCart.length > 0 ? `${localCart.length} items in your cart` : 'Your cart is empty'}
                 </p>
                 <div className="space-y-2 sm:space-y-3">
-                  {cart.length > 0 && (
-                    <button className="w-full bg-white text-black py-3 sm:py-4 rounded-full font-medium hover:bg-white/90 transition-colors min-h-[44px] text-sm sm:text-base">
+                  {localCart.length > 0 && (
+                    <button 
+                      onClick={handleCheckout}
+                      className="w-full bg-white text-black py-3 sm:py-4 rounded-full font-medium hover:bg-white/90 transition-colors min-h-[44px] text-sm sm:text-base"
+                      data-testid="button-checkout"
+                    >
                       Checkout ({cartTotal} KWD)
                     </button>
                   )}

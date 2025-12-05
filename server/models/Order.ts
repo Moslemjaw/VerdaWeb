@@ -35,7 +35,8 @@ export interface IOrder extends Document {
   total: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
   paymentStatus: 'unpaid' | 'paid' | 'refunded';
-  paymentMethod: 'card' | 'cod' | 'paypal';
+  paymentMethod: 'card' | 'cod' | 'whatsapp';
+  customerPhone: string;
   shippingAddress: IShippingAddress;
   notes?: string;
   createdAt: Date;
@@ -91,9 +92,10 @@ const OrderSchema = new Schema<IOrder>({
   },
   paymentMethod: {
     type: String,
-    enum: ['card', 'cod', 'paypal'],
+    enum: ['card', 'cod', 'whatsapp'],
     default: 'card'
   },
+  customerPhone: { type: String, required: true },
   shippingAddress: { type: ShippingAddressSchema, required: true },
   notes: { type: String },
 }, { timestamps: true });
