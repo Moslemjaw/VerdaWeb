@@ -1403,11 +1403,30 @@ export default function AdminDashboard() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [adminSearch, setAdminSearch] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [lastSeenOrderCount, setLastSeenOrderCount] = useState<number>(0);
+
+  const newOrdersCount = (statsData?.stats?.totalOrders || 0) - lastSeenOrderCount;
+
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+    if (!showNotifications) {
+      setLastSeenOrderCount(statsData?.stats?.totalOrders || 0);
+    }
+  };
+
+  const filteredNavItems = (items: typeof navItems) => {
+    if (!adminSearch) return items;
+    return items.filter(item => 
+      item.label.toLowerCase().includes(adminSearch.toLowerCase())
+    );
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
       </div>
     );
   }
@@ -1432,29 +1451,29 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex">
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#111118] border-r border-white/5 transform transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:static lg:transform-none`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-sm transform transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:static lg:transform-none`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
+          <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-sm">L</span>
+                <span className="text-white font-bold text-sm">L</span>
               </div>
-              <span className="font-serif text-lg font-semibold">Lumière</span>
+              <span className="font-serif text-lg font-semibold text-gray-900">Lumière</span>
             </div>
             <button 
               onClick={() => setMobileMenuOpen(false)}
-              className="lg:hidden p-1 hover:bg-white/5 rounded"
+              className="lg:hidden p-1 hover:bg-gray-100 rounded"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
+            {filteredNavItems(navItems).map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
@@ -1466,14 +1485,14 @@ export default function AdminDashboard() {
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     isActive 
-                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-400 border border-amber-500/20' 
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-amber-400' : ''}`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-amber-600' : 'text-gray-400'}`} />
                   <span>{item.label}</span>
                   {item.badge && item.badge > 0 && (
-                    <span className="ml-auto bg-amber-500 text-black text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className="ml-auto bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                       {item.badge}
                     </span>
                   )}
@@ -1483,13 +1502,13 @@ export default function AdminDashboard() {
           </nav>
 
           {/* User section */}
-          <div className="p-4 border-t border-white/5">
+          <div className="p-4 border-t border-gray-100">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-sm font-bold">
+              <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-sm font-bold text-white">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.name}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
                 <p className="text-xs text-gray-500 truncate">Administrator</p>
               </div>
             </div>
@@ -1497,7 +1516,7 @@ export default function AdminDashboard() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white text-xs"
+                className="flex-1 text-xs"
                 onClick={() => setLocation('/')}
               >
                 <Eye className="w-3.5 h-3.5 mr-1.5" />
@@ -1506,7 +1525,7 @@ export default function AdminDashboard() {
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="text-gray-400 hover:text-white hover:bg-white/5"
+                className="text-gray-400 hover:text-gray-600"
                 onClick={() => logout()}
               >
                 <LogOut className="w-4 h-4" />
@@ -1519,7 +1538,7 @@ export default function AdminDashboard() {
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -1527,34 +1546,105 @@ export default function AdminDashboard() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top bar */}
-        <header className="h-16 bg-[#111118]/80 backdrop-blur-sm border-b border-white/5 sticky top-0 z-30 flex items-center justify-between px-4 lg:px-8">
+        <header className="h-16 bg-white border-b border-gray-200 sticky top-0 z-30 flex items-center justify-between px-4 lg:px-8">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 hover:bg-white/5 rounded-lg"
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5 text-gray-600" />
             </button>
-            <div className="hidden sm:flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2 min-w-[200px]">
-              <Search className="w-4 h-4 text-gray-500" />
+            <div className="hidden sm:flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 min-w-[250px]">
+              <Search className="w-4 h-4 text-gray-400" />
               <input 
                 type="text" 
-                placeholder="Search..." 
-                className="bg-transparent text-sm outline-none flex-1 placeholder:text-gray-500"
+                placeholder="Search menu..." 
+                value={adminSearch}
+                onChange={(e) => setAdminSearch(e.target.value)}
+                className="bg-transparent text-sm outline-none flex-1 placeholder:text-gray-400 text-gray-900"
               />
-              <kbd className="text-[10px] text-gray-600 bg-white/5 px-1.5 py-0.5 rounded">⌘K</kbd>
+              {adminSearch && (
+                <button onClick={() => setAdminSearch('')} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="relative p-2 hover:bg-white/5 rounded-lg">
-              <Bell className="w-5 h-5 text-gray-400" />
-              {(stats?.pendingOrders || 0) > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full" />
+            <div className="relative">
+              <button 
+                onClick={handleNotificationClick}
+                className="relative p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <Bell className="w-5 h-5 text-gray-500" />
+                {((stats?.pendingOrders || 0) > 0 || newOrdersCount > 0) && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+                )}
+              </button>
+              
+              {/* Notifications dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
+                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {(stats?.pendingOrders || 0) > 0 && (
+                      <button 
+                        onClick={() => { setActiveTab('orders'); setShowNotifications(false); }}
+                        className="w-full px-4 py-3 hover:bg-gray-50 flex items-start gap-3 text-left border-b border-gray-50"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                          <ShoppingBag className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Pending Orders</p>
+                          <p className="text-xs text-gray-500">You have {stats?.pendingOrders} order(s) waiting to be processed</p>
+                        </div>
+                      </button>
+                    )}
+                    {newOrdersCount > 0 && (
+                      <button 
+                        onClick={() => { setActiveTab('orders'); setShowNotifications(false); }}
+                        className="w-full px-4 py-3 hover:bg-gray-50 flex items-start gap-3 text-left border-b border-gray-50"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                          <Bell className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">New Orders!</p>
+                          <p className="text-xs text-gray-500">{newOrdersCount} new order(s) received since your last visit</p>
+                        </div>
+                      </button>
+                    )}
+                    {statsData?.recentOrders?.slice(0, 3).map((order) => (
+                      <button 
+                        key={order._id}
+                        onClick={() => { setActiveTab('orders'); setShowNotifications(false); }}
+                        className="w-full px-4 py-3 hover:bg-gray-50 flex items-start gap-3 text-left border-b border-gray-50"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <Package className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{order.orderNumber}</p>
+                          <p className="text-xs text-gray-500">{order.customerName} • ${order.total.toFixed(2)}</p>
+                        </div>
+                      </button>
+                    ))}
+                    {!statsData?.recentOrders?.length && !(stats?.pendingOrders || 0) && newOrdersCount <= 0 && (
+                      <div className="px-4 py-8 text-center text-gray-500">
+                        <Bell className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                        <p className="text-sm">No notifications yet</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
-            </button>
-            <div className="w-px h-6 bg-white/10" />
+            </div>
+            <div className="w-px h-6 bg-gray-200" />
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium">{user?.name}</p>
+              <p className="text-sm font-medium text-gray-900">{user?.name}</p>
               <p className="text-xs text-gray-500">Admin</p>
             </div>
           </div>
@@ -1572,117 +1662,117 @@ export default function AdminDashboard() {
           <TabsContent value="overview" className="space-y-6 mt-0">
             {/* Page header */}
             <div className="mb-6">
-              <h1 className="text-2xl font-serif font-bold text-white">Dashboard Overview</h1>
-              <p className="text-gray-400 text-sm mt-1">Welcome back! Here's what's happening with your store.</p>
+              <h1 className="text-2xl font-serif font-bold text-gray-900">Dashboard Overview</h1>
+              <p className="text-gray-500 text-sm mt-1">Welcome back! Here's what's happening with your store.</p>
             </div>
 
             {/* KPI Cards - Revenue Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-xl p-5 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-emerald-400">Total Revenue</span>
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                    <DollarSign className="h-4 w-4 text-emerald-400" />
+                  <span className="text-sm font-medium text-emerald-700">Total Revenue</span>
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+                    <DollarSign className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-white">${(stats?.totalRevenue || 0).toLocaleString()}</div>
-                <p className="text-xs text-emerald-400/70 mt-1">Lifetime sales</p>
+                <div className="text-3xl font-bold text-emerald-800">${(stats?.totalRevenue || 0).toLocaleString()}</div>
+                <p className="text-xs text-emerald-600 mt-1">Lifetime sales</p>
               </div>
               
-              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-5 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-blue-400">Today's Revenue</span>
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm font-medium text-blue-700">Today's Revenue</span>
+                  <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-white">${(stats?.todayRevenue || 0).toLocaleString()}</div>
-                <p className="text-xs text-blue-400/70 mt-1">Sales today</p>
+                <div className="text-3xl font-bold text-blue-800">${(stats?.todayRevenue || 0).toLocaleString()}</div>
+                <p className="text-xs text-blue-600 mt-1">Sales today</p>
               </div>
               
-              <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-5 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-purple-400">Total Orders</span>
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <ShoppingBag className="h-4 w-4 text-purple-400" />
+                  <span className="text-sm font-medium text-purple-700">Total Orders</span>
+                  <div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center">
+                    <ShoppingBag className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-white">{stats?.totalOrders || 0}</div>
-                <p className="text-xs text-purple-400/70 mt-1">{stats?.pendingOrders || 0} pending</p>
+                <div className="text-3xl font-bold text-purple-800">{stats?.totalOrders || 0}</div>
+                <p className="text-xs text-purple-600 mt-1">{stats?.pendingOrders || 0} pending</p>
               </div>
               
-              <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-xl p-5 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-amber-400">In Progress</span>
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                    <Truck className="h-4 w-4 text-amber-400" />
+                  <span className="text-sm font-medium text-amber-700">In Progress</span>
+                  <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
+                    <Truck className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-white">{(stats?.processingOrders || 0) + (stats?.shippedOrders || 0)}</div>
-                <p className="text-xs text-amber-400/70 mt-1">{stats?.deliveredOrders || 0} delivered</p>
+                <div className="text-3xl font-bold text-amber-800">{(stats?.processingOrders || 0) + (stats?.shippedOrders || 0)}</div>
+                <p className="text-xs text-amber-600 mt-1">{stats?.deliveredOrders || 0} delivered</p>
               </div>
             </div>
 
             {/* Secondary Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-[#16161d] border border-white/5 rounded-xl p-5">
+              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-400">Total Users</span>
-                  <Users className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-600">Total Users</span>
+                  <Users className="h-4 w-4 text-gray-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">{stats?.totalUsers || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">{stats?.totalUsers || 0}</div>
                 <p className="text-xs text-gray-500 mt-1">Registered accounts</p>
               </div>
               
-              <div className="bg-[#16161d] border border-white/5 rounded-xl p-5">
+              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-400">Total Products</span>
-                  <Package className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-600">Total Products</span>
+                  <Package className="h-4 w-4 text-gray-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">{stats?.totalProducts || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">{stats?.totalProducts || 0}</div>
                 <p className="text-xs text-gray-500 mt-1">{stats?.inStockProducts || 0} in stock</p>
               </div>
               
-              <div className="bg-[#16161d] border border-white/5 rounded-xl p-5">
+              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-400">Categories</span>
-                  <Tag className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-600">Categories</span>
+                  <Tag className="h-4 w-4 text-gray-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">{stats?.totalCategories || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">{stats?.totalCategories || 0}</div>
                 <p className="text-xs text-gray-500 mt-1">Product categories</p>
               </div>
               
-              <div className="bg-[#16161d] border border-white/5 rounded-xl p-5">
+              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-400">Featured</span>
-                  <TrendingUp className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-600">Featured</span>
+                  <TrendingUp className="h-4 w-4 text-gray-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">{stats?.featuredProducts || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">{stats?.featuredProducts || 0}</div>
                 <p className="text-xs text-gray-500 mt-1">Featured products</p>
               </div>
             </div>
 
             {/* Recent Users & Products */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="bg-[#16161d] border border-white/5 rounded-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/5">
-                  <h3 className="font-semibold text-white">Recent Users</h3>
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="px-5 py-4 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-900">Recent Users</h3>
                   <p className="text-xs text-gray-500">Latest registered users</p>
                 </div>
                 <div className="p-5 space-y-4">
-                  {statsData?.recentUsers?.map((user) => (
-                    <div key={user._id} className="flex items-center justify-between">
+                  {statsData?.recentUsers?.map((recentUser) => (
+                    <div key={recentUser._id} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                          <span className="font-medium text-white text-sm">{user.name?.charAt(0) || 'U'}</span>
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                          <span className="font-medium text-white text-sm">{recentUser.name?.charAt(0) || 'U'}</span>
                         </div>
                         <div>
-                          <p className="font-medium text-white text-sm">{user.name}</p>
-                          <p className="text-xs text-gray-500">{user.email}</p>
+                          <p className="font-medium text-gray-900 text-sm">{recentUser.name}</p>
+                          <p className="text-xs text-gray-500">{recentUser.email}</p>
                         </div>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${user.role === 'admin' ? 'bg-amber-500/20 text-amber-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                        {user.role}
+                      <span className={`text-xs px-2 py-1 rounded-full ${recentUser.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'}`}>
+                        {recentUser.role}
                       </span>
                     </div>
                   ))}
@@ -1692,9 +1782,9 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="bg-[#16161d] border border-white/5 rounded-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/5">
-                  <h3 className="font-semibold text-white">Recent Products</h3>
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="px-5 py-4 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-900">Recent Products</h3>
                   <p className="text-xs text-gray-500">Latest added products</p>
                 </div>
                 <div className="p-5 space-y-4">
@@ -1703,11 +1793,11 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-3">
                         <img src={product.imageUrl} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
                         <div>
-                          <p className="font-medium text-white text-sm">{product.name}</p>
+                          <p className="font-medium text-gray-900 text-sm">{product.name}</p>
                           <p className="text-xs text-gray-500">{product.category}</p>
                         </div>
                       </div>
-                      <span className="font-medium text-amber-400">${product.price}</span>
+                      <span className="font-medium text-amber-600">${product.price}</span>
                     </div>
                   ))}
                   {!statsData?.recentProducts?.length && (
@@ -1718,29 +1808,29 @@ export default function AdminDashboard() {
             </div>
 
             {/* Recent Orders */}
-            <div className="bg-[#16161d] border border-white/5 rounded-xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-white/5">
-                <h3 className="font-semibold text-white">Recent Orders</h3>
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h3 className="font-semibold text-gray-900">Recent Orders</h3>
                 <p className="text-xs text-gray-500">Latest customer orders</p>
               </div>
               <div className="p-5 space-y-4">
                 {statsData?.recentOrders?.map((order) => (
-                  <div key={order._id} className="flex items-center justify-between border-b border-white/5 pb-4 last:border-0 last:pb-0">
+                  <div key={order._id} className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                        <ShoppingBag className="w-5 h-5 text-amber-400" />
+                      <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                        <ShoppingBag className="w-5 h-5 text-amber-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-white text-sm">{order.orderNumber}</p>
+                        <p className="font-medium text-gray-900 text-sm">{order.orderNumber}</p>
                         <p className="text-xs text-gray-500">{order.customerName} • {order.items.length} item(s)</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-white">${order.total.toFixed(2)}</p>
+                      <p className="font-medium text-gray-900">${order.total.toFixed(2)}</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        order.status === 'delivered' ? 'bg-emerald-500/20 text-emerald-400' : 
-                        order.status === 'cancelled' ? 'bg-red-500/20 text-red-400' : 
-                        'bg-gray-500/20 text-gray-400'
+                        order.status === 'delivered' ? 'bg-emerald-100 text-emerald-700' : 
+                        order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 
+                        'bg-gray-100 text-gray-600'
                       }`}>
                         {order.status}
                       </span>
