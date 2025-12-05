@@ -1,33 +1,84 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { useSiteContent } from "@/hooks/useSiteContent";
 
-interface Category {
+interface CMSCategory {
   name: string;
   image: string;
 }
 
-const defaultCategories: Category[] = [
-  { name: "Dresses", image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600" },
-  { name: "Evening Wear", image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600" },
-  { name: "Accessories", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600" },
-  { name: "Outerwear", image: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600" },
-  { name: "Tops", image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=600" },
-  { name: "Bottoms", image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600" },
-];
+interface DBCategory {
+  _id: string;
+  name: string;
+  slug: string;
+  imageUrl: string;
+  isActive: boolean;
+  order: number;
+}
+
+interface DisplayCategory {
+  name: string;
+  image: string;
+}
+
+const defaultImages: Record<string, string> = {
+  "Dresses": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600",
+  "Evening Wear": "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600",
+  "Accessories": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600",
+  "Outerwear": "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600",
+  "Tops": "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=600",
+  "Bottoms": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600",
+};
+
+const defaultPlaceholder = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
 
 export default function FeaturedCollection() {
   const { data: siteContent } = useSiteContent();
   const collectionSettings = siteContent?.featured_collection;
 
+  // Fetch actual categories from database to get their images
+  const { data: dbCategories = [] } = useQuery<DBCategory[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await fetch('/api/categories');
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
   const sectionTitle = collectionSettings?.title || "Collections";
   const buttonText = collectionSettings?.buttonText || "View All Products";
   const buttonLink = collectionSettings?.buttonLink || "/shop";
   
-  const cmsCategories = (collectionSettings as any)?.categories || [];
-  const categories: Category[] = cmsCategories.length === 6 
-    ? cmsCategories 
-    : defaultCategories;
+  const cmsCategories: CMSCategory[] = (collectionSettings as any)?.categories || [];
+  
+  // Build display categories: use CMS names but look up images from DB categories
+  const categories: DisplayCategory[] = cmsCategories.length > 0 
+    ? cmsCategories.map(cmsCat => {
+        // Find matching category in database (case-insensitive)
+        const dbCat = dbCategories.find(
+          db => db.name.toLowerCase() === cmsCat.name.toLowerCase() && db.isActive
+        );
+        
+        // Priority: 1. CMS image if set, 2. DB category image, 3. default image by name, 4. placeholder
+        const image = cmsCat.image && cmsCat.image.trim() !== '' 
+          ? cmsCat.image 
+          : dbCat?.imageUrl && dbCat.imageUrl.trim() !== ''
+            ? dbCat.imageUrl
+            : defaultImages[cmsCat.name] || defaultPlaceholder;
+        
+        return { name: cmsCat.name, image };
+      })
+    : dbCategories
+        .filter(cat => cat.isActive)
+        .slice(0, 6)
+        .map(cat => ({
+          name: cat.name,
+          image: cat.imageUrl && cat.imageUrl.trim() !== '' 
+            ? cat.imageUrl 
+            : defaultImages[cat.name] || defaultPlaceholder
+        }));
 
   return (
     <section className="py-24 px-6 bg-background">
