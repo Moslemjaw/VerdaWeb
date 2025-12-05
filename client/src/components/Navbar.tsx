@@ -30,8 +30,9 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
+    { href: "/", label: "Home" },
     { href: "/new-in", label: "New In" },
-    { href: "/best", label: "Best" },
+    { href: "/shop?filter=bestsellers", label: "Explore" },
     { href: "/shop", label: "Shop" },
     { href: "/about", label: "About" },
   ];
