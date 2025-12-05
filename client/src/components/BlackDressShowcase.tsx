@@ -22,6 +22,7 @@ const defaultImages = [model1, model2, model3, model4, model5];
 export default function BlackDressShowcase() {
   const [animationPhase, setAnimationPhase] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [rotationIndex, setRotationIndex] = useState(0);
   const { data: siteContent } = useSiteContent();
 
   useEffect(() => {
@@ -30,6 +31,15 @@ export default function BlackDressShowcase() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  useEffect(() => {
+    if (animationPhase === 1) {
+      const interval = setInterval(() => {
+        setRotationIndex((prev) => (prev + 1) % 5);
+      }, 15000);
+      return () => clearInterval(interval);
+    }
+  }, [animationPhase]);
   
   const newCollectionContent = siteContent?.new_collection;
   
@@ -54,9 +64,17 @@ export default function BlackDressShowcase() {
   });
 
   const validCmsImages = cmsImages.filter((img: string) => img && img.trim() !== '');
-  const heroImages = validCmsImages.length === 5 
+  const baseImages = validCmsImages.length === 5 
     ? validCmsImages 
     : defaultImages;
+
+  const heroImages = [
+    baseImages[(0 + rotationIndex) % 5],
+    baseImages[(1 + rotationIndex) % 5],
+    baseImages[(2 + rotationIndex) % 5],
+    baseImages[(3 + rotationIndex) % 5],
+    baseImages[(4 + rotationIndex) % 5],
+  ];
 
   const products = apiProducts.length > 0 ? apiProducts.slice(0, 4) : [];
 
