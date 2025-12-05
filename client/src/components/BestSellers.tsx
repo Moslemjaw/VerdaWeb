@@ -66,14 +66,14 @@ export default function BestSellers() {
 
   return (
     <section className="py-16 bg-white">
-      <div className="flex">
+      <div className="flex items-center">
         {/* Left Side - Static Content (25-30% width) */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-[28%] flex-shrink-0 pl-8 pr-6 flex flex-col justify-center"
+          className="w-[28%] flex-shrink-0 pl-8 pr-6"
         >
           <h2 className="text-3xl font-bold tracking-tight text-black mb-3">{title}</h2>
           <p className="text-gray-500 text-sm mb-8">Shop our bestselling styles.</p>
