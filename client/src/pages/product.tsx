@@ -352,6 +352,8 @@ function ProductInfo({
   setQuantity,
   isWishlisted,
   setIsWishlisted,
+  handleAddToCart,
+  isInCart,
 }: ProductInfoProps) {
   return (
     <motion.div
@@ -464,6 +466,28 @@ function ProductInfo({
             <Plus className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      {/* Add to Cart Button */}
+      <div className="mt-8">
+        <Button
+          onClick={handleAddToCart}
+          disabled={!product.inStock}
+          className="w-full h-14 text-base font-medium gap-2"
+          data-testid="button-add-to-cart-main"
+        >
+          {isInCart ? (
+            <>
+              <Check className="w-5 h-5" />
+              Add More to Cart
+            </>
+          ) : (
+            <>
+              <ShoppingBag className="w-5 h-5" />
+              Add to Cart
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Product Details */}
