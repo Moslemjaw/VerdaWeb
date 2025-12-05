@@ -123,7 +123,18 @@ export default function BlackDressShowcase() {
             onViewportEnter={() => setTimeout(() => setAnimationPhase(1), 500)}
             transition={{ duration: 1, ease: "easeInOut" }}
           >
-             <img src={heroImages[2]} alt="Center Model" className="w-full h-full object-cover" />
+            <AnimatePresence mode="wait">
+              <motion.img 
+                key={rotationIndex}
+                src={heroImages[2]} 
+                alt="Center Model" 
+                className="w-full h-full object-cover"
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
+              />
+            </AnimatePresence>
           </motion.div>
 
           <AnimatePresence>
@@ -133,36 +144,80 @@ export default function BlackDressShowcase() {
                   initial={{ x: 0, opacity: 0, scale: 0.8 }}
                   animate={{ x: isMobile ? "-90%" : "-220%", opacity: 1, scale: isMobile ? 0.7 : 0.9 }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-                  className="absolute z-10 h-[50%] md:h-[70%] aspect-[3/4] shadow-xl"
+                  className="absolute z-10 h-[50%] md:h-[70%] aspect-[3/4] shadow-xl overflow-hidden"
                 >
-                   <img src={heroImages[0]} alt="Model 1" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
+                  <AnimatePresence mode="wait">
+                    <motion.img 
+                      key={`img0-${rotationIndex}`}
+                      src={heroImages[0]} 
+                      alt="Model 1" 
+                      className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all"
+                      initial={{ opacity: 0, x: -50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 50 }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                    />
+                  </AnimatePresence>
                 </motion.div>
 
                 <motion.div
                   initial={{ x: 0, opacity: 0, scale: 0.85 }}
                   animate={{ x: isMobile ? "-45%" : "-110%", opacity: 1, scale: isMobile ? 0.8 : 0.95 }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-                  className="absolute z-20 h-[55%] md:h-[75%] aspect-[3/4] shadow-xl"
+                  className="absolute z-20 h-[55%] md:h-[75%] aspect-[3/4] shadow-xl overflow-hidden"
                 >
-                   <img src={heroImages[1]} alt="Model 2" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
+                  <AnimatePresence mode="wait">
+                    <motion.img 
+                      key={`img1-${rotationIndex}`}
+                      src={heroImages[1]} 
+                      alt="Model 2" 
+                      className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all"
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 30 }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                    />
+                  </AnimatePresence>
                 </motion.div>
 
                 <motion.div
                   initial={{ x: 0, opacity: 0, scale: 0.85 }}
                   animate={{ x: isMobile ? "45%" : "110%", opacity: 1, scale: isMobile ? 0.8 : 0.95 }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-                  className="absolute z-20 h-[55%] md:h-[75%] aspect-[3/4] shadow-xl"
+                  className="absolute z-20 h-[55%] md:h-[75%] aspect-[3/4] shadow-xl overflow-hidden"
                 >
-                   <img src={heroImages[3]} alt="Model 4" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
+                  <AnimatePresence mode="wait">
+                    <motion.img 
+                      key={`img3-${rotationIndex}`}
+                      src={heroImages[3]} 
+                      alt="Model 4" 
+                      className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all"
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -30 }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                    />
+                  </AnimatePresence>
                 </motion.div>
 
                 <motion.div
                   initial={{ x: 0, opacity: 0, scale: 0.8 }}
                   animate={{ x: isMobile ? "90%" : "220%", opacity: 1, scale: isMobile ? 0.7 : 0.9 }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-                  className="absolute z-10 h-[50%] md:h-[70%] aspect-[3/4] shadow-xl"
+                  className="absolute z-10 h-[50%] md:h-[70%] aspect-[3/4] shadow-xl overflow-hidden"
                 >
-                   <img src={heroImages[4]} alt="Model 5" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
+                  <AnimatePresence mode="wait">
+                    <motion.img 
+                      key={`img4-${rotationIndex}`}
+                      src={heroImages[4]} 
+                      alt="Model 5" 
+                      className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all"
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -50 }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                    />
+                  </AnimatePresence>
                 </motion.div>
               </>
             )}
