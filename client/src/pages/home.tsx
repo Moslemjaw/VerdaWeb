@@ -20,7 +20,7 @@ export default function Home() {
         <Hero />
         
         <div className="relative z-10 bg-background">
-          <FeaturedCollection />
+          <BestSellers />
 
           <div className="py-20 text-center max-w-2xl mx-auto px-6">
             <p className="text-2xl md:text-3xl font-serif leading-relaxed text-primary">
@@ -30,7 +30,7 @@ export default function Home() {
           
           <BlackDressShowcase />
 
-          <BestSellers />
+          <FeaturedCollection />
           
           <section className="py-24 px-6 bg-secondary/30">
             <div className="container mx-auto text-center">
