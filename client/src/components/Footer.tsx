@@ -109,8 +109,12 @@ export default function Footer() {
         <div className="border-t border-neutral-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-neutral-500 gap-4">
           <p>&copy; {new Date().getFullYear()} Lumière. All rights reserved.</p>
           <div className="flex gap-6">
-            <span className="hover:text-white cursor-pointer transition-colors">Privacy Policy</span>
-            <span className="hover:text-white cursor-pointer transition-colors">Terms of Service</span>
+            <Link href="/privacy">
+              <span className="hover:text-white cursor-pointer transition-colors">Privacy Policy</span>
+            </Link>
+            <Link href="/terms">
+              <span className="hover:text-white cursor-pointer transition-colors">Terms of Service</span>
+            </Link>
           </div>
         </div>
       </div>

@@ -16,6 +16,8 @@ import Checkout from "@/pages/checkout";
 import ProductDetails from "@/pages/product";
 import About from "@/pages/about";
 import FAQ from "@/pages/faq";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +35,8 @@ function Router() {
       <Route path="/product/:id" component={ProductDetails} />
       <Route path="/about" component={About} />
       <Route path="/faq" component={FAQ} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       <Route component={NotFound} />
     </Switch>
   );
