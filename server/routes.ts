@@ -8,6 +8,7 @@ import { Order, IOrder } from "./models/Order";
 import { Discount, IDiscount } from "./models/Discount";
 import { ShippingSettings, getShippingSettings } from "./models/ShippingSettings";
 import { ShippingCountry, initializeDefaultCountries } from "./models/ShippingCountry";
+import { Popup, IPopup } from "./models/Popup";
 import { requireAuth, requireAdmin, AuthRequest } from "./middleware/auth";
 import { Request, Response } from "express";
 import multer from "multer";
@@ -1004,6 +1005,154 @@ export async function registerRoutes(
     } catch (error) {
       console.error('Delete shipping country error:', error);
       res.status(500).json({ error: "Failed to delete shipping country" });
+    }
+  });
+
+  // ============================================
+  // POPUP ROUTES
+  // ============================================
+
+  // Public endpoint to get active popups
+  app.get("/api/popups/active", async (req: Request, res: Response) => {
+    try {
+      const { type } = req.query;
+      const query: any = { isActive: true };
+      
+      if (type && ['global_discount', 'new_account_discount', 'announcement'].includes(type as string)) {
+        query.type = type;
+      }
+      
+      const popups = await Popup.find(query).sort({ createdAt: -1 });
+      res.json(popups);
+    } catch (error) {
+      console.error('Get active popups error:', error);
+      res.status(500).json({ error: "Failed to get active popups" });
+    }
+  });
+
+  // Admin: Get all popups
+  app.get("/api/admin/popups", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const popups = await Popup.find().sort({ createdAt: -1 });
+      res.json(popups);
+    } catch (error) {
+      console.error('Get popups error:', error);
+      res.status(500).json({ error: "Failed to get popups" });
+    }
+  });
+
+  // Admin: Create popup
+  app.post("/api/admin/popups", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { type, title, description, discountCode, linkUrl, linkText, isActive } = req.body;
+
+      if (!type || !title || !description) {
+        return res.status(400).json({ error: "Type, title, and description are required" });
+      }
+
+      if (!['global_discount', 'new_account_discount', 'announcement'].includes(type)) {
+        return res.status(400).json({ error: "Invalid popup type" });
+      }
+
+      // Validate type-specific required fields
+      if ((type === 'global_discount' || type === 'new_account_discount') && !discountCode) {
+        return res.status(400).json({ error: "Discount code is required for discount popups" });
+      }
+
+      if (type === 'announcement' && !linkUrl) {
+        return res.status(400).json({ error: "Link URL is required for announcement popups" });
+      }
+
+      const popup = new Popup({
+        type,
+        title,
+        description,
+        discountCode: type !== 'announcement' ? discountCode : null,
+        linkUrl: type === 'announcement' ? linkUrl : null,
+        linkText: type === 'announcement' ? (linkText || 'Learn More') : null,
+        isActive: isActive ?? true,
+      });
+
+      await popup.save();
+      res.status(201).json(popup);
+    } catch (error) {
+      console.error('Create popup error:', error);
+      res.status(500).json({ error: "Failed to create popup" });
+    }
+  });
+
+  // Admin: Update popup
+  app.put("/api/admin/popups/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { type, title, description, discountCode, linkUrl, linkText, isActive } = req.body;
+
+      const popup = await Popup.findById(id);
+      if (!popup) {
+        return res.status(404).json({ error: "Popup not found" });
+      }
+
+      const newType = type || popup.type;
+
+      // Validate type-specific required fields
+      if ((newType === 'global_discount' || newType === 'new_account_discount') && discountCode === '') {
+        return res.status(400).json({ error: "Discount code is required for discount popups" });
+      }
+
+      if (newType === 'announcement' && linkUrl === '') {
+        return res.status(400).json({ error: "Link URL is required for announcement popups" });
+      }
+
+      if (type !== undefined) popup.type = type;
+      if (title !== undefined) popup.title = title;
+      if (description !== undefined) popup.description = description;
+      if (discountCode !== undefined) popup.discountCode = discountCode;
+      if (linkUrl !== undefined) popup.linkUrl = linkUrl;
+      if (linkText !== undefined) popup.linkText = linkText;
+      if (isActive !== undefined) popup.isActive = isActive;
+
+      await popup.save();
+      res.json(popup);
+    } catch (error) {
+      console.error('Update popup error:', error);
+      res.status(500).json({ error: "Failed to update popup" });
+    }
+  });
+
+  // Admin: Toggle popup active status
+  app.patch("/api/admin/popups/:id/toggle", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const popup = await Popup.findById(id);
+      if (!popup) {
+        return res.status(404).json({ error: "Popup not found" });
+      }
+
+      popup.isActive = !popup.isActive;
+      await popup.save();
+      res.json(popup);
+    } catch (error) {
+      console.error('Toggle popup error:', error);
+      res.status(500).json({ error: "Failed to toggle popup" });
+    }
+  });
+
+  // Admin: Delete popup
+  app.delete("/api/admin/popups/:id", requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const popup = await Popup.findById(id);
+      if (!popup) {
+        return res.status(404).json({ error: "Popup not found" });
+      }
+
+      await Popup.findByIdAndDelete(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Delete popup error:', error);
+      res.status(500).json({ error: "Failed to delete popup" });
     }
   });
 
