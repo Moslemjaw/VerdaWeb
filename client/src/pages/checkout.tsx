@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag, Gift } from 'lucide-react';
+import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -190,7 +190,7 @@ export default function Checkout() {
   if (orderComplete) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="border-b">
+        <header className="border-b border-border">
           <div className="container mx-auto px-4 py-4">
             <Link href="/" className="font-serif text-xl tracking-widest">LUMIÈRE</Link>
           </div>
@@ -201,26 +201,26 @@ export default function Checkout() {
             animate={{ opacity: 1, scale: 1 }}
             className="max-w-md mx-auto text-center"
           >
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Check className="w-10 h-10 text-green-600" />
+            <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Check className="w-10 h-10 text-primary" />
             </div>
             <h2 className="font-serif text-3xl mb-2">Order Confirmed!</h2>
             <p className="text-muted-foreground mb-2">Thank you for your order</p>
             <p className="text-lg font-medium mb-8">Order #{orderNumber}</p>
             
-            <div className="bg-secondary/30 rounded-xl p-6 text-left mb-8">
+            <div className="bg-secondary/50 rounded-xl p-6 text-left mb-8 border border-border">
               <h3 className="font-medium mb-4">What's next?</h3>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 mt-0.5 text-green-600" />
+                  <Check className="w-4 h-4 mt-0.5 text-primary" />
                   <span>You'll receive an email confirmation shortly</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 mt-0.5 text-green-600" />
+                  <Check className="w-4 h-4 mt-0.5 text-primary" />
                   <span>We'll notify you when your order ships</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 mt-0.5 text-green-600" />
+                  <Check className="w-4 h-4 mt-0.5 text-primary" />
                   <span>Delivery within 2-3 business days in Kuwait</span>
                 </li>
               </ul>
@@ -246,7 +246,7 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b sticky top-0 bg-background z-50">
+      <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-md z-50">
         <div className="container mx-auto px-4 py-4">
           <Link href="/cart" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
@@ -260,7 +260,7 @@ export default function Checkout() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <section className="border rounded-lg p-6">
+            <section className="border border-border rounded-lg p-6 bg-card">
               <h2 className="font-serif text-lg mb-4">Customer Information</h2>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -271,12 +271,12 @@ export default function Checkout() {
                     value={formData.customerName}
                     onChange={handleInputChange}
                     placeholder=""
-                    className="h-11 border-gray-200"
+                    className="h-11 bg-background border-border"
                     data-testid="input-customer-name"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="customerEmail" className="text-xs uppercase tracking-wide text-muted-foreground">Email *</Label>
                     <Input
@@ -286,7 +286,7 @@ export default function Checkout() {
                       value={formData.customerEmail}
                       onChange={handleInputChange}
                       placeholder=""
-                      className="h-11 border-gray-200"
+                      className="h-11 bg-background border-border"
                       data-testid="input-customer-email"
                     />
                   </div>
@@ -299,7 +299,7 @@ export default function Checkout() {
                       value={formData.customerPhone}
                       onChange={handleInputChange}
                       placeholder=""
-                      className="h-11 border-gray-200"
+                      className="h-11 bg-background border-border"
                       data-testid="input-customer-phone"
                     />
                   </div>
@@ -307,7 +307,7 @@ export default function Checkout() {
               </div>
             </section>
 
-            <section className="border rounded-lg p-6">
+            <section className="border border-border rounded-lg p-6 bg-card">
               <h2 className="font-serif text-lg mb-4">Delivery Address</h2>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -318,7 +318,7 @@ export default function Checkout() {
                     value={formData.street}
                     onChange={handleInputChange}
                     placeholder=""
-                    className="h-11 border-gray-200"
+                    className="h-11 bg-background border-border"
                     data-testid="input-street"
                   />
                 </div>
@@ -331,21 +331,20 @@ export default function Checkout() {
                     value={formData.area}
                     onChange={handleInputChange}
                     placeholder=""
-                    className="h-11 border-gray-200"
+                    className="h-11 bg-background border-border"
                     data-testid="input-area"
                   />
                 </div>
               </div>
             </section>
 
-            <section className="border rounded-lg p-6">
+            <section className="border border-border rounded-lg p-6 bg-card">
               <h2 className="font-serif text-lg mb-4">Gift Options</h2>
               <div className="flex items-center gap-3">
                 <Checkbox
                   id="isGift"
                   checked={formData.isGift}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isGift: checked === true }))}
-                  className="border-pink-300 data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
                   data-testid="checkbox-gift"
                 />
                 <Label htmlFor="isGift" className="text-sm cursor-pointer">
@@ -354,12 +353,12 @@ export default function Checkout() {
               </div>
             </section>
 
-            <section className="border rounded-lg p-6">
+            <section className="border border-border rounded-lg p-6 bg-card">
               <h2 className="font-serif text-lg mb-4">Payment Method</h2>
               <div className="space-y-3">
                 <label 
                   className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedPayment === 'cod' ? 'border-pink-400 bg-pink-50/50' : 'border-gray-200 hover:border-gray-300'
+                    selectedPayment === 'cod' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground'
                   }`}
                 >
                   <input
@@ -368,11 +367,11 @@ export default function Checkout() {
                     value="cod"
                     checked={selectedPayment === 'cod'}
                     onChange={() => setSelectedPayment('cod')}
-                    className="w-4 h-4 accent-pink-500"
+                    className="w-4 h-4 accent-primary"
                     data-testid="radio-cod"
                   />
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Truck className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                    <Truck className="w-5 h-5 text-foreground" />
                   </div>
                   <div>
                     <p className="font-medium text-sm">Cash on Delivery</p>
@@ -382,7 +381,7 @@ export default function Checkout() {
 
                 <label 
                   className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedPayment === 'whatsapp' ? 'border-pink-400 bg-pink-50/50' : 'border-gray-200 hover:border-gray-300'
+                    selectedPayment === 'whatsapp' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground'
                   }`}
                 >
                   <input
@@ -391,11 +390,11 @@ export default function Checkout() {
                     value="whatsapp"
                     checked={selectedPayment === 'whatsapp'}
                     onChange={() => setSelectedPayment('whatsapp')}
-                    className="w-4 h-4 accent-pink-500"
+                    className="w-4 h-4 accent-primary"
                     data-testid="radio-whatsapp"
                   />
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <MessageCircle className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="w-5 h-5 text-foreground" />
                   </div>
                   <div>
                     <p className="font-medium text-sm">Pay via WhatsApp</p>
@@ -404,8 +403,8 @@ export default function Checkout() {
                 </label>
 
                 <label 
-                  className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer opacity-60 ${
-                    selectedPayment === 'card' ? 'border-pink-400 bg-pink-50/50' : 'border-gray-200'
+                  className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer opacity-50 ${
+                    selectedPayment === 'card' ? 'border-primary bg-primary/5' : 'border-border'
                   }`}
                 >
                   <input
@@ -414,16 +413,16 @@ export default function Checkout() {
                     value="card"
                     checked={selectedPayment === 'card'}
                     onChange={() => setSelectedPayment('card')}
-                    className="w-4 h-4 accent-pink-500"
+                    className="w-4 h-4 accent-primary"
                     data-testid="radio-card"
                   />
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CreditCard className="w-5 h-5 text-gray-500" />
+                  <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-sm">Credit/Debit Card</p>
-                      <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 bg-gray-200 text-gray-600 rounded">Coming Soon</span>
+                      <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 bg-secondary text-muted-foreground rounded">Coming Soon</span>
                     </div>
                     <p className="text-xs text-muted-foreground">Online payment gateway will be available soon</p>
                   </div>
@@ -431,27 +430,27 @@ export default function Checkout() {
               </div>
             </section>
 
-            <section className="border rounded-lg p-6">
+            <section className="border border-border rounded-lg p-6 bg-card">
               <h2 className="font-serif text-lg mb-4">Additional Notes</h2>
               <textarea
                 name="notes"
                 value={formData.notes}
                 onChange={handleInputChange}
                 placeholder="Any special instructions for your order..."
-                className="w-full px-3 py-3 text-sm border border-gray-200 rounded-lg bg-background resize-none h-24 focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-300"
+                className="w-full px-3 py-3 text-sm border border-border rounded-lg bg-background resize-none h-24 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 data-testid="input-notes"
               />
             </section>
           </div>
 
           <div className="lg:col-span-1">
-            <div className="border rounded-lg p-6 sticky top-20">
+            <div className="border border-border rounded-lg p-6 sticky top-20 bg-card">
               <h2 className="font-serif text-lg mb-4">Order Summary</h2>
               
               <div className="space-y-4 mb-6">
                 {items.map(item => (
                   <div key={item._id} className="flex gap-3" data-testid={`order-item-${item._id}`}>
-                    <div className="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                    <div className="w-16 h-20 bg-secondary rounded overflow-hidden flex-shrink-0">
                       <img 
                         src={item.imageUrl} 
                         alt={item.name}
@@ -465,32 +464,32 @@ export default function Checkout() {
                         <p className="text-xs text-muted-foreground">Size: {item.selectedSize}</p>
                       )}
                     </div>
-                    <p className="text-sm font-medium whitespace-nowrap">{item.price * item.quantity} K.D.</p>
+                    <p className="text-sm font-medium whitespace-nowrap">{item.price * item.quantity} KWD</p>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t pt-4 space-y-2">
+              <div className="border-t border-border pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>{totalPrice} K.D.</span>
+                  <span>{totalPrice} KWD</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span>{shippingCost === 0 ? 'Free' : `${shippingCost} K.D.`}</span>
+                  <span>{shippingCost === 0 ? 'Free' : `${shippingCost} KWD`}</span>
                 </div>
               </div>
 
-              <div className="border-t mt-4 pt-4">
+              <div className="border-t border-border mt-4 pt-4">
                 <div className="flex justify-between items-center mb-6">
                   <span className="font-medium">Total</span>
-                  <span className="text-xl font-serif text-pink-500">{finalTotal} K.D.</span>
+                  <span className="text-xl font-serif">{finalTotal} KWD</span>
                 </div>
 
                 <Button
                   onClick={handlePlaceOrder}
                   disabled={isProcessing}
-                  className="w-full h-12 bg-pink-500 hover:bg-pink-600 text-white font-medium"
+                  className="w-full h-12 font-medium"
                   data-testid="button-place-order"
                 >
                   {isProcessing ? (
