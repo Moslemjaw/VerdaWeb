@@ -121,7 +121,9 @@ export default function ProductDetails() {
     );
   }
 
-  const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean);
+  // Combine imageUrl with images array, filtering out duplicates
+  const imageSet = new Set([product.imageUrl, ...(product.images || [])].filter(Boolean));
+  const allImages = Array.from(imageSet);
   const currentImage = allImages[selectedImageIndex] || product.imageUrl;
 
   const handlePrevImage = () => {
