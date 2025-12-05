@@ -172,6 +172,8 @@ The application requires the following environment variables to run. All sensiti
 |----------|------|---------|-------------|
 | `NODE_ENV` | Env | `development` | Set to `production` for production builds |
 | `PORT` | Env | `5000` | Port for the server to listen on |
+| `MYFATOORAH_API_KEY` | Secret | - | MyFatoorah payment gateway API key (for credit card payments) |
+| `MYFATOORAH_SECRET_KEY` | Secret | - | MyFatoorah payment gateway secret key |
 
 ### Replit-Managed Variables
 
@@ -188,3 +190,38 @@ This application is built on the MERN stack:
 - **E**xpress.js - Backend web framework for REST API
 - **R**eact - Frontend library for building the user interface
 - **N**ode.js - JavaScript runtime for the server
+
+## Checkout & Payment System
+
+### Payment Methods
+The checkout system supports three payment methods:
+
+1. **Cash on Delivery (COD)**
+   - Customer pays when the order arrives
+   - Order created with `paymentStatus: 'unpaid'`
+   - Fully functional
+
+2. **WhatsApp Payment**
+   - Opens WhatsApp with pre-formatted order message
+   - Includes order details, customer info, and total
+   - Store owner sends payment link via WhatsApp
+   - Fully functional
+
+3. **Credit Card (MyFatoorah)**
+   - Infrastructure ready for MyFatoorah integration
+   - Requires `MYFATOORAH_API_KEY` and `MYFATOORAH_SECRET_KEY` secrets
+   - Shows "Coming Soon" badge until keys are configured
+
+### Cart System
+- Global cart context (`CartContext.tsx`) manages cart state across the app
+- Cart items persisted to localStorage for session continuity
+- Integration with Explore page's swipe-to-add functionality
+
+### Order Model
+- Order numbers auto-generated with format: `LUM-TIMESTAMP-RANDOM`
+- Tracks customer info, shipping address, items, and payment status
+- Status progression: pending → processing → shipped → delivered
+
+### Currency
+- All prices displayed in Kuwaiti Dinar (KWD)
+- Free shipping for orders over 50 KWD
