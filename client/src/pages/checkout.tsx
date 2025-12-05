@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 
 interface AppliedDiscount {
   code: string;
@@ -65,7 +66,21 @@ export default function Checkout() {
     confirmPassword: '',
   });
 
-  const shippingCost = totalPrice >= 50 ? 0 : 3;
+  const { data: shippingSettings } = useQuery<{ baseRate: number; freeThreshold: number; enableFreeThreshold: boolean }>({
+    queryKey: ['shippingSettings'],
+    queryFn: async () => {
+      const res = await fetch('/api/shipping');
+      if (!res.ok) {
+        return { baseRate: 2, freeThreshold: 50, enableFreeThreshold: true };
+      }
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const shippingCost = shippingSettings
+    ? (shippingSettings.enableFreeThreshold && totalPrice >= shippingSettings.freeThreshold ? 0 : shippingSettings.baseRate)
+    : (totalPrice >= 50 ? 0 : 2);
   const discountAmount = appliedDiscount ? appliedDiscount.discountAmount : 0;
   const finalTotal = Math.max(0, totalPrice - discountAmount + shippingCost);
 
