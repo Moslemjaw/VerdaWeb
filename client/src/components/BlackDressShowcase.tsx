@@ -73,13 +73,13 @@ export default function BlackDressShowcase() {
           </motion.p>
         </div>
 
-        <div className="absolute bottom-4 left-4 right-4 md:bottom-auto md:left-auto md:top-20 md:right-20 z-40 md:z-10 text-center md:text-right max-w-xl md:max-w-xl pointer-events-none mx-auto md:mx-0">
+        <div className="absolute bottom-4 right-4 md:bottom-auto md:top-20 md:right-20 z-40 md:z-10 text-right max-w-[200px] md:max-w-xl pointer-events-none">
            <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl md:text-7xl lg:text-8xl font-sans font-bold tracking-tighter leading-[0.9] text-white"
+            className="text-2xl md:text-7xl lg:text-8xl font-sans font-bold tracking-tighter leading-[0.9] text-white"
           >
             {headingLines.map((line: string, i: number) => (
               <span key={i}>{line}{i < headingLines.length - 1 && <br />}</span>
