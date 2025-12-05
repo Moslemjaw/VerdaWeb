@@ -1,7 +1,8 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -273,6 +274,7 @@ export default function AdminDashboard() {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [analyticsPeriod, setAnalyticsPeriod] = useState<'day' | 'month' | 'year'>('month');
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -435,6 +437,75 @@ export default function AdminDashboard() {
   });
 
   const orders = ordersData?.orders || [];
+
+  // Calculate analytics data based on orders
+  const analyticsData = useMemo(() => {
+    if (!orders.length) return [];
+    
+    const now = new Date();
+    const data: { name: string; revenue: number; orders: number }[] = [];
+    
+    if (analyticsPeriod === 'day') {
+      // Last 7 days
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const dayStart = new Date(date.setHours(0, 0, 0, 0));
+        const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+        
+        const dayOrders = orders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate >= dayStart && orderDate <= dayEnd;
+        });
+        
+        data.push({
+          name: dateStr,
+          revenue: dayOrders.reduce((sum, o) => sum + o.total, 0),
+          orders: dayOrders.length
+        });
+      }
+    } else if (analyticsPeriod === 'month') {
+      // Last 6 months
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+        
+        const monthOrders = orders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate >= monthStart && orderDate <= monthEnd;
+        });
+        
+        data.push({
+          name: monthName,
+          revenue: monthOrders.reduce((sum, o) => sum + o.total, 0),
+          orders: monthOrders.length
+        });
+      }
+    } else {
+      // Last 5 years
+      for (let i = 4; i >= 0; i--) {
+        const year = now.getFullYear() - i;
+        const yearStart = new Date(year, 0, 1);
+        const yearEnd = new Date(year, 11, 31, 23, 59, 59, 999);
+        
+        const yearOrders = orders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate >= yearStart && orderDate <= yearEnd;
+        });
+        
+        data.push({
+          name: year.toString(),
+          revenue: yearOrders.reduce((sum, o) => sum + o.total, 0),
+          orders: yearOrders.length
+        });
+      }
+    }
+    
+    return data;
+  }, [orders, analyticsPeriod]);
 
   const { data: discounts = [] } = useQuery<Discount[]>({
     queryKey: ['adminDiscounts'],
@@ -1675,7 +1746,7 @@ export default function AdminDashboard() {
                     <DollarSign className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-emerald-800">${(stats?.totalRevenue || 0).toLocaleString()}</div>
+                <div className="text-3xl font-bold text-emerald-800">{(stats?.totalRevenue || 0).toFixed(3)} KWD</div>
                 <p className="text-xs text-emerald-600 mt-1">Lifetime sales</p>
               </div>
               
@@ -1686,7 +1757,7 @@ export default function AdminDashboard() {
                     <TrendingUp className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-blue-800">${(stats?.todayRevenue || 0).toLocaleString()}</div>
+                <div className="text-3xl font-bold text-blue-800">{(stats?.todayRevenue || 0).toFixed(3)} KWD</div>
                 <p className="text-xs text-blue-600 mt-1">Sales today</p>
               </div>
               
@@ -1752,6 +1823,118 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Revenue Analytics Graph */}
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-gray-900">Revenue Analytics</h3>
+                  <p className="text-xs text-gray-500">Track your sales performance over time</p>
+                </div>
+                <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setAnalyticsPeriod('day')}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      analyticsPeriod === 'day' 
+                        ? 'bg-white text-gray-900 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Day
+                  </button>
+                  <button
+                    onClick={() => setAnalyticsPeriod('month')}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      analyticsPeriod === 'month' 
+                        ? 'bg-white text-gray-900 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Month
+                  </button>
+                  <button
+                    onClick={() => setAnalyticsPeriod('year')}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      analyticsPeriod === 'year' 
+                        ? 'bg-white text-gray-900 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Year
+                  </button>
+                </div>
+              </div>
+              <div className="p-5">
+                {analyticsData.length > 0 ? (
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={analyticsData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis 
+                          dataKey="name" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: '#6b7280' }}
+                        />
+                        <YAxis 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: '#6b7280' }}
+                          tickFormatter={(value) => `${value.toFixed(0)}`}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                          formatter={(value: number) => [`${value.toFixed(3)} KWD`, 'Revenue']}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="revenue" 
+                          stroke="#10b981" 
+                          strokeWidth={2}
+                          fillOpacity={1} 
+                          fill="url(#colorRevenue)" 
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center">
+                    <div className="text-center">
+                      <TrendingUp className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                      <p className="text-gray-500 text-sm">No sales data yet</p>
+                      <p className="text-gray-400 text-xs mt-1">Revenue analytics will appear when you have orders</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {analyticsData.length > 0 && (
+                <div className="px-5 pb-5 grid grid-cols-2 gap-4">
+                  <div className="bg-emerald-50 rounded-lg p-4">
+                    <p className="text-xs text-emerald-600 font-medium">Total Period Revenue</p>
+                    <p className="text-xl font-bold text-emerald-800 mt-1">
+                      {analyticsData.reduce((sum, d) => sum + d.revenue, 0).toFixed(3)} KWD
+                    </p>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <p className="text-xs text-blue-600 font-medium">Total Period Orders</p>
+                    <p className="text-xl font-bold text-blue-800 mt-1">
+                      {analyticsData.reduce((sum, d) => sum + d.orders, 0)} orders
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Recent Users & Products */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
@@ -1797,7 +1980,7 @@ export default function AdminDashboard() {
                           <p className="text-xs text-gray-500">{product.category}</p>
                         </div>
                       </div>
-                      <span className="font-medium text-amber-600">${product.price}</span>
+                      <span className="font-medium text-amber-600">{product.price.toFixed(3)} KWD</span>
                     </div>
                   ))}
                   {!statsData?.recentProducts?.length && (
@@ -1826,7 +2009,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-gray-900">${order.total.toFixed(2)}</p>
+                      <p className="font-medium text-gray-900">{order.total.toFixed(3)} KWD</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         order.status === 'delivered' ? 'bg-emerald-100 text-emerald-700' : 
                         order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 
@@ -1908,7 +2091,7 @@ export default function AdminDashboard() {
                           <p className="text-sm">{order.items.length} item(s)</p>
                         </td>
                         <td className="p-4">
-                          <p className="font-medium">${order.total.toFixed(2)}</p>
+                          <p className="font-medium">{order.total.toFixed(3)} KWD</p>
                         </td>
                         <td className="p-4">
                           <Select
@@ -1996,12 +2179,12 @@ export default function AdminDashboard() {
                           {viewingOrder.items.map((item, idx) => (
                             <div key={idx} className="flex justify-between text-sm">
                               <span>{item.name} x{item.quantity} {item.size ? `(${item.size})` : ''}</span>
-                              <span>${(item.price * item.quantity).toFixed(2)}</span>
+                              <span>{(item.price * item.quantity).toFixed(3)} KWD</span>
                             </div>
                           ))}
                           <div className="border-t pt-2 mt-2 font-medium flex justify-between">
                             <span>Total</span>
-                            <span>${viewingOrder.total.toFixed(2)}</span>
+                            <span>{viewingOrder.total.toFixed(3)} KWD</span>
                           </div>
                         </div>
                       </div>
