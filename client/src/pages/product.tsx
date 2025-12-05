@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ShoppingBag, Heart, Check, Minus, Plus, Share2, ZoomIn } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Heart, Check, Minus, Plus, Share2, ZoomIn, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
@@ -33,6 +33,7 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['product', id],
@@ -114,8 +115,101 @@ export default function ProductDetails() {
   const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean);
   const currentImage = allImages[selectedImageIndex] || product.imageUrl;
 
+  const handlePrevImage = () => {
+    setSelectedImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setSelectedImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Zoom/Lightbox Modal */}
+      <AnimatePresence>
+        {isZoomed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
+            onClick={() => setIsZoomed(false)}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setIsZoomed(false)}
+              className="absolute top-4 right-4 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+              data-testid="button-close-zoom"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+
+            {/* Navigation arrows */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                  className="absolute left-4 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                  data-testid="button-prev-image"
+                >
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                  className="absolute right-4 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                  data-testid="button-next-image"
+                >
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </button>
+              </>
+            )}
+
+            {/* Main zoomed image */}
+            <motion.img
+              key={selectedImageIndex}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              src={currentImage}
+              alt={product.name}
+              className="max-h-[90vh] max-w-[90vw] object-contain"
+              onClick={(e) => e.stopPropagation()}
+              data-testid="img-zoomed"
+            />
+
+            {/* Image counter */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
+                {selectedImageIndex + 1} / {allImages.length}
+              </div>
+            )}
+
+            {/* Thumbnail strip at bottom */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-2">
+                {allImages.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(index); }}
+                    className={`w-12 h-16 overflow-hidden border-2 transition-all ${
+                      selectedImageIndex === index 
+                        ? 'border-white' 
+                        : 'border-transparent opacity-50 hover:opacity-100'
+                    }`}
+                  >
+                    <img 
+                      src={img} 
+                      alt={`${product.name} view ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
@@ -179,7 +273,8 @@ export default function ProductDetails() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="aspect-[3/4] bg-secondary/30 overflow-hidden"
+                      className="aspect-[3/4] bg-secondary/30 overflow-hidden cursor-pointer"
+                      onClick={() => setIsZoomed(true)}
                     >
                       <img 
                         src={currentImage} 
@@ -190,10 +285,14 @@ export default function ProductDetails() {
                     </motion.div>
                   </AnimatePresence>
                   
-                  {/* Zoom indicator */}
-                  <div className="absolute bottom-4 right-4 bg-white/90 p-2 rounded-sm">
+                  {/* Zoom button */}
+                  <button
+                    onClick={() => setIsZoomed(true)}
+                    className="absolute bottom-4 right-4 bg-white/90 hover:bg-white p-2 rounded-sm transition-colors cursor-pointer"
+                    data-testid="button-zoom"
+                  >
                     <ZoomIn className="w-4 h-4" />
-                  </div>
+                  </button>
                 </div>
               </div>
 
@@ -227,7 +326,8 @@ export default function ProductDetails() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="aspect-[3/4] sm:aspect-[4/5] bg-secondary/30 overflow-hidden"
+                className="aspect-[3/4] sm:aspect-[4/5] bg-secondary/30 overflow-hidden cursor-pointer"
+                onClick={() => setIsZoomed(true)}
               >
                 <img 
                   src={currentImage} 
@@ -237,6 +337,15 @@ export default function ProductDetails() {
                 />
               </motion.div>
             </AnimatePresence>
+
+            {/* Zoom button - mobile */}
+            <button
+              onClick={() => setIsZoomed(true)}
+              className="absolute bottom-16 right-4 bg-white/90 hover:bg-white p-2 rounded-sm transition-colors cursor-pointer shadow-md"
+              data-testid="button-zoom-mobile"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </button>
 
             {/* Image Dots Indicator */}
             {allImages.length > 1 && (
