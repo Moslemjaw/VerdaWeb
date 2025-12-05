@@ -273,6 +273,7 @@ export default function AdminDashboard() {
     seasonText: '',
     heading: '',
     buttonText: '',
+    category: '',
     image1: '',
     image2: '',
     image3: '',
@@ -608,6 +609,7 @@ export default function AdminDashboard() {
           seasonText: (newCollectionData.content as any).seasonText || '',
           heading: (newCollectionData.content as any).heading || '',
           buttonText: newCollectionData.content.buttonText || '',
+          category: (newCollectionData.content as any).category || '',
           image1: images[0] || '',
           image2: images[1] || '',
           image3: images[2] || '',
@@ -905,6 +907,7 @@ export default function AdminDashboard() {
         seasonText: newCollectionContent.seasonText,
         heading: newCollectionContent.heading,
         buttonText: newCollectionContent.buttonText,
+        category: newCollectionContent.category,
         images,
       },
     });
@@ -2140,11 +2143,11 @@ export default function AdminDashboard() {
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <ShoppingBag className="w-6 h-6" /> 3. New Collection Gallery
                 </CardTitle>
-                <CardDescription>The dramatic black section with 5 model images and "DESIGNED TO MAKE AN ENTRANCE" text</CardDescription>
+                <CardDescription>The dramatic black section with 5 product cards. Products are clickable and link to their detail pages.</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-2">
                       <Label className="font-medium">Season Text (left side)</Label>
                       <Textarea
@@ -2172,6 +2175,24 @@ export default function AdminDashboard() {
                         onChange={(e) => setNewCollectionContent({ ...newCollectionContent, buttonText: e.target.value })}
                         placeholder="e.g., View All Products"
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-medium">Product Category</Label>
+                      <Select
+                        value={newCollectionContent.category}
+                        onValueChange={(value) => setNewCollectionContent({ ...newCollectionContent, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category to display" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories (Featured)</SelectItem>
+                          {CATEGORIES.map((cat) => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">Products from this category will appear in the gallery</p>
                     </div>
                   </div>
                   

@@ -1,5 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import model1 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_1.png";
 import model2 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_2.png";
@@ -7,7 +9,23 @@ import model3 from "@assets/generated_images/full_body_shot_of_model_in_black_dr
 import model4 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_4.png";
 import model5 from "@assets/generated_images/full_body_shot_of_model_in_black_dress_5.png";
 
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+}
+
 const defaultImages = [model1, model2, model3, model4, model5];
+
+const defaultProducts = [
+  { _id: '1', name: "The Enchanté Gown", price: 120, imageUrl: model1, category: "Evening Wear" },
+  { _id: '2', name: "Midnight Silk Slip", price: 180, imageUrl: model2, category: "Evening Wear" },
+  { _id: '3', name: "Noir Cocktail Dress", price: 250, imageUrl: model3, category: "Evening Wear" },
+  { _id: '4', name: "Obsidian Maxi", price: 320, imageUrl: model4, category: "Evening Wear" },
+  { _id: '5', name: "Eclipse Evening Wear", price: 150, imageUrl: model5, category: "Evening Wear" },
+];
 
 export default function BlackDressShowcase() {
   const [animationPhase, setAnimationPhase] = useState(0);
@@ -18,25 +36,35 @@ export default function BlackDressShowcase() {
   const seasonText = (newCollectionContent as any)?.seasonText || "New Collection\nFall / Winter 2025\nLimited Edition";
   const heading = (newCollectionContent as any)?.heading || "DESIGNED\nTO MAKE\nAN ENTRANCE";
   const buttonText = newCollectionContent?.buttonText || "View All Products";
+  const selectedCategory = (newCollectionContent as any)?.category || "";
   const cmsImages = (newCollectionContent as any)?.images || [];
   
+  const { data: apiProducts = [] } = useQuery<Product[]>({
+    queryKey: ['newCollectionProducts', selectedCategory],
+    queryFn: async () => {
+      const url = selectedCategory 
+        ? `/api/products?category=${encodeURIComponent(selectedCategory)}&limit=5`
+        : '/api/products/featured?limit=5';
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
   const validCmsImages = cmsImages.filter((img: string) => img && img.trim() !== '');
   const heroImages = validCmsImages.length === 5 
     ? validCmsImages 
     : defaultImages;
 
-  const products = Array.from({ length: 5 }).map((_, i) => ({
-    id: i + 1,
-    name: [
-      "The Enchanté Gown",
-      "Midnight Silk Slip",
-      "Noir Cocktail Dress",
-      "Obsidian Maxi",
-      "Eclipse Evening Wear",
-    ][i],
-    price: ["120 KWD", "180 KWD", "250 KWD", "320 KWD", "150 KWD"][i],
-    image: heroImages[i % 5]
-  }));
+  const products: Product[] = apiProducts.length >= 5 
+    ? apiProducts.slice(0, 5)
+    : apiProducts.length > 0
+      ? [...apiProducts, ...defaultProducts].slice(0, 5)
+      : defaultProducts;
+
+  const displayImages = products.map((p, i) => 
+    validCmsImages.length === 5 ? validCmsImages[i] : p.imageUrl
+  );
 
   const seasonLines = seasonText.split('\n');
   const headingLines = heading.split('\n');
@@ -83,7 +111,7 @@ export default function BlackDressShowcase() {
             onViewportEnter={() => setTimeout(() => setAnimationPhase(1), 500)}
             transition={{ duration: 1, ease: "easeInOut" }}
           >
-             <img src={heroImages[2]} alt="Center Model" className="w-full h-full object-cover" />
+             <img src={displayImages[2] || heroImages[2]} alt="Center Model" className="w-full h-full object-cover" />
           </motion.div>
 
           <AnimatePresence>
@@ -95,7 +123,7 @@ export default function BlackDressShowcase() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
                   className="absolute z-10 h-[60%] md:h-[70%] aspect-[3/4] shadow-xl"
                 >
-                   <img src={heroImages[0]} alt="Model 1" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
+                   <img src={displayImages[0] || heroImages[0]} alt="Model 1" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
@@ -104,7 +132,7 @@ export default function BlackDressShowcase() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
                   className="absolute z-20 h-[65%] md:h-[75%] aspect-[3/4] shadow-xl"
                 >
-                   <img src={heroImages[1]} alt="Model 2" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
+                   <img src={displayImages[1] || heroImages[1]} alt="Model 2" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
@@ -113,7 +141,7 @@ export default function BlackDressShowcase() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
                   className="absolute z-20 h-[65%] md:h-[75%] aspect-[3/4] shadow-xl"
                 >
-                   <img src={heroImages[3]} alt="Model 4" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
+                   <img src={displayImages[3] || heroImages[3]} alt="Model 4" className="w-full h-full object-cover brightness-90 hover:brightness-100 transition-all" />
                 </motion.div>
 
                 <motion.div
@@ -122,7 +150,7 @@ export default function BlackDressShowcase() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
                   className="absolute z-10 h-[60%] md:h-[70%] aspect-[3/4] shadow-xl"
                 >
-                   <img src={heroImages[4]} alt="Model 5" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
+                   <img src={displayImages[4] || heroImages[4]} alt="Model 5" className="w-full h-full object-cover brightness-75 hover:brightness-100 transition-all" />
                 </motion.div>
               </>
             )}
@@ -134,23 +162,25 @@ export default function BlackDressShowcase() {
         <div className="container mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-12">
             {products.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 50 }}
-                transition={{ duration: 0.8, delay: 1 + (index * 0.1), ease: "easeOut" }}
-                className="group cursor-pointer"
-              >
-                <div className="aspect-[3/4] overflow-hidden mb-4 bg-white/5">
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <h3 className="text-white font-serif text-sm tracking-wide mb-1 group-hover:underline underline-offset-4 decoration-white/50">{product.name}</h3>
-                <p className="text-white font-bold text-sm">{product.price}</p>
-              </motion.div>
+              <Link href={product._id.length > 10 ? `/product/${product._id}` : `/shop`} key={product._id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 50 }}
+                  transition={{ duration: 0.8, delay: 1 + (index * 0.1), ease: "easeOut" }}
+                  className="group cursor-pointer"
+                  data-testid={`new-collection-product-${product._id}`}
+                >
+                  <div className="aspect-[3/4] overflow-hidden mb-4 bg-white/5">
+                    <img 
+                      src={validCmsImages.length === 5 ? validCmsImages[index] : product.imageUrl} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <h3 className="text-white font-serif text-sm tracking-wide mb-1 group-hover:underline underline-offset-4 decoration-white/50">{product.name}</h3>
+                  <p className="text-white font-bold text-sm">{product.price} KWD</p>
+                </motion.div>
+              </Link>
             ))}
           </div>
           
@@ -160,9 +190,11 @@ export default function BlackDressShowcase() {
             transition={{ duration: 0.8, delay: 1.8, ease: "easeOut" }}
             className="flex justify-center mt-16"
           >
-            <button className="px-8 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
-              {buttonText}
-            </button>
+            <Link href={selectedCategory ? `/shop?category=${encodeURIComponent(selectedCategory)}` : '/shop'}>
+              <button className="px-8 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
+                {buttonText}
+              </button>
+            </Link>
           </motion.div>
         </div>
       </div>
