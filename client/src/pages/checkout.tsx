@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag, User, Tag, X } from 'lucide-react';
+import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag, User, Tag, X, Globe } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
+
+interface ShippingCountry {
+  _id: string;
+  name: string;
+  code: string;
+  shippingRate: number;
+  freeThreshold: number;
+  enableFreeThreshold: boolean;
+  isDefault: boolean;
+}
 
 interface AppliedDiscount {
   code: string;
@@ -30,6 +41,7 @@ interface CheckoutFormData {
   houseNumber: string;
   apartmentNumber: string;
   area: string;
+  country: string;
   notes: string;
   isGift: boolean;
   password: string;
@@ -60,26 +72,37 @@ export default function Checkout() {
     houseNumber: '',
     apartmentNumber: '',
     area: '',
+    country: '',
     notes: '',
     isGift: false,
     password: '',
     confirmPassword: '',
   });
 
-  const { data: shippingSettings } = useQuery<{ baseRate: number; freeThreshold: number; enableFreeThreshold: boolean }>({
-    queryKey: ['shippingSettings'],
+  const { data: shippingCountries = [] } = useQuery<ShippingCountry[]>({
+    queryKey: ['shippingCountries'],
     queryFn: async () => {
-      const res = await fetch('/api/shipping');
+      const res = await fetch('/api/shipping/countries');
       if (!res.ok) {
-        return { baseRate: 2, freeThreshold: 50, enableFreeThreshold: true };
+        return [];
       }
       return res.json();
     },
     staleTime: 1000 * 60 * 5,
   });
 
-  const shippingCost = shippingSettings
-    ? (shippingSettings.enableFreeThreshold && totalPrice >= shippingSettings.freeThreshold ? 0 : shippingSettings.baseRate)
+  useEffect(() => {
+    if (shippingCountries.length > 0 && !formData.country) {
+      const defaultCountry = shippingCountries.find(c => c.isDefault);
+      if (defaultCountry) {
+        setFormData(prev => ({ ...prev, country: defaultCountry._id }));
+      }
+    }
+  }, [shippingCountries, formData.country]);
+
+  const selectedCountry = shippingCountries.find(c => c._id === formData.country);
+  const shippingCost = selectedCountry
+    ? (selectedCountry.enableFreeThreshold && totalPrice >= selectedCountry.freeThreshold ? 0 : selectedCountry.shippingRate)
     : (totalPrice >= 50 ? 0 : 2);
   const discountAmount = appliedDiscount ? appliedDiscount.discountAmount : 0;
   const finalTotal = Math.max(0, totalPrice - discountAmount + shippingCost);
@@ -137,6 +160,10 @@ export default function Checkout() {
       toast({ title: 'Please enter your phone number', variant: 'destructive' });
       return false;
     }
+    if (!formData.country) {
+      toast({ title: 'Please select a country', variant: 'destructive' });
+      return false;
+    }
     if (!formData.area.trim()) {
       toast({ title: 'Please enter your area', variant: 'destructive' });
       return false;
@@ -190,7 +217,7 @@ export default function Checkout() {
         city: formData.area,
         state: formData.area,
         postalCode: '',
-        country: 'Kuwait',
+        country: selectedCountry?.name || 'Kuwait',
         phone: formData.customerPhone,
       },
       notes: formData.isGift ? `[GIFT ORDER] ${formData.notes}` : formData.notes,
@@ -277,7 +304,8 @@ export default function Checkout() {
           `Order #: ${order.orderNumber}\n` +
           `Total: ${finalTotal} KWD\n` +
           `Name: ${formData.customerName}\n` +
-          `Phone: ${formData.customerPhone}\n\n` +
+          `Phone: ${formData.customerPhone}\n` +
+          `Country: ${selectedCountry?.name || 'Kuwait'}\n\n` +
           `Items:\n${items.map(item => `- ${item.name} (${item.quantity}x) - ${item.price * item.quantity} KWD`).join('\n')}\n\n` +
           `Please send me the payment link. Thank you!`
         );
@@ -529,6 +557,37 @@ export default function Checkout() {
             <section className="border border-border rounded-lg p-6 bg-card">
               <h2 className="font-serif text-lg mb-4">Delivery Address</h2>
               <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="country" className="text-xs uppercase tracking-wide text-muted-foreground">Country *</Label>
+                  <Select
+                    value={formData.country}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
+                  >
+                    <SelectTrigger className="h-11 bg-background border-border" data-testid="select-country">
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {shippingCountries.map((country) => (
+                        <SelectItem key={country._id} value={country._id}>
+                          <div className="flex items-center justify-between w-full gap-4">
+                            <span>{country.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {country.shippingRate === 0 
+                                ? 'Free Shipping' 
+                                : `${country.shippingRate} KWD shipping`}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedCountry && selectedCountry.enableFreeThreshold && (
+                    <p className="text-xs text-muted-foreground">
+                      Free shipping on orders over {selectedCountry.freeThreshold} KWD
+                    </p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="area" className="text-xs uppercase tracking-wide text-muted-foreground">Area *</Label>
                   <Input
@@ -790,7 +849,9 @@ export default function Checkout() {
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="text-muted-foreground">
+                    Shipping{selectedCountry ? ` (${selectedCountry.name})` : ''}
+                  </span>
                   <span>{shippingCost === 0 ? 'Free' : `${shippingCost} KWD`}</span>
                 </div>
               </div>
