@@ -333,6 +333,8 @@ export default function AdminDashboard() {
 
   const [bestSellersContent, setBestSellersContent] = useState({
     title: '',
+    description: '',
+    category: '',
     buttonText: '',
   });
 
@@ -988,6 +990,8 @@ export default function AdminDashboard() {
       if (bestSellersData?.content) {
         setBestSellersContent({
           title: bestSellersData.content.title || '',
+          description: bestSellersData.content.description || '',
+          category: (bestSellersData.content as any).category || '',
           buttonText: bestSellersData.content.buttonText || '',
         });
       }
@@ -1347,6 +1351,8 @@ export default function AdminDashboard() {
       section: 'best_sellers',
       content: {
         title: bestSellersContent.title,
+        description: bestSellersContent.description,
+        category: bestSellersContent.category,
         buttonText: bestSellersContent.buttonText,
       },
     });
@@ -3306,6 +3312,33 @@ export default function AdminDashboard() {
                       placeholder="e.g., Shop All"
                     />
                   </div>
+                </div>
+                <div className="space-y-2 mt-4">
+                  <Label className="font-medium">Description</Label>
+                  <Textarea
+                    value={bestSellersContent.description}
+                    onChange={(e) => setBestSellersContent({ ...bestSellersContent, description: e.target.value })}
+                    placeholder="e.g., Discover our most loved pieces, chosen by our community."
+                    rows={2}
+                  />
+                </div>
+                <div className="space-y-2 mt-4">
+                  <Label className="font-medium">Filter by Category</Label>
+                  <Select
+                    value={bestSellersContent.category}
+                    onValueChange={(value) => setBestSellersContent({ ...bestSellersContent, category: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Categories (Featured Products)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories (Featured Products)</SelectItem>
+                      {categories.filter(cat => cat.isActive).map((cat) => (
+                        <SelectItem key={cat._id} value={cat.name}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">Filter products by category. Leave as "All" to show all featured products.</p>
                 </div>
                 <p className="text-sm text-muted-foreground mt-4">Products displayed in this section are pulled from your product catalog. Mark products as "Featured" in the Products tab to show them here.</p>
                 <Button onClick={handleSaveBestSellersContent} className="mt-6" disabled={updateContentMutation.isPending}>

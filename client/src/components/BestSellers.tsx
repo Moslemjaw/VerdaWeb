@@ -34,11 +34,20 @@ export default function BestSellers() {
   
   const bestSellersContent = siteContent?.best_sellers;
   const title = bestSellersContent?.title || "BEST SELLERS";
+  const description = (bestSellersContent as any)?.description || "Shop our bestselling styles.";
+  const selectedCategory = (bestSellersContent as any)?.category || "";
   const buttonText = bestSellersContent?.buttonText || "SHOP BEST SELLERS";
 
   const { data: apiProducts = [] } = useQuery<Product[]>({
-    queryKey: ['featuredProducts'],
+    queryKey: ['featuredProducts', selectedCategory],
     queryFn: async () => {
+      // If a specific category is selected, fetch featured products from that category
+      if (selectedCategory && selectedCategory !== 'all') {
+        const res = await fetch(`/api/products/featured?category=${encodeURIComponent(selectedCategory)}`);
+        if (!res.ok) throw new Error('Failed to fetch products');
+        return res.json();
+      }
+      // Otherwise fetch all featured products
       const res = await fetch('/api/products/featured');
       if (!res.ok) throw new Error('Failed to fetch products');
       return res.json();
@@ -78,7 +87,7 @@ export default function BestSellers() {
           className="text-center mb-6"
         >
           <h2 className="text-2xl font-bold tracking-tight text-black mb-2">{title}</h2>
-          <p className="text-gray-500 text-sm mb-4">Shop our bestselling styles.</p>
+          <p className="text-gray-500 text-sm mb-4">{description}</p>
         </motion.div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -121,7 +130,7 @@ export default function BestSellers() {
             className="w-[28%] flex-shrink-0 px-6 text-center flex flex-col items-center justify-center"
           >
             <h2 className="text-3xl font-bold tracking-tight text-black mb-3">{title}</h2>
-            <p className="text-gray-500 text-sm mb-8">Shop our bestselling styles.</p>
+            <p className="text-gray-500 text-sm mb-8">{description}</p>
             <Link href="/shop?filter=bestsellers">
               <span className="inline-block border border-black text-black px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition-all cursor-pointer">
                 {buttonText}

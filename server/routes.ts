@@ -288,7 +288,15 @@ export async function registerRoutes(
 
   app.get("/api/products/featured", async (req: Request, res: Response) => {
     try {
-      const products = await Product.find({ featured: true }).limit(3);
+      const category = req.query.category as string;
+      const query: any = { featured: true };
+      
+      // Filter by category if specified
+      if (category) {
+        query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+      }
+      
+      const products = await Product.find(query).limit(10);
       res.json(products);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch featured products" });
