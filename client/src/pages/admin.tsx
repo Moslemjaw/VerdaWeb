@@ -265,6 +265,7 @@ export default function AdminDashboard() {
 
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
+  const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
 
   const { data: statsData } = useQuery<{ stats: Stats; recentUsers: User[]; recentProducts: Product[]; recentOrders: Order[] }>({
     queryKey: ['adminStats'],
@@ -1014,6 +1015,13 @@ export default function AdminDashboard() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => setViewingOrder(order)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => deleteOrderMutation.mutate(order._id)}
                             >
                               <Trash2 className="w-4 h-4 text-destructive" />
@@ -1025,6 +1033,73 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+
+              <Dialog open={!!viewingOrder} onOpenChange={(open) => !open && setViewingOrder(null)}>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Order Details - {viewingOrder?.orderNumber}</DialogTitle>
+                  </DialogHeader>
+                  {viewingOrder && (
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="font-medium mb-2">Customer Information</h3>
+                        <div className="bg-muted/50 p-4 rounded-lg space-y-1 text-sm">
+                          <p><span className="text-muted-foreground">Name:</span> {viewingOrder.customerName}</p>
+                          <p><span className="text-muted-foreground">Email:</span> {viewingOrder.customerEmail}</p>
+                          <p><span className="text-muted-foreground">Phone:</span> {viewingOrder.shippingAddress.phone || 'N/A'}</p>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="font-medium mb-2">Shipping Address</h3>
+                        <div className="bg-muted/50 p-4 rounded-lg space-y-1 text-sm">
+                          <p>{viewingOrder.shippingAddress.name}</p>
+                          <p>{viewingOrder.shippingAddress.line1}</p>
+                          {viewingOrder.shippingAddress.line2 && <p>{viewingOrder.shippingAddress.line2}</p>}
+                          <p>{viewingOrder.shippingAddress.city}, {viewingOrder.shippingAddress.state}</p>
+                          {viewingOrder.shippingAddress.postalCode && <p>{viewingOrder.shippingAddress.postalCode}</p>}
+                          <p>{viewingOrder.shippingAddress.country}</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="font-medium mb-2">Order Items</h3>
+                        <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                          {viewingOrder.items.map((item, idx) => (
+                            <div key={idx} className="flex justify-between text-sm">
+                              <span>{item.name} x{item.quantity} {item.size ? `(${item.size})` : ''}</span>
+                              <span>${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                          ))}
+                          <div className="border-t pt-2 mt-2 font-medium flex justify-between">
+                            <span>Total</span>
+                            <span>${viewingOrder.total.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {viewingOrder.notes && (
+                        <div>
+                          <h3 className="font-medium mb-2">Order Notes</h3>
+                          <div className="bg-muted/50 p-4 rounded-lg text-sm">
+                            {viewingOrder.notes}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <Badge variant={viewingOrder.paymentStatus === 'paid' ? 'default' : 'destructive'}>
+                          Payment: {viewingOrder.paymentStatus}
+                        </Badge>
+                        <Badge variant="outline">
+                          Method: {viewingOrder.paymentMethod.toUpperCase()}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+
               {orders.length === 0 && (
                 <div className="p-12 text-center">
                   <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
