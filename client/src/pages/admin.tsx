@@ -12,8 +12,10 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2, MessageSquare, Copy, ExternalLink, FolderOpen, Award, Menu, X, ChevronRight, Search, Bell, LogOut } from 'lucide-react';
+import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2, MessageSquare, Copy, ExternalLink, FolderOpen, Award, Menu, X, ChevronRight, Search, Bell, LogOut, Check, ChevronsUpDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 function ImageUploadInput({ 
   value, 
@@ -2004,27 +2006,80 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Categories * (select multiple)</Label>
-                        <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
-                          {categories.filter(cat => cat.isActive).map((cat) => (
-                            <div key={cat._id} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`cat-${cat._id}`}
-                                checked={productForm.categories.includes(cat.name)}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    setProductForm({ ...productForm, categories: [...productForm.categories, cat.name] });
-                                  } else {
-                                    setProductForm({ ...productForm, categories: productForm.categories.filter(c => c !== cat.name) });
-                                  }
-                                }}
-                              />
-                              <label htmlFor={`cat-${cat._id}`} className="text-sm cursor-pointer">{cat.name}</label>
-                            </div>
-                          ))}
-                        </div>
-                        {productForm.categories.length > 0 && (
-                          <p className="text-xs text-muted-foreground">Selected: {productForm.categories.join(', ')}</p>
-                        )}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className="w-full justify-between h-auto min-h-10 text-left font-normal"
+                            >
+                              <div className="flex flex-wrap gap-1">
+                                {productForm.categories.length > 0 ? (
+                                  productForm.categories.map((cat) => (
+                                    <Badge
+                                      key={cat}
+                                      variant="secondary"
+                                      className="mr-1 mb-1"
+                                    >
+                                      {cat}
+                                      <button
+                                        className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setProductForm({
+                                            ...productForm,
+                                            categories: productForm.categories.filter((c) => c !== cat)
+                                          });
+                                        }}
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </button>
+                                    </Badge>
+                                  ))
+                                ) : (
+                                  <span className="text-muted-foreground">Select categories...</span>
+                                )}
+                              </div>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Search categories..." />
+                              <CommandList>
+                                <CommandEmpty>No category found.</CommandEmpty>
+                                <CommandGroup>
+                                  {categories.filter(cat => cat.isActive).map((cat) => (
+                                    <CommandItem
+                                      key={cat._id}
+                                      value={cat.name}
+                                      onSelect={() => {
+                                        if (productForm.categories.includes(cat.name)) {
+                                          setProductForm({
+                                            ...productForm,
+                                            categories: productForm.categories.filter((c) => c !== cat.name)
+                                          });
+                                        } else {
+                                          setProductForm({
+                                            ...productForm,
+                                            categories: [...productForm.categories, cat.name]
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Check
+                                        className={`mr-2 h-4 w-4 ${
+                                          productForm.categories.includes(cat.name) ? "opacity-100" : "opacity-0"
+                                        }`}
+                                      />
+                                      {cat.name}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="brand">Brand *</Label>
