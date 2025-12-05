@@ -244,3 +244,47 @@ The checkout system supports three payment methods:
 - All price displays use `formatPrice()` helper for consistent currency conversion
 - Admin dashboard uses KWD for all inputs/labels (base currency for management)
 - Free shipping threshold: 50 KWD (approximately $163 USD)
+
+## Popup Management System
+
+The platform includes a comprehensive popup management system for marketing and announcements.
+
+### Popup Types
+
+1. **Global Discount Popup** (`global_discount`)
+   - Shows to all visitors 2 seconds after page load
+   - Displays a discount code that can be copied to clipboard
+   - Persists dismissal in localStorage to avoid showing again
+
+2. **New Account Discount Popup** (`new_account_discount`)
+   - Shows only after a user successfully signs up
+   - Triggered via localStorage flag set during signup
+   - One-time display per new account
+   - Includes copyable discount code
+
+3. **Announcement Popup** (`announcement`)
+   - General announcements with optional link
+   - Shows 2 seconds after page load for new visitors
+   - Dismissal tracked in localStorage
+
+### Admin Management
+
+Located in the admin dashboard under the "Popups" tab:
+- Create, edit, and delete popups
+- Toggle active/inactive status
+- Type-specific form fields (discount code, link URL, link text)
+- View all popups with status indicators
+
+### Technical Implementation
+
+- **Model**: `server/models/Popup.ts` - MongoDB schema with type, title, description, discountCode, linkUrl, linkText, isActive
+- **Routes**: Admin CRUD at `/api/admin/popups/*`, public endpoint at `/api/popups/active`
+- **Frontend**: `PopupManager.tsx` component displays popups with Radix Dialog
+- **Dismissal**: Tracked in localStorage by popup ID with timestamp
+
+### Dismissal Behavior
+
+- Each popup has a unique ID used for tracking dismissal
+- Dismissed popups are stored in localStorage under `lumiere_dismissed_popups`
+- Users can close popups with X button or action buttons
+- New account popups only show once after signup (flag cleared after display)
