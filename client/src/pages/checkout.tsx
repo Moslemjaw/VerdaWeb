@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag, User } from 'lucide-react';
+import { ArrowLeft, CreditCard, MessageCircle, Truck, Check, Loader2, ShoppingBag, User, Tag, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+
+interface AppliedDiscount {
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  discountAmount: number;
+}
 
 type PaymentMethod = 'cod' | 'whatsapp' | 'card';
 type CheckoutMode = 'guest' | 'create-account';
@@ -39,6 +46,9 @@ export default function Checkout() {
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
   const [checkoutMode, setCheckoutMode] = useState<CheckoutMode>('guest');
+  const [discountCode, setDiscountCode] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState<AppliedDiscount | null>(null);
+  const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
   
   const [formData, setFormData] = useState<CheckoutFormData>({
     customerName: '',
@@ -56,7 +66,43 @@ export default function Checkout() {
   });
 
   const shippingCost = totalPrice >= 50 ? 0 : 3;
-  const finalTotal = totalPrice + shippingCost;
+  const discountAmount = appliedDiscount ? appliedDiscount.discountAmount : 0;
+  const finalTotal = Math.max(0, totalPrice - discountAmount + shippingCost);
+
+  const applyDiscountCode = async () => {
+    if (!discountCode.trim()) {
+      toast({ title: 'Please enter a discount code', variant: 'destructive' });
+      return;
+    }
+
+    setIsApplyingDiscount(true);
+    try {
+      const response = await fetch('/api/discounts/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: discountCode, orderTotal: totalPrice }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast({ title: data.error || 'Invalid discount code', variant: 'destructive' });
+        return;
+      }
+
+      setAppliedDiscount(data.discount);
+      toast({ title: `Discount applied: ${data.discount.type === 'percentage' ? `${data.discount.value}% off` : `${data.discount.value} KWD off`}` });
+    } catch (error) {
+      toast({ title: 'Failed to apply discount code', variant: 'destructive' });
+    } finally {
+      setIsApplyingDiscount(false);
+    }
+  };
+
+  const removeDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountCode('');
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -657,11 +703,66 @@ export default function Checkout() {
                 ))}
               </div>
 
+              <div className="border-t border-border pt-4 mb-4">
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+                    <Tag className="w-3 h-3" />
+                    Discount Code
+                  </Label>
+                  {appliedDiscount ? (
+                    <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                      <div>
+                        <p className="text-sm font-medium text-primary">{appliedDiscount.code}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {appliedDiscount.type === 'percentage' 
+                            ? `${appliedDiscount.value}% off` 
+                            : `${appliedDiscount.value} KWD off`}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeDiscount}
+                        className="h-8 w-8 p-0"
+                        data-testid="button-remove-discount"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter code"
+                        value={discountCode}
+                        onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                        className="h-10 bg-background border-border uppercase"
+                        data-testid="input-discount-code"
+                      />
+                      <Button
+                        onClick={applyDiscountCode}
+                        disabled={isApplyingDiscount}
+                        variant="outline"
+                        className="h-10 px-4"
+                        data-testid="button-apply-discount"
+                      >
+                        {isApplyingDiscount ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="border-t border-border pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>{totalPrice} KWD</span>
+                  <span>{totalPrice.toFixed(2)} KWD</span>
                 </div>
+                {appliedDiscount && (
+                  <div className="flex justify-between text-sm text-primary">
+                    <span>Discount ({appliedDiscount.code})</span>
+                    <span>-{appliedDiscount.discountAmount.toFixed(2)} KWD</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>
                   <span>{shippingCost === 0 ? 'Free' : `${shippingCost} KWD`}</span>
@@ -671,7 +772,7 @@ export default function Checkout() {
               <div className="border-t border-border mt-4 pt-4">
                 <div className="flex justify-between items-center mb-6">
                   <span className="font-medium">Total</span>
-                  <span className="text-xl font-serif">{finalTotal} KWD</span>
+                  <span className="text-xl font-serif">{finalTotal.toFixed(2)} KWD</span>
                 </div>
 
                 <Button
