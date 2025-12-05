@@ -14,6 +14,7 @@ interface Product {
   _id: string;
   name: string;
   price: number;
+  compareAtPrice?: number;
   imageUrl: string;
   category: string;
 }
@@ -240,15 +241,22 @@ export default function BlackDressShowcase() {
                     className="group cursor-pointer"
                     data-testid={`new-collection-product-${product._id}`}
                   >
-                    <div className="aspect-[3/4] overflow-hidden mb-4 bg-white/5">
+                    <div className="aspect-[3/4] overflow-hidden mb-2 sm:mb-4 bg-gradient-to-b from-neutral-800 to-neutral-900">
                       <img 
                         src={product.imageUrl} 
                         alt={product.name} 
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
                       />
                     </div>
-                    <h3 className="text-white font-serif text-sm tracking-wide mb-1 group-hover:underline underline-offset-4 decoration-white/50">{product.name}</h3>
-                    <p className="text-white font-bold text-sm">{formatPrice(product.price)}</p>
+                    <h3 className="text-xs sm:text-sm text-white/90 font-light tracking-wide mb-1 group-hover:text-white transition-colors line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      {product.compareAtPrice && product.compareAtPrice > product.price && (
+                        <span className="text-xs text-white/40 line-through">{formatPrice(product.compareAtPrice)}</span>
+                      )}
+                      <span className="text-sm text-white/70 font-medium">{formatPrice(product.price)}</span>
+                    </div>
                   </motion.div>
                 </Link>
               ))}
