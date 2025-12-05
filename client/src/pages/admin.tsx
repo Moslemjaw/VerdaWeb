@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2, MessageSquare, Copy, ExternalLink, FolderOpen, Award } from 'lucide-react';
+import { Trash2, Edit, Users, Package, Tag, TrendingUp, Image, Settings, LayoutDashboard, ShoppingBag, FileText, DollarSign, Clock, CheckCircle, XCircle, Truck, Eye, Upload, Loader2, MessageSquare, Copy, ExternalLink, FolderOpen, Award, Menu, X, ChevronRight, Search, Bell, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 function ImageUploadInput({ 
@@ -1399,8 +1399,15 @@ export default function AdminDashboard() {
     });
   };
 
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      </div>
+    );
   }
 
   if (!user || !isAdmin) {
@@ -1409,242 +1416,340 @@ export default function AdminDashboard() {
 
   const stats = statsData?.stats;
 
+  const navItems = [
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag, badge: stats?.pendingOrders },
+    { id: 'products', label: 'Products', icon: Package },
+    { id: 'categories', label: 'Categories', icon: FolderOpen },
+    { id: 'brands', label: 'Brands', icon: Award },
+    { id: 'discounts', label: 'Discounts', icon: Tag },
+    { id: 'shipping', label: 'Shipping', icon: Truck },
+    { id: 'popups', label: 'Popups', icon: MessageSquare },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'content', label: 'Content', icon: FileText },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Settings className="w-5 h-5 text-primary-foreground" />
+    <div className="min-h-screen bg-[#0a0a0f] text-white flex">
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#111118] border-r border-white/5 transform transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:static lg:transform-none`}>
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm">L</span>
+              </div>
+              <span className="font-serif text-lg font-semibold">Lumière</span>
             </div>
-            <div>
-              <h1 className="text-xl font-serif font-bold">Lumière Admin</h1>
-              <p className="text-xs text-muted-foreground">Welcome, {user?.name}</p>
-            </div>
+            <button 
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden p-1 hover:bg-white/5 rounded"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={() => setLocation('/')}>
-              View Site
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => logout()}>
-              Logout
-            </Button>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    isActive 
+                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-400 border border-amber-500/20' 
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-amber-400' : ''}`} />
+                  <span>{item.label}</span>
+                  {item.badge && item.badge > 0 && (
+                    <span className="ml-auto bg-amber-500 text-black text-xs font-bold px-2 py-0.5 rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* User section */}
+          <div className="p-4 border-t border-white/5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-sm font-bold">
+                {user?.name?.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{user?.name}</p>
+                <p className="text-xs text-gray-500 truncate">Administrator</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white text-xs"
+                onClick={() => setLocation('/')}
+              >
+                <Eye className="w-3.5 h-3.5 mr-1.5" />
+                View Site
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-gray-400 hover:text-white hover:bg-white/5"
+                onClick={() => logout()}
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
-      </header>
+      </aside>
 
-      <main className="container mx-auto px-6 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="flex flex-wrap gap-1 mb-8 h-auto">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <LayoutDashboard className="w-4 h-4" /> Overview
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4" /> Orders
-            </TabsTrigger>
-            <TabsTrigger value="products" className="flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4" /> Products
-            </TabsTrigger>
-            <TabsTrigger value="categories" className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4" /> Categories
-            </TabsTrigger>
-            <TabsTrigger value="brands" className="flex items-center gap-2">
-              <Award className="w-4 h-4" /> Brands
-            </TabsTrigger>
-            <TabsTrigger value="discounts" className="flex items-center gap-2">
-              <Tag className="w-4 h-4" /> Discounts
-            </TabsTrigger>
-            <TabsTrigger value="shipping" className="flex items-center gap-2">
-              <Truck className="w-4 h-4" /> Shipping
-            </TabsTrigger>
-            <TabsTrigger value="popups" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" /> Popups
-            </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="w-4 h-4" /> Users
-            </TabsTrigger>
-            <TabsTrigger value="content" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" /> Content
-            </TabsTrigger>
-          </TabsList>
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-green-800">Total Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-900">${(stats?.totalRevenue || 0).toLocaleString()}</div>
-                  <p className="text-xs text-green-700">Lifetime sales</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-blue-800">Today's Revenue</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-blue-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-blue-900">${(stats?.todayRevenue || 0).toLocaleString()}</div>
-                  <p className="text-xs text-blue-700">Sales today</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-purple-800">Total Orders</CardTitle>
-                  <ShoppingBag className="h-4 w-4 text-purple-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-purple-900">{stats?.totalOrders || 0}</div>
-                  <p className="text-xs text-purple-700">{stats?.pendingOrders || 0} pending</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-orange-800">In Progress</CardTitle>
-                  <Truck className="h-4 w-4 text-orange-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-orange-900">{(stats?.processingOrders || 0) + (stats?.shippedOrders || 0)}</div>
-                  <p className="text-xs text-orange-700">{stats?.deliveredOrders || 0} delivered</p>
-                </CardContent>
-              </Card>
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Top bar */}
+        <header className="h-16 bg-[#111118]/80 backdrop-blur-sm border-b border-white/5 sticky top-0 z-30 flex items-center justify-between px-4 lg:px-8">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 hover:bg-white/5 rounded-lg"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="hidden sm:flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2 min-w-[200px]">
+              <Search className="w-4 h-4 text-gray-500" />
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="bg-transparent text-sm outline-none flex-1 placeholder:text-gray-500"
+              />
+              <kbd className="text-[10px] text-gray-600 bg-white/5 px-1.5 py-0.5 rounded">⌘K</kbd>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="relative p-2 hover:bg-white/5 rounded-lg">
+              <Bell className="w-5 h-5 text-gray-400" />
+              {(stats?.pendingOrders || 0) > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full" />
+              )}
+            </button>
+            <div className="w-px h-6 bg-white/10" />
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium">{user?.name}</p>
+              <p className="text-xs text-gray-500">Admin</p>
+            </div>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 p-4 lg:p-8 overflow-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="hidden">
+              {navItems.map(item => (
+                <TabsTrigger key={item.id} value={item.id}>{item.label}</TabsTrigger>
+              ))}
+            </TabsList>
+
+          <TabsContent value="overview" className="space-y-6 mt-0">
+            {/* Page header */}
+            <div className="mb-6">
+              <h1 className="text-2xl font-serif font-bold text-white">Dashboard Overview</h1>
+              <p className="text-gray-400 text-sm mt-1">Welcome back! Here's what's happening with your store.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{stats?.totalUsers || 0}</div>
-                  <p className="text-xs text-muted-foreground">Registered accounts</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{stats?.totalProducts || 0}</div>
-                  <p className="text-xs text-muted-foreground">{stats?.inStockProducts || 0} in stock</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Categories</CardTitle>
-                  <Tag className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{stats?.totalCategories || 0}</div>
-                  <p className="text-xs text-muted-foreground">Product categories</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Featured</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{stats?.featuredProducts || 0}</div>
-                  <p className="text-xs text-muted-foreground">Featured products</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Users</CardTitle>
-                  <CardDescription>Latest registered users</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {statsData?.recentUsers?.map((user) => (
-                      <div key={user._id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="font-medium text-primary">{user.name?.charAt(0) || 'U'}</span>
-                          </div>
-                          <div>
-                            <p className="font-medium">{user.name}</p>
-                            <p className="text-sm text-muted-foreground">{user.email}</p>
-                          </div>
-                        </div>
-                        <span className={`text-xs px-2 py-1 rounded ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
-                          {user.role}
-                        </span>
-                      </div>
-                    ))}
-                    {!statsData?.recentUsers?.length && (
-                      <p className="text-muted-foreground text-center py-4">No users yet</p>
-                    )}
+            {/* KPI Cards - Revenue Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-xl p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-emerald-400">Total Revenue</span>
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <DollarSign className="h-4 w-4 text-emerald-400" />
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Products</CardTitle>
-                  <CardDescription>Latest added products</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {statsData?.recentProducts?.map((product) => (
-                      <div key={product._id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <img src={product.imageUrl} alt={product.name} className="w-10 h-10 rounded object-cover" />
-                          <div>
-                            <p className="font-medium">{product.name}</p>
-                            <p className="text-sm text-muted-foreground">{product.category}</p>
-                          </div>
-                        </div>
-                        <span className="font-medium">${product.price}</span>
-                      </div>
-                    ))}
-                    {!statsData?.recentProducts?.length && (
-                      <p className="text-muted-foreground text-center py-4">No products yet</p>
-                    )}
+                </div>
+                <div className="text-3xl font-bold text-white">${(stats?.totalRevenue || 0).toLocaleString()}</div>
+                <p className="text-xs text-emerald-400/70 mt-1">Lifetime sales</p>
+              </div>
+              
+              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-blue-400">Today's Revenue</span>
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-blue-400" />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="text-3xl font-bold text-white">${(stats?.todayRevenue || 0).toLocaleString()}</div>
+                <p className="text-xs text-blue-400/70 mt-1">Sales today</p>
+              </div>
+              
+              <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-purple-400">Total Orders</span>
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <ShoppingBag className="h-4 w-4 text-purple-400" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-white">{stats?.totalOrders || 0}</div>
+                <p className="text-xs text-purple-400/70 mt-1">{stats?.pendingOrders || 0} pending</p>
+              </div>
+              
+              <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-xl p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-amber-400">In Progress</span>
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                    <Truck className="h-4 w-4 text-amber-400" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-white">{(stats?.processingOrders || 0) + (stats?.shippedOrders || 0)}</div>
+                <p className="text-xs text-amber-400/70 mt-1">{stats?.deliveredOrders || 0} delivered</p>
+              </div>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Orders</CardTitle>
-                <CardDescription>Latest customer orders</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {statsData?.recentOrders?.map((order) => (
-                    <div key={order._id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+            {/* Secondary Stats Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-[#16161d] border border-white/5 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-gray-400">Total Users</span>
+                  <Users className="h-4 w-4 text-gray-500" />
+                </div>
+                <div className="text-2xl font-bold text-white">{stats?.totalUsers || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">Registered accounts</p>
+              </div>
+              
+              <div className="bg-[#16161d] border border-white/5 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-gray-400">Total Products</span>
+                  <Package className="h-4 w-4 text-gray-500" />
+                </div>
+                <div className="text-2xl font-bold text-white">{stats?.totalProducts || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">{stats?.inStockProducts || 0} in stock</p>
+              </div>
+              
+              <div className="bg-[#16161d] border border-white/5 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-gray-400">Categories</span>
+                  <Tag className="h-4 w-4 text-gray-500" />
+                </div>
+                <div className="text-2xl font-bold text-white">{stats?.totalCategories || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">Product categories</p>
+              </div>
+              
+              <div className="bg-[#16161d] border border-white/5 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-gray-400">Featured</span>
+                  <TrendingUp className="h-4 w-4 text-gray-500" />
+                </div>
+                <div className="text-2xl font-bold text-white">{stats?.featuredProducts || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">Featured products</p>
+              </div>
+            </div>
+
+            {/* Recent Users & Products */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="bg-[#16161d] border border-white/5 rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-white/5">
+                  <h3 className="font-semibold text-white">Recent Users</h3>
+                  <p className="text-xs text-gray-500">Latest registered users</p>
+                </div>
+                <div className="p-5 space-y-4">
+                  {statsData?.recentUsers?.map((user) => (
+                    <div key={user._id} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <ShoppingBag className="w-5 h-5 text-primary" />
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                          <span className="font-medium text-white text-sm">{user.name?.charAt(0) || 'U'}</span>
                         </div>
                         <div>
-                          <p className="font-medium">{order.orderNumber}</p>
-                          <p className="text-sm text-muted-foreground">{order.customerName} • {order.items.length} item(s)</p>
+                          <p className="font-medium text-white text-sm">{user.name}</p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium">${order.total.toFixed(2)}</p>
-                        <Badge variant={order.status === 'delivered' ? 'default' : order.status === 'cancelled' ? 'destructive' : 'secondary'} className="text-xs">
-                          {order.status}
-                        </Badge>
-                      </div>
+                      <span className={`text-xs px-2 py-1 rounded-full ${user.role === 'admin' ? 'bg-amber-500/20 text-amber-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                        {user.role}
+                      </span>
                     </div>
                   ))}
-                  {!statsData?.recentOrders?.length && (
-                    <p className="text-muted-foreground text-center py-4">No orders yet</p>
+                  {!statsData?.recentUsers?.length && (
+                    <p className="text-gray-500 text-center py-4 text-sm">No users yet</p>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div className="bg-[#16161d] border border-white/5 rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-white/5">
+                  <h3 className="font-semibold text-white">Recent Products</h3>
+                  <p className="text-xs text-gray-500">Latest added products</p>
+                </div>
+                <div className="p-5 space-y-4">
+                  {statsData?.recentProducts?.map((product) => (
+                    <div key={product._id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <img src={product.imageUrl} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                        <div>
+                          <p className="font-medium text-white text-sm">{product.name}</p>
+                          <p className="text-xs text-gray-500">{product.category}</p>
+                        </div>
+                      </div>
+                      <span className="font-medium text-amber-400">${product.price}</span>
+                    </div>
+                  ))}
+                  {!statsData?.recentProducts?.length && (
+                    <p className="text-gray-500 text-center py-4 text-sm">No products yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Orders */}
+            <div className="bg-[#16161d] border border-white/5 rounded-xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/5">
+                <h3 className="font-semibold text-white">Recent Orders</h3>
+                <p className="text-xs text-gray-500">Latest customer orders</p>
+              </div>
+              <div className="p-5 space-y-4">
+                {statsData?.recentOrders?.map((order) => (
+                  <div key={order._id} className="flex items-center justify-between border-b border-white/5 pb-4 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                        <ShoppingBag className="w-5 h-5 text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-white text-sm">{order.orderNumber}</p>
+                        <p className="text-xs text-gray-500">{order.customerName} • {order.items.length} item(s)</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-white">${order.total.toFixed(2)}</p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        order.status === 'delivered' ? 'bg-emerald-500/20 text-emerald-400' : 
+                        order.status === 'cancelled' ? 'bg-red-500/20 text-red-400' : 
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {!statsData?.recentOrders?.length && (
+                  <p className="text-gray-500 text-center py-4 text-sm">No orders yet</p>
+                )}
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="orders" className="space-y-6">
@@ -3710,6 +3815,7 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+    </div>
     </div>
   );
 }
