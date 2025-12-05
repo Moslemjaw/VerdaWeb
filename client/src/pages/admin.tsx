@@ -176,11 +176,6 @@ export default function AdminDashboard() {
     buttonText: '',
   });
 
-  if (!isLoading && (!user || !isAdmin)) {
-    setLocation('/');
-    return null;
-  }
-
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
 
@@ -294,6 +289,12 @@ export default function AdminDashboard() {
       }
     }
   }, [siteContent]);
+
+  useEffect(() => {
+    if (!isLoading && (!user || !isAdmin)) {
+      setLocation('/');
+    }
+  }, [isLoading, user, isAdmin, setLocation]);
 
   const createProductMutation = useMutation({
     mutationFn: async (product: any) => {
@@ -578,6 +579,10 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!user || !isAdmin) {
+    return null;
   }
 
   const stats = statsData?.stats;
