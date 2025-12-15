@@ -488,7 +488,7 @@ export default function Shop() {
                       className="group cursor-pointer"
                       data-testid={`card-product-${product._id}`}
                     >
-                      <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-2 sm:mb-4 rounded-lg p-2 sm:p-3">
+                      <div className="relative aspect-[3/4] overflow-hidden bg-transparent mb-2 sm:mb-4 rounded-lg">
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 

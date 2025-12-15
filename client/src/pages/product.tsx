@@ -202,7 +202,7 @@ export default function ProductDetails() {
                   <button
                     key={index}
                     onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(index); }}
-                    className={`w-12 h-16 overflow-hidden border-2 transition-all p-1 bg-secondary/30 ${
+                    className={`w-12 h-16 overflow-hidden border-2 transition-all bg-transparent ${
                       selectedImageIndex === index 
                         ? 'border-white' 
                         : 'border-transparent opacity-50 hover:opacity-100'
@@ -258,7 +258,7 @@ export default function ProductDetails() {
                       <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
-                        className={`aspect-[3/4] overflow-hidden border-2 transition-all p-1 bg-secondary/30 ${
+                        className={`aspect-[3/4] overflow-hidden border-2 transition-all bg-transparent ${
                           selectedImageIndex === index 
                             ? 'border-primary' 
                             : 'border-transparent hover:border-muted-foreground/30'
@@ -284,7 +284,7 @@ export default function ProductDetails() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="aspect-[3/4] bg-secondary/30 overflow-hidden cursor-pointer p-4"
+                      className="aspect-[3/4] bg-transparent overflow-hidden cursor-pointer"
                       onClick={() => setIsZoomed(true)}
                     >
                       <img 
@@ -340,7 +340,7 @@ export default function ProductDetails() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="aspect-[3/4] sm:aspect-[4/5] bg-secondary/30 overflow-hidden cursor-pointer p-3 sm:p-4"
+                className="aspect-[3/4] sm:aspect-[4/5] bg-transparent overflow-hidden cursor-pointer"
                 onClick={() => setIsZoomed(true)}
               >
                 <img 
@@ -388,7 +388,7 @@ export default function ProductDetails() {
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`w-16 h-20 flex-shrink-0 overflow-hidden border-2 transition-all p-1 bg-secondary/30 ${
+                    className={`w-16 h-20 flex-shrink-0 overflow-hidden border-2 transition-all bg-transparent ${
                       selectedImageIndex === index 
                         ? 'border-primary' 
                         : 'border-transparent'

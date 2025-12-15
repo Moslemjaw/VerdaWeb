@@ -83,7 +83,7 @@ export default function BestSellers() {
                   className="group cursor-pointer"
                   data-testid={`card-product-${product._id}`}
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6 rounded-lg p-2 sm:p-3">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-transparent mb-6 rounded-lg">
                     <div className="absolute top-4 left-4 z-10">
                       <span className="bg-primary text-primary-foreground text-xs uppercase tracking-wider px-3 py-1 rounded-full flex items-center gap-1">
                         <Star className="w-3 h-3 fill-current" />
