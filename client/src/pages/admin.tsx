@@ -1101,7 +1101,7 @@ export default function AdminDashboard() {
 
       const exploreData = siteContent.find(c => c.section === 'explore');
       if (exploreData?.content) {
-        const rawCategories = (exploreData.content as any).categories || [];
+        const rawCategories = (exploreData.content as any).exploreCategories || [];
         const normalizedCategories = rawCategories.map((cat: any) => 
           typeof cat === 'string' ? cat : (cat?.name || '')
         ).filter((cat: string) => cat);
@@ -1503,7 +1503,7 @@ export default function AdminDashboard() {
       content: {
         title: exploreContent.title,
         description: exploreContent.description,
-        categories: exploreContent.categories,
+        exploreCategories: exploreContent.categories,
       },
     });
   };
@@ -2114,6 +2114,15 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
+                    {orders.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                          <ShoppingBag className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg font-medium">No orders yet</p>
+                          <p className="text-sm">Orders will appear here when customers place them</p>
+                        </td>
+                      </tr>
+                    )}
                     {orders.map((order) => (
                       <tr key={order._id} className="border-b hover:bg-muted/30">
                         <td className="p-4">

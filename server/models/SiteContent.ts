@@ -37,7 +37,7 @@ const SiteContentSchema = new Schema<ISiteContent>(
       type: String,
       required: true,
       unique: true,
-      enum: ['hero', 'featured_collection', 'brand_story', 'newsletter', 'categories', 'new_collection', 'best_sellers', 'new_in'],
+      enum: ['hero', 'featured_collection', 'brand_story', 'newsletter', 'categories', 'new_collection', 'best_sellers', 'new_in', 'explore'],
     },
     content: {
       title: String,
@@ -53,6 +53,7 @@ const SiteContentSchema = new Schema<ISiteContent>(
       navLabel: String,
       useCategoryImages: Boolean,
       heroImages: [String],
+      exploreCategories: [String],
       categories: [{
         name: String,
         image: String,

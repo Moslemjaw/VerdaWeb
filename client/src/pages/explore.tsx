@@ -151,7 +151,7 @@ export default function Explore() {
       const res = await fetch('/api/content/explore');
       if (!res.ok) return { title: 'Explore', description: 'Discover your style', categories: [] };
       const data = await res.json();
-      const rawCategories = data.content?.categories || [];
+      const rawCategories = data.content?.exploreCategories || [];
       const normalizedCategories = rawCategories.map((cat: any) => 
         typeof cat === 'string' ? cat : (cat?.name || '')
       ).filter((cat: string) => cat);
