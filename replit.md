@@ -1,8 +1,8 @@
-# Lumière - Modern Women's Fashion E-commerce Platform
+# Verda - Modern Women's Fashion E-commerce Platform
 
 ## Overview
 
-Lumière is a luxury women's fashion e-commerce web application that provides an elegant shopping experience with high-end visual design. The platform features product browsing, user authentication, and an admin dashboard for managing products and users. Built with a modern full-stack architecture, it emphasizes smooth animations, minimalist aesthetics, and responsive design.
+Verda is a luxury women's fashion e-commerce web application that provides an elegant shopping experience with high-end visual design. The platform features product browsing, user authentication, and an admin dashboard for managing products and users. Built with a modern full-stack architecture, it emphasizes smooth animations, minimalist aesthetics, and responsive design.
 
 ## User Preferences
 
@@ -285,6 +285,6 @@ Located in the admin dashboard under the "Popups" tab:
 ### Dismissal Behavior
 
 - Each popup has a unique ID used for tracking dismissal
-- Dismissed popups are stored in localStorage under `lumiere_dismissed_popups`
+- Dismissed popups are stored in localStorage under `verda_dismissed_popups`
 - Users can close popups with X button or action buttons
 - New account popups only show once after signup (flag cleared after display)

@@ -1,4 +1,4 @@
-# Lumière Deployment Guide
+# Verda Deployment Guide
 
 ## Quick Setup: Frontend (Vercel) + Backend (Render)
 
@@ -13,7 +13,7 @@ Go to [render.com](https://render.com) and sign up.
 1. Click **New +** → **Web Service**
 2. Connect your GitHub repository
 3. Configure the service:
-   - **Name**: `lumiere-backend` (or your choice)
+   - **Name**: `verda-backend` (or your choice)
    - **Region**: Choose closest to your users
    - **Branch**: `main`
    - **Root Directory**: Leave empty
@@ -32,7 +32,7 @@ In Render dashboard, go to **Environment** tab and add:
 | `NODE_ENV` | `production` |
 
 ### 1.4 Deploy
-Click **Create Web Service**. Note your backend URL (e.g., `https://lumiere-backend.onrender.com`).
+Click **Create Web Service**. Note your backend URL (e.g., `https://verda-backend.onrender.com`).
 
 ---
 

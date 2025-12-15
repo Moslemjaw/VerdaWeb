@@ -47,7 +47,7 @@ const productSchema = new Schema<IProduct>({
   },
   brand: {
     type: String,
-    default: 'Lumière',
+    default: 'Verda',
   },
   imageUrl: {
     type: String,

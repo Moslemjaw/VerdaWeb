@@ -1282,7 +1282,7 @@ export default function AdminDashboard() {
       compareAtPrice: '',
       description: '',
       categories: [],
-      brand: 'Lumière',
+      brand: 'Verda',
       imageUrl: '',
       images: '',
       uploadedImages: [],
@@ -1395,7 +1395,7 @@ export default function AdminDashboard() {
       compareAtPrice: (product as any).compareAtPrice?.toString() || '',
       description: product.description,
       categories: productCategories,
-      brand: product.brand || 'Lumière',
+      brand: product.brand || 'Verda',
       imageUrl: product.imageUrl,
       images: '',
       uploadedImages: product.images || [],
@@ -1568,7 +1568,7 @@ export default function AdminDashboard() {
               <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">L</span>
               </div>
-              <span className="font-serif text-lg font-semibold text-gray-900">Lumière</span>
+              <span className="font-serif text-lg font-semibold text-gray-900">Verda</span>
             </div>
             <button 
               onClick={() => setMobileMenuOpen(false)}
@@ -3478,7 +3478,7 @@ export default function AdminDashboard() {
                       <Input
                         value={brandForm.name}
                         onChange={(e) => setBrandForm({ ...brandForm, name: e.target.value })}
-                        placeholder="e.g., Lumière"
+                        placeholder="e.g., Verda"
                         required
                       />
                     </div>
@@ -4165,7 +4165,7 @@ export default function AdminDashboard() {
                     <Textarea
                       value={brandStoryContent.description}
                       onChange={(e) => setBrandStoryContent({ ...brandStoryContent, description: e.target.value })}
-                      placeholder="Lumière creates timeless pieces for the modern woman. Merging classic silhouettes with contemporary attitude."
+                      placeholder="Verda creates timeless pieces for the modern woman. Merging classic silhouettes with contemporary attitude."
                       rows={4}
                     />
                   </div>
@@ -4188,7 +4188,7 @@ export default function AdminDashboard() {
                     <Input
                       value={newsletterContent.title}
                       onChange={(e) => setNewsletterContent({ ...newsletterContent, title: e.target.value })}
-                      placeholder="e.g., Join the World of Lumière"
+                      placeholder="e.g., Join the World of Verda"
                     />
                   </div>
                   <div className="space-y-2">

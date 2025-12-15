@@ -1,6 +1,6 @@
-# Payment Gateway Setup Guide - Lumière
+# Payment Gateway Setup Guide - Verda
 
-This guide explains how to set up payment methods for your Lumière e-commerce store.
+This guide explains how to set up payment methods for your Verda e-commerce store.
 
 ---
 

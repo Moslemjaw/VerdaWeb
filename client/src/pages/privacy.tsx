@@ -41,10 +41,10 @@ export default function PrivacyPolicy() {
             <div className="space-y-10 text-neutral-300 leading-relaxed">
               <section>
                 <p>
-                  This Privacy & Cookie Policy applies to information collected and processed via the Lumière website and associated customer service channels. We take your privacy as a priority and want you to know how your data is collected, used, shared, and stored.
+                  This Privacy & Cookie Policy applies to information collected and processed via the Verda website and associated customer service channels. We take your privacy as a priority and want you to know how your data is collected, used, shared, and stored.
                 </p>
                 <p className="mt-4">
-                  Lumière is a women's fashion company offering luxury and contemporary fashion pieces. By visiting our website or supplying information through our customer service channels, you are consenting to the practices described in this Privacy and Cookie Policy and our Terms and Conditions.
+                  Verda is a women's fashion company offering luxury and contemporary fashion pieces. By visiting our website or supplying information through our customer service channels, you are consenting to the practices described in this Privacy and Cookie Policy and our Terms and Conditions.
                 </p>
               </section>
 
@@ -71,7 +71,7 @@ export default function PrivacyPolicy() {
               <section>
                 <h2 className="text-xl font-serif text-white mb-4">Usage of Customer Information</h2>
                 <p>
-                  Lumière never shares your personal information with third parties for marketing purposes. We never transfer, sell, or trade your data with any party outside of Lumière. However, we may share some customer information with our partners and government agencies when necessary.
+                  Verda never shares your personal information with third parties for marketing purposes. We never transfer, sell, or trade your data with any party outside of Verda. However, we may share some customer information with our partners and government agencies when necessary.
                 </p>
                 <p className="mt-4">We use your information for:</p>
                 <ul className="list-disc pl-6 mt-4 space-y-2">
@@ -102,7 +102,7 @@ export default function PrivacyPolicy() {
               <section>
                 <h2 className="text-xl font-serif text-white mb-4">Cookies</h2>
                 <p>
-                  Lumière uses cookies for essential operations such as site navigation, allowing you to add items to the shopping cart, and providing you with the best user experience. You may manage cookies by:
+                  Verda uses cookies for essential operations such as site navigation, allowing you to add items to the shopping cart, and providing you with the best user experience. You may manage cookies by:
                 </p>
                 <ul className="list-disc pl-6 mt-4 space-y-2">
                   <li>Changing your browser settings to get notified when a cookie tries to access your computer</li>
@@ -122,15 +122,15 @@ export default function PrivacyPolicy() {
                   <li><strong className="text-white">Right to access:</strong> You have the right to request information about the personal data we hold about you.</li>
                   <li><strong className="text-white">Right to object:</strong> You have the right to object to processing of your personal data.</li>
                   <li><strong className="text-white">Right to rectification:</strong> You have the right to request correction of your personal data if the information is incorrect.</li>
-                  <li><strong className="text-white">Right to restriction:</strong> You have the right to request that Lumière restrict the processing of your personal data.</li>
-                  <li><strong className="text-white">Right to delete:</strong> You have the right to delete your account with Lumière, in which case all your personal data will no longer be available with us.</li>
+                  <li><strong className="text-white">Right to restriction:</strong> You have the right to request that Verda restrict the processing of your personal data.</li>
+                  <li><strong className="text-white">Right to delete:</strong> You have the right to delete your account with Verda, in which case all your personal data will no longer be available with us.</li>
                 </ul>
               </section>
 
               <section>
                 <h2 className="text-xl font-serif text-white mb-4">Contact Us</h2>
                 <p>
-                  Please contact Lumière customer support through our WhatsApp for any privacy-related inquiries.
+                  Please contact Verda customer support through our WhatsApp for any privacy-related inquiries.
                 </p>
               </section>
             </div>

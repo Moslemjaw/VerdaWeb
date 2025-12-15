@@ -62,13 +62,13 @@ async function seed() {
 
     // Create admin user
     const adminUser = new User({
-      email: 'admin@lumiere.com',
+      email: 'admin@verda.com',
       password: 'admin123',
       name: 'Admin User',
       role: 'admin',
     });
     await adminUser.save();
-    console.log('✅ Created admin user (admin@lumiere.com / admin123)');
+    console.log('✅ Created admin user (admin@verda.com / admin123)');
 
     // Create sample user
     const sampleUser = new User({
@@ -89,7 +89,7 @@ async function seed() {
 
     console.log('\n🎉 Database seeded successfully!');
     console.log('\nYou can now:');
-    console.log('- Login as admin: admin@lumiere.com / admin123');
+    console.log('- Login as admin: admin@verda.com / admin123');
     console.log('- Login as user: user@example.com / password123');
     console.log('- Visit /admin for the admin dashboard\n');
 

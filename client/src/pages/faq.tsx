@@ -133,7 +133,7 @@ export default function FAQPage() {
               How Can We Help?
             </h1>
             <p className="text-neutral-400 text-lg max-w-xl leading-relaxed">
-              Find answers to common questions about shopping with Lumière, from orders and shipping to returns and account support.
+              Find answers to common questions about shopping with Verda, from orders and shipping to returns and account support.
             </p>
           </motion.div>
 

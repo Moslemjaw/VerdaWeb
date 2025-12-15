@@ -1,6 +1,6 @@
-# Render Deployment Guide - Lumière
+# Render Deployment Guide - Verda
 
-This guide explains how to deploy your Lumière backend on Render and keep it running 24/7.
+This guide explains how to deploy your Verda backend on Render and keep it running 24/7.
 
 ---
 

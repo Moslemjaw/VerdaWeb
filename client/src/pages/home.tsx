@@ -24,7 +24,7 @@ export default function Home() {
 
           <div className="py-20 text-center max-w-2xl mx-auto px-6">
             <p className="text-2xl md:text-3xl font-serif leading-relaxed text-primary">
-              {brandStory?.description || "Lumière creates timeless pieces for the modern woman. Merging classic silhouettes with contemporary attitude."}
+              {brandStory?.description || "Verda creates timeless pieces for the modern woman. Merging classic silhouettes with contemporary attitude."}
             </p>
           </div>
           
@@ -35,7 +35,7 @@ export default function Home() {
           <section className="py-24 px-6 bg-secondary/30">
             <div className="container mx-auto text-center">
               <h2 className="text-4xl font-serif mb-4">
-                {newsletter?.title || "Join the World of Lumière"}
+                {newsletter?.title || "Join the World of Verda"}
               </h2>
               <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                 {newsletter?.subtitle || "Subscribe to receive updates, access to exclusive deals, and more."}

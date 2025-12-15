@@ -302,7 +302,7 @@ export default function Checkout() {
         setOrderNumber(order.orderNumber);
         
         const message = encodeURIComponent(
-          `Hi! I'd like to complete my Lumière order.\n\n` +
+          `Hi! I'd like to complete my Verda order.\n\n` +
           `Order #: ${order.orderNumber}\n` +
           `Total: ${finalTotal} KWD\n` +
           `Name: ${formData.customerName}\n` +
@@ -350,7 +350,7 @@ export default function Checkout() {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border">
           <div className="container mx-auto px-4 py-4">
-            <Link href="/" className="font-serif text-xl tracking-widest">LUMIÈRE</Link>
+            <Link href="/" className="font-serif text-xl tracking-widest">VERDA</Link>
           </div>
         </header>
         <main className="container mx-auto px-4 py-12">

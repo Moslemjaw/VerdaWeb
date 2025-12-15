@@ -17,10 +17,10 @@ export default function About() {
             className="text-center max-w-3xl mx-auto"
           >
             <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-4">Our Story</h3>
-            <h1 className="text-5xl md:text-6xl font-serif mb-8">About Lumière</h1>
+            <h1 className="text-5xl md:text-6xl font-serif mb-8">About Verda</h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Founded on the belief that every woman deserves to feel extraordinary, 
-              Lumière brings timeless elegance to the modern wardrobe.
+              Verda brings timeless elegance to the modern wardrobe.
             </p>
           </motion.div>
         </div>
@@ -38,7 +38,7 @@ export default function About() {
               <div className="aspect-[4/5] bg-secondary rounded-lg overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
-                  alt="Lumière atelier"
+                  alt="Verda atelier"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -52,7 +52,7 @@ export default function About() {
             >
               <h2 className="text-3xl font-serif">The Beginning</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Lumière was born in 2020 from a simple vision: to create fashion that 
+                Verda was born in 2020 from a simple vision: to create fashion that 
                 celebrates the strength, grace, and individuality of every woman. Our 
                 founder, inspired by the timeless elegance of Parisian ateliers and the 
                 bold spirit of modern women, set out to bridge the gap between luxury 
@@ -153,7 +153,7 @@ export default function About() {
                 </span>
               </Link>
               <a 
-                href="mailto:hello@lumiere.com" 
+                href="mailto:hello@verda.com" 
                 className="inline-block border border-primary px-8 py-4 text-sm uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 Contact Us

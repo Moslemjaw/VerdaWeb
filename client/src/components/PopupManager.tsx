@@ -25,8 +25,8 @@ interface PopupManagerProps {
 
 type Props = Partial<PopupManagerProps>;
 
-const DISMISSED_POPUPS_KEY = 'lumiere_dismissed_popups';
-const NEW_ACCOUNT_POPUP_FLAG = 'lumiere_show_new_account_popup';
+const DISMISSED_POPUPS_KEY = 'verda_dismissed_popups';
+const NEW_ACCOUNT_POPUP_FLAG = 'verda_show_new_account_popup';
 
 function getDismissedPopups(): Record<string, boolean> {
   try {

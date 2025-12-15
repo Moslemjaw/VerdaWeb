@@ -41,7 +41,7 @@ export default function TermsConditions() {
             <div className="space-y-10 text-neutral-300 leading-relaxed">
               <section>
                 <p>
-                  This page sets out the legal terms and conditions under which Lumière sells any of the products listed on this website to you. We seek to comply with international standards in distance-selling and e-commerce at all times. If you have any concerns, please contact us.
+                  This page sets out the legal terms and conditions under which Verda sells any of the products listed on this website to you. We seek to comply with international standards in distance-selling and e-commerce at all times. If you have any concerns, please contact us.
                 </p>
               </section>
 
@@ -99,7 +99,7 @@ export default function TermsConditions() {
               <section>
                 <h2 className="text-xl font-serif text-white mb-4">Copyright</h2>
                 <p>
-                  Lumière holds full intellectual property rights to all content including images on this website, with the exclusion of images from third parties. Permission from Lumière must be given before any content or images may be used by anyone else.
+                  Verda holds full intellectual property rights to all content including images on this website, with the exclusion of images from third parties. Permission from Verda must be given before any content or images may be used by anyone else.
                 </p>
               </section>
 

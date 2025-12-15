@@ -31,7 +31,7 @@ export default function Login() {
       <div className="w-full max-w-md space-y-6 sm:space-y-8">
         <div className="text-center">
           <Link href="/">
-            <span className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">Lumière</span>
+            <span className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">Verda</span>
           </Link>
           <h1 className="text-3xl sm:text-4xl font-serif font-bold mb-2 mt-6">Welcome Back</h1>
           <p className="text-muted-foreground text-sm sm:text-base">Sign in to your account</p>

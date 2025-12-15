@@ -232,7 +232,7 @@ export default function ProductDetails() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <Link href="/">
-            <span className="font-serif text-lg tracking-wider">LUMIÈRE</span>
+            <span className="font-serif text-lg tracking-wider">VERDA</span>
           </Link>
           <button 
             onClick={handleShare}

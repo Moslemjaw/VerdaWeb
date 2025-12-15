@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link href="/">
               <span className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">
-                Lumière
+                Verda
               </span>
             </Link>
             <p className="mt-4 text-sm text-neutral-400 leading-relaxed">
@@ -127,7 +127,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-neutral-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-neutral-500 gap-4">
-          <p>&copy; {new Date().getFullYear()} Lumière. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Verda. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy">
               <span className="hover:text-white cursor-pointer transition-colors">
