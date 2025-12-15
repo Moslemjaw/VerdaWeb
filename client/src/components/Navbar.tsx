@@ -141,6 +141,10 @@ export default function Navbar() {
                   <span className="text-xs text-muted-foreground">{user?.email}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setLocation('/account')} data-testid="nav-account-link">
+                  <User className="w-4 h-4 mr-2" />
+                  My Account
+                </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => setLocation('/admin')} data-testid="nav-admin-link">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
