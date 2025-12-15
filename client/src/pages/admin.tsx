@@ -2561,8 +2561,8 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Card key={product._id} className="overflow-hidden">
-                  <div className="aspect-[3/4] relative">
-                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                  <div className="aspect-[3/4] relative p-2">
+                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain" />
                     <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                       {!product.inStock && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded">Out of Stock</span>}
                       {product.featured && <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded">Featured</span>}

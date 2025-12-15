@@ -332,11 +332,11 @@ export default function BlackDressShowcase() {
                       className="group cursor-pointer flex-shrink-0 w-[160px] sm:w-[200px] md:w-[240px] lg:w-[280px]"
                       data-testid={`new-collection-product-${product._id}`}
                     >
-                      <div className="aspect-[3/4] overflow-hidden mb-3 sm:mb-4 bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-sm">
+                      <div className="aspect-[3/4] overflow-hidden mb-3 sm:mb-4 bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-sm p-2 sm:p-3">
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
+                          className="w-full h-full object-contain transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
                         />
                       </div>
                       <h3 className="text-sm sm:text-base text-white/90 font-light tracking-wide mb-2 group-hover:text-white transition-colors line-clamp-2 leading-tight">

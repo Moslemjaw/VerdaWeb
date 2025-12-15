@@ -83,7 +83,7 @@ export default function BestSellers() {
                   className="group cursor-pointer"
                   data-testid={`card-product-${product._id}`}
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6 rounded-lg">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6 rounded-lg p-2 sm:p-3">
                     <div className="absolute top-4 left-4 z-10">
                       <span className="bg-primary text-primary-foreground text-xs uppercase tracking-wider px-3 py-1 rounded-full flex items-center gap-1">
                         <Star className="w-3 h-3 fill-current" />
@@ -93,7 +93,7 @@ export default function BestSellers() {
                     <img 
                       src={product.imageUrl} 
                       alt={product.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                     <button className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-medium">

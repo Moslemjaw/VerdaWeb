@@ -202,7 +202,7 @@ export default function ProductDetails() {
                   <button
                     key={index}
                     onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(index); }}
-                    className={`w-12 h-16 overflow-hidden border-2 transition-all ${
+                    className={`w-12 h-16 overflow-hidden border-2 transition-all p-1 bg-secondary/30 ${
                       selectedImageIndex === index 
                         ? 'border-white' 
                         : 'border-transparent opacity-50 hover:opacity-100'
@@ -211,7 +211,7 @@ export default function ProductDetails() {
                     <img 
                       src={img} 
                       alt={`${product.name} view ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </button>
                 ))}
@@ -258,7 +258,7 @@ export default function ProductDetails() {
                       <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
-                        className={`aspect-[3/4] overflow-hidden border-2 transition-all ${
+                        className={`aspect-[3/4] overflow-hidden border-2 transition-all p-1 bg-secondary/30 ${
                           selectedImageIndex === index 
                             ? 'border-primary' 
                             : 'border-transparent hover:border-muted-foreground/30'
@@ -268,7 +268,7 @@ export default function ProductDetails() {
                         <img 
                           src={img} 
                           alt={`${product.name} view ${index + 1}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                       </button>
                     ))}
@@ -284,13 +284,13 @@ export default function ProductDetails() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="aspect-[3/4] bg-secondary/30 overflow-hidden cursor-pointer"
+                      className="aspect-[3/4] bg-secondary/30 overflow-hidden cursor-pointer p-4"
                       onClick={() => setIsZoomed(true)}
                     >
                       <img 
                         src={currentImage} 
                         alt={product.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                         data-testid="img-product-main"
                       />
                     </motion.div>
@@ -340,13 +340,13 @@ export default function ProductDetails() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="aspect-[3/4] sm:aspect-[4/5] bg-secondary/30 overflow-hidden cursor-pointer"
+                className="aspect-[3/4] sm:aspect-[4/5] bg-secondary/30 overflow-hidden cursor-pointer p-3 sm:p-4"
                 onClick={() => setIsZoomed(true)}
               >
                 <img 
                   src={currentImage} 
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   data-testid="img-product-main-mobile"
                 />
               </motion.div>
@@ -388,7 +388,7 @@ export default function ProductDetails() {
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`w-16 h-20 flex-shrink-0 overflow-hidden border-2 transition-all ${
+                    className={`w-16 h-20 flex-shrink-0 overflow-hidden border-2 transition-all p-1 bg-secondary/30 ${
                       selectedImageIndex === index 
                         ? 'border-primary' 
                         : 'border-transparent'
@@ -398,7 +398,7 @@ export default function ProductDetails() {
                     <img 
                       src={img} 
                       alt={`${product.name} view ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </button>
                 ))}

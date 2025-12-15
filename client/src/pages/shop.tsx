@@ -488,11 +488,11 @@ export default function Shop() {
                       className="group cursor-pointer"
                       data-testid={`card-product-${product._id}`}
                     >
-                      <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-2 sm:mb-4 rounded-lg">
+                      <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-2 sm:mb-4 rounded-lg p-2 sm:p-3">
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                         />
                         {/* Sale Badge */}
                         {product.compareAtPrice && product.compareAtPrice < product.price && (

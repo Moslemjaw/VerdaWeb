@@ -170,11 +170,11 @@ export default function NewIn() {
                       className="group cursor-pointer flex-shrink-0 w-[45vw] sm:w-[40vw] md:w-[280px] snap-start"
                       data-testid={`card-product-${product._id}`}
                     >
-                      <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-b from-neutral-800 to-neutral-900 mb-2 sm:mb-4">
+                      <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-b from-neutral-800 to-neutral-900 mb-2 sm:mb-4 p-2 sm:p-3">
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
+                          className="w-full h-full object-contain transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       </div>
