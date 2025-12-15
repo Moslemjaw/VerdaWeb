@@ -263,7 +263,7 @@ export default function Checkout() {
 
     try {
       if (!isAuthenticated && checkoutMode === 'create-account') {
-        const registerResponse = await fetch('/api/register', {
+        const registerResponse = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
