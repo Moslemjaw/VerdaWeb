@@ -7,6 +7,27 @@ import { createServer } from "http";
 const app = express();
 const httpServer = createServer(app);
 
+// CORS configuration for separate frontend/backend hosting
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const allowedOrigins = [FRONTEND_URL];
+if (process.env.NODE_ENV === 'development') {
+  allowedOrigins.push('http://localhost:5000', 'http://localhost:5173');
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Health check endpoint to keep server alive on Render
 app.get('/healthz', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
