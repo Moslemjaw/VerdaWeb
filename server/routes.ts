@@ -32,6 +32,10 @@ if (useCloudinary) {
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
+  console.log('✅ Cloudinary configured successfully');
+} else {
+  console.log('⚠️  Cloudinary not configured - using local storage');
+  console.log('   Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to enable');
 }
 
 // Local storage setup (fallback for development)
@@ -45,10 +49,13 @@ const storage = useCloudinary
   ? new CloudinaryStorage({
       cloudinary: cloudinary,
       params: async (req, file) => {
+        // Determine folder based on context if possible
+        const folder = "verda-products"; // Default folder
         return {
-          folder: "verda-products",
+          folder: folder,
           allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
           transformation: [{ width: 1200, height: 1200, crop: "limit" }],
+          resource_type: "image",
         };
       },
     })
@@ -105,21 +112,33 @@ export async function registerRoutes(
         return res.status(400).json({ error: 'No file uploaded' });
       }
       
-      // Cloudinary returns file with 'secure_url' or 'url' property
+      // CloudinaryStorage returns file with 'path' property containing the URL
       // Local storage returns file with 'filename' property
       let imageUrl: string;
-      if (useCloudinary && 'secure_url' in req.file) {
-        imageUrl = (req.file as any).secure_url;
-      } else if (useCloudinary && 'url' in req.file) {
-        imageUrl = (req.file as any).url;
+      const file = req.file as any;
+      
+      if (useCloudinary) {
+        // CloudinaryStorage stores the URL in the 'path' property
+        if (file.path) {
+          imageUrl = file.path;
+        } else if (file.secure_url) {
+          imageUrl = file.secure_url;
+        } else if (file.url) {
+          imageUrl = file.url;
+        } else {
+          console.error('Cloudinary upload failed - no URL in response:', file);
+          return res.status(500).json({ error: 'Failed to get image URL from Cloudinary' });
+        }
+        console.log('✅ Image uploaded to Cloudinary:', imageUrl);
       } else {
         // Local storage
         imageUrl = `/uploads/${req.file.filename}`;
+        console.log('✅ Image saved locally:', imageUrl);
       }
       
       res.json({ 
         url: imageUrl, 
-        filename: (req.file as any).filename || (req.file as any).public_id || 'uploaded'
+        filename: file.filename || file.public_id || file.originalname || 'uploaded'
       });
     } catch (error) {
       console.error('Upload error:', error);
