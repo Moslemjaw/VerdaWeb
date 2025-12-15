@@ -16,21 +16,51 @@ import { Request, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
+// Configure Cloudinary
+const useCloudinary = !!(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+);
+
+if (useCloudinary) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
+
+// Local storage setup (fallback for development)
 const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Configure multer storage - use Cloudinary if available, otherwise local
+const storage = useCloudinary
+  ? new CloudinaryStorage({
+      cloudinary: cloudinary,
+      params: async (req, file) => {
+        return {
+          folder: "verda-products",
+          allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
+          transformation: [{ width: 1200, height: 1200, crop: "limit" }],
+        };
+      },
+    })
+  : multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, uploadDir);
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+      }
+    });
 
 const upload = multer({
   storage,
@@ -59,9 +89,11 @@ export async function registerRoutes(
 ): Promise<Server> {
   connectDB().catch(console.error);
 
-  // Serve uploaded files
-  const express = await import('express');
-  app.use('/uploads', express.default.static(uploadDir));
+  // Serve uploaded files (only for local storage)
+  if (!useCloudinary) {
+    const express = await import('express');
+    app.use('/uploads', express.default.static(uploadDir));
+  }
 
   // ============================================
   // IMAGE UPLOAD ROUTE
@@ -72,8 +104,23 @@ export async function registerRoutes(
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
-      const imageUrl = `/uploads/${req.file.filename}`;
-      res.json({ url: imageUrl, filename: req.file.filename });
+      
+      // Cloudinary returns file with 'secure_url' or 'url' property
+      // Local storage returns file with 'filename' property
+      let imageUrl: string;
+      if (useCloudinary && 'secure_url' in req.file) {
+        imageUrl = (req.file as any).secure_url;
+      } else if (useCloudinary && 'url' in req.file) {
+        imageUrl = (req.file as any).url;
+      } else {
+        // Local storage
+        imageUrl = `/uploads/${req.file.filename}`;
+      }
+      
+      res.json({ 
+        url: imageUrl, 
+        filename: (req.file as any).filename || (req.file as any).public_id || 'uploaded'
+      });
     } catch (error) {
       console.error('Upload error:', error);
       res.status(500).json({ error: 'Failed to upload file' });
