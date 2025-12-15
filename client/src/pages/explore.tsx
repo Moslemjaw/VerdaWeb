@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
@@ -13,9 +13,16 @@ interface Product {
   compareAtPrice?: number;
   description: string;
   category: string;
+  categories?: string[];
   imageUrl: string;
   inStock: boolean;
   featured: boolean;
+}
+
+interface ExploreContent {
+  title: string;
+  description: string;
+  categories: string[];
 }
 
 const sampleProducts: Product[] = [
@@ -138,7 +145,38 @@ export default function Explore() {
     },
   });
 
-  const products = apiProducts.length > 0 ? apiProducts : sampleProducts;
+  const { data: exploreContent } = useQuery<ExploreContent>({
+    queryKey: ['exploreContent'],
+    queryFn: async () => {
+      const res = await fetch('/api/content/explore');
+      if (!res.ok) return { title: 'Explore', description: 'Discover your style', categories: [] };
+      const data = await res.json();
+      const rawCategories = data.content?.categories || [];
+      const normalizedCategories = rawCategories.map((cat: any) => 
+        typeof cat === 'string' ? cat : (cat?.name || '')
+      ).filter((cat: string) => cat);
+      return {
+        title: data.content?.title || 'Explore',
+        description: data.content?.description || 'Discover your style',
+        categories: normalizedCategories,
+      };
+    },
+  });
+
+  const filteredProducts = useMemo(() => {
+    const baseProducts = apiProducts.length > 0 ? apiProducts : sampleProducts;
+    
+    if (!exploreContent?.categories || exploreContent.categories.length === 0) {
+      return baseProducts;
+    }
+
+    return baseProducts.filter(product => {
+      const productCategories = product.categories || [product.category];
+      return productCategories.some(cat => exploreContent.categories.includes(cat));
+    });
+  }, [apiProducts, exploreContent]);
+
+  const products = filteredProducts;
   const currentProduct = products[currentIndex];
   const nextProduct = products[currentIndex + 1];
   const isComplete = currentIndex >= products.length;
@@ -187,8 +225,8 @@ export default function Explore() {
               </span>
             </Link>
             <div>
-              <h1 className="text-xl sm:text-2xl font-serif text-white">Explore</h1>
-              <p className="text-white/60 text-xs sm:text-sm">Swipe right to add, left to skip</p>
+              <h1 className="text-xl sm:text-2xl font-serif text-white">{exploreContent?.title || 'Explore'}</h1>
+              <p className="text-white/60 text-xs sm:text-sm">{exploreContent?.description || 'Swipe right to add, left to skip'}</p>
             </div>
           </div>
           <button 

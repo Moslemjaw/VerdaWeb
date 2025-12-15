@@ -355,6 +355,12 @@ export default function AdminDashboard() {
     buttonText: 'View All Products',
   });
 
+  const [exploreContent, setExploreContent] = useState({
+    title: 'Explore',
+    description: 'Discover your style',
+    categories: [] as string[],
+  });
+
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
@@ -1090,6 +1096,19 @@ export default function AdminDashboard() {
           buttonText: newInData.content.buttonText || 'View All Products',
         });
       }
+
+      const exploreData = siteContent.find(c => c.section === 'explore');
+      if (exploreData?.content) {
+        const rawCategories = (exploreData.content as any).categories || [];
+        const normalizedCategories = rawCategories.map((cat: any) => 
+          typeof cat === 'string' ? cat : (cat?.name || '')
+        ).filter((cat: string) => cat);
+        setExploreContent({
+          title: exploreData.content.title || 'Explore',
+          description: exploreData.content.description || 'Discover your style',
+          categories: normalizedCategories,
+        });
+      }
     }
   }, [siteContent]);
 
@@ -1468,6 +1487,17 @@ export default function AdminDashboard() {
         description: newInContent.description,
         category: newInContent.category,
         buttonText: newInContent.buttonText,
+      },
+    });
+  };
+
+  const handleSaveExploreContent = () => {
+    updateContentMutation.mutate({
+      section: 'explore',
+      content: {
+        title: exploreContent.title,
+        description: exploreContent.description,
+        categories: exploreContent.categories,
       },
     });
   };
@@ -3811,6 +3841,117 @@ export default function AdminDashboard() {
                 <p className="text-sm text-muted-foreground mt-4">Products displayed in this section are pulled from your product catalog. Mark products as "Featured" in the Products tab to show them here.</p>
                 <Button onClick={handleSaveBestSellersContent} className="mt-6" disabled={updateContentMutation.isPending}>
                   Save Best Sellers
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Eye className="w-6 h-6" /> Explore Page
+                </CardTitle>
+                <CardDescription>Configure the Explore page swipe experience. Select which categories to display.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="font-medium">Page Title</Label>
+                    <Input
+                      value={exploreContent.title}
+                      onChange={(e) => setExploreContent({ ...exploreContent, title: e.target.value })}
+                      placeholder="e.g., Explore"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-medium">Description</Label>
+                    <Input
+                      value={exploreContent.description}
+                      onChange={(e) => setExploreContent({ ...exploreContent, description: e.target.value })}
+                      placeholder="e.g., Discover your style"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2 mt-4">
+                  <Label className="font-medium">Filter by Categories (select multiple)</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-between h-auto min-h-10 text-left font-normal"
+                      >
+                        <div className="flex flex-wrap gap-1">
+                          {exploreContent.categories.length > 0 ? (
+                            exploreContent.categories.map((cat) => (
+                              <Badge
+                                key={cat}
+                                variant="secondary"
+                                className="mr-1 mb-1"
+                              >
+                                {cat}
+                                <button
+                                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExploreContent({
+                                      ...exploreContent,
+                                      categories: exploreContent.categories.filter((c) => c !== cat)
+                                    });
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-muted-foreground">All Categories (no filter)</span>
+                          )}
+                        </div>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search categories..." />
+                        <CommandList>
+                          <CommandEmpty>No category found.</CommandEmpty>
+                          <CommandGroup>
+                            {categories.filter(cat => cat.isActive).map((cat) => (
+                              <CommandItem
+                                key={cat._id}
+                                value={cat.name}
+                                onSelect={() => {
+                                  if (exploreContent.categories.includes(cat.name)) {
+                                    setExploreContent({
+                                      ...exploreContent,
+                                      categories: exploreContent.categories.filter((c) => c !== cat.name)
+                                    });
+                                  } else {
+                                    setExploreContent({
+                                      ...exploreContent,
+                                      categories: [...exploreContent.categories, cat.name]
+                                    });
+                                  }
+                                }}
+                              >
+                                <Check
+                                  className={`mr-2 h-4 w-4 ${
+                                    exploreContent.categories.includes(cat.name) ? "opacity-100" : "opacity-0"
+                                  }`}
+                                />
+                                {cat.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <p className="text-xs text-muted-foreground">Select categories to show in the Explore page. Leave empty to show all products.</p>
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">The Explore page uses a swipe interface where customers can swipe right to add products to cart or swipe left to skip.</p>
+                <Button onClick={handleSaveExploreContent} className="mt-6" disabled={updateContentMutation.isPending}>
+                  Save Explore Settings
                 </Button>
               </CardContent>
             </Card>
