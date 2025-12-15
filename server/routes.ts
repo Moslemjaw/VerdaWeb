@@ -482,7 +482,7 @@ export async function registerRoutes(
       ]);
 
       const revenueResult = await Order.aggregate([
-        { $match: { paymentStatus: 'paid' } },
+        { $match: { status: { $nin: ['cancelled', 'refunded'] } } },
         { $group: { _id: null, total: { $sum: '$total' } } }
       ]);
       const totalRevenue = revenueResult[0]?.total || 0;
@@ -490,7 +490,7 @@ export async function registerRoutes(
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
       const todayRevenueResult = await Order.aggregate([
-        { $match: { paymentStatus: 'paid', createdAt: { $gte: todayStart } } },
+        { $match: { status: { $nin: ['cancelled', 'refunded'] }, createdAt: { $gte: todayStart } } },
         { $group: { _id: null, total: { $sum: '$total' } } }
       ]);
       const todayRevenue = todayRevenueResult[0]?.total || 0;
