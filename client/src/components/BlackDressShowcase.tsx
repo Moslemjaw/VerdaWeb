@@ -332,7 +332,7 @@ export default function BlackDressShowcase() {
                       className="group cursor-pointer flex-shrink-0 w-[160px] sm:w-[200px] md:w-[240px] lg:w-[280px]"
                       data-testid={`new-collection-product-${product._id}`}
                     >
-                      <div className="aspect-[3/4] overflow-hidden mb-3 sm:mb-4 bg-transparent rounded-sm">
+                      <div className="aspect-[2/3] overflow-hidden mb-3 sm:mb-4 bg-transparent rounded-sm">
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 

@@ -92,7 +92,7 @@ export default function BestSellers() {
                   transition={{ duration: 0.4, delay: index * 0.05 }}
                   className="group cursor-pointer"
                 >
-                  <div className="aspect-[3/4] bg-transparent mb-2 overflow-hidden rounded-lg">
+                  <div className="aspect-[2/3] bg-transparent mb-2 overflow-hidden rounded-lg">
                     <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain" />
                   </div>
                   <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>
@@ -155,7 +155,7 @@ export default function BestSellers() {
                       transition={{ duration: 0.4, delay: index * 0.05 }}
                       className="flex-shrink-0 w-[200px] group cursor-pointer"
                     >
-                      <div className="aspect-[3/4] bg-transparent mb-3 overflow-hidden">
+                      <div className="aspect-[2/3] bg-transparent mb-3 overflow-hidden">
                         <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
                       </div>
                       <h3 className="text-xs uppercase tracking-wide text-gray-700 mb-1 truncate">{product.name}</h3>

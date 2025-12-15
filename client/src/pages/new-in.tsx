@@ -170,7 +170,7 @@ export default function NewIn() {
                       className="group cursor-pointer flex-shrink-0 w-[45vw] sm:w-[40vw] md:w-[280px] snap-start"
                       data-testid={`card-product-${product._id}`}
                     >
-                      <div className="relative aspect-[3/4] overflow-hidden bg-transparent mb-2 sm:mb-4">
+                      <div className="relative aspect-[2/3] overflow-hidden bg-transparent mb-2 sm:mb-4">
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 
