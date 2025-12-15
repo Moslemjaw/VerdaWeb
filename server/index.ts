@@ -7,6 +7,11 @@ import { createServer } from "http";
 const app = express();
 const httpServer = createServer(app);
 
+// Trust proxy for production (required for secure cookies behind Render's proxy)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // CORS configuration for separate frontend/backend hosting
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const allowedOrigins = [FRONTEND_URL];
@@ -70,7 +75,7 @@ if (!SESSION_SECRET) {
   throw new Error('SESSION_SECRET environment variable is required');
 }
 
-// Session middleware
+// Session middleware - configured for cross-domain authentication
 app.use(
   session({
     secret: SESSION_SECRET,
@@ -80,6 +85,7 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax', // 'none' required for cross-domain cookies
     },
   })
 );
