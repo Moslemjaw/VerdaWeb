@@ -7,6 +7,26 @@ import { createServer } from "http";
 const app = express();
 const httpServer = createServer(app);
 
+// Health check endpoint to keep server alive on Render
+app.get('/healthz', (_req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Keep-alive mechanism for Render free tier (pings every 10 minutes)
+const RENDER_APP_URL = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL;
+if (RENDER_APP_URL && process.env.NODE_ENV === 'production') {
+  const PING_INTERVAL = 10 * 60 * 1000; // 10 minutes
+  setInterval(async () => {
+    try {
+      const response = await fetch(`${RENDER_APP_URL}/healthz`);
+      console.log(`[Keep-Alive] Ping successful: ${response.status}`);
+    } catch (error) {
+      console.error(`[Keep-Alive] Ping failed:`, error);
+    }
+  }, PING_INTERVAL);
+  console.log(`[Keep-Alive] Started pinging ${RENDER_APP_URL} every 10 minutes`);
+}
+
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
