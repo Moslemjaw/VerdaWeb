@@ -15,14 +15,36 @@ if (process.env.NODE_ENV === 'production') {
 // CORS configuration for separate frontend/backend hosting
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const allowedOrigins = [FRONTEND_URL];
+
+// Add custom domain if different from FRONTEND_URL
+const CUSTOM_DOMAIN = process.env.CUSTOM_DOMAIN;
+if (CUSTOM_DOMAIN && !allowedOrigins.includes(CUSTOM_DOMAIN)) {
+  allowedOrigins.push(CUSTOM_DOMAIN);
+  // Also add www version if main domain doesn't have www
+  if (!CUSTOM_DOMAIN.includes('www.') && !allowedOrigins.includes(`https://www.${CUSTOM_DOMAIN.replace(/^https?:\/\//, '')}`)) {
+    allowedOrigins.push(`https://www.${CUSTOM_DOMAIN.replace(/^https?:\/\//, '')}`);
+  }
+}
+
 if (process.env.NODE_ENV === 'development') {
   allowedOrigins.push('http://localhost:5000', 'http://localhost:5173');
 }
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+  const host = req.headers.host;
+  
+  // Allow requests from custom domain (verdafashion.com) or allowed origins
+  const isCustomDomain = host && (host.includes('verdafashion.com') || host.includes('verdaweb.onrender.com'));
+  const isAllowedOrigin = origin && allowedOrigins.includes(origin);
+  
+  if (isCustomDomain || isAllowedOrigin) {
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    } else if (isCustomDomain) {
+      // Allow same-origin requests from custom domain
+      res.setHeader('Access-Control-Allow-Origin', `https://${host}`);
+    }
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
