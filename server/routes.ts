@@ -708,12 +708,68 @@ export async function registerRoutes(
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {
       const orderData = req.body;
+      // Link order to authenticated user if logged in
+      if (req.session.userId) {
+        orderData.userId = req.session.userId;
+      }
       const order = new Order(orderData);
       await order.save();
       res.status(201).json(order);
     } catch (error) {
       console.error('Create order error:', error);
       res.status(500).json({ error: "Failed to create order" });
+    }
+  });
+
+  // Get user's order history
+  app.get("/api/orders/my", requireAuth, async (req: AuthRequest, res: Response) => {
+    try {
+      const orders = await Order.find({ 
+        $or: [
+          { userId: req.user?.id },
+          { customerEmail: req.user?.email }
+        ]
+      }).sort({ createdAt: -1 });
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
+  // Update user profile
+  app.patch("/api/auth/profile", requireAuth, async (req: AuthRequest, res: Response) => {
+    try {
+      const { name, currentPassword, newPassword } = req.body;
+      const user = await User.findById(req.user?.id);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (name) {
+        user.name = name;
+      }
+
+      if (currentPassword && newPassword) {
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+          return res.status(400).json({ error: "Current password is incorrect" });
+        }
+        user.password = newPassword;
+      }
+
+      await user.save();
+      res.json({ 
+        user: { 
+          id: user._id, 
+          email: user.email, 
+          name: user.name, 
+          role: user.role 
+        } 
+      });
+    } catch (error) {
+      console.error('Profile update error:', error);
+      res.status(500).json({ error: "Failed to update profile" });
     }
   });
 

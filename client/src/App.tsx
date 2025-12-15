@@ -21,6 +21,7 @@ import FAQ from "@/pages/faq";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import NotFound from "@/pages/not-found";
+import Account from "@/pages/account";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
+      <Route path="/account" component={Account} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/shop" component={Shop} />
       <Route path="/new-in" component={NewIn} />
