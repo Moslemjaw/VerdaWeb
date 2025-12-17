@@ -79,9 +79,9 @@ export default function FeaturedCollection() {
         }));
 
   return (
-    <section className="py-24 px-6 bg-background">
+    <section className="py-20 md:py-24 px-6 bg-background">
       <div className="container mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 md:mb-14">
           <h2 className="text-4xl md:text-5xl font-serif text-primary mb-4">{sectionTitle}</h2>
           <Link href={buttonLink}>
             <span className="text-sm border-b border-primary pb-1 hover:opacity-60 transition-opacity cursor-pointer">
@@ -90,7 +90,7 @@ export default function FeaturedCollection() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-5">
           {categories.map((category, index) => (
             <Link href={`/shop?category=${encodeURIComponent(category.name)}`} key={category.name}>
               <motion.div
@@ -101,11 +101,11 @@ export default function FeaturedCollection() {
                 className="group cursor-pointer"
                 data-testid={`card-category-${category.name.toLowerCase().replace(/\s+/g, '-')}`}
               >
-                <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4">
+                <div className="relative aspect-[2/3] overflow-hidden mb-2">
                   <img 
                     src={category.image} 
                     alt={category.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
                   <div 
