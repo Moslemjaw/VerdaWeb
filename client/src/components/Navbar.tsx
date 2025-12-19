@@ -77,7 +77,7 @@ export default function Navbar() {
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link href="/">
           <span className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">
-            ON OFF
+            Verda
           </span>
         </Link>
 
