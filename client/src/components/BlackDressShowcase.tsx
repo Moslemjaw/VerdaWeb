@@ -203,6 +203,20 @@ export default function BlackDressShowcase() {
             </AnimatePresence>
           </motion.div>
 
+          {/* View All Products Button - Centered */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 20 }}
+            transition={{ duration: 0.8, delay: 1.5, ease: "easeOut" }}
+            className="absolute z-40 bottom-10 left-1/2 -translate-x-1/2"
+          >
+            <Link href={selectedCategory && selectedCategory !== 'all' ? `/shop?category=${encodeURIComponent(selectedCategory)}` : '/shop'}>
+              <button className="px-8 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold bg-black/50 backdrop-blur-sm">
+                {buttonText}
+              </button>
+            </Link>
+          </motion.div>
+
           <AnimatePresence>
             {animationPhase === 1 && (
               <>
@@ -363,19 +377,6 @@ export default function BlackDressShowcase() {
               <p className="text-white/60 text-lg">No products found in this category. Select a different category in the admin dashboard.</p>
             </motion.div>
           )}
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: animationPhase === 1 ? 1 : 0, y: animationPhase === 1 ? 0 : 20 }}
-            transition={{ duration: 0.8, delay: 1.8, ease: "easeOut" }}
-            className="flex justify-center mt-16"
-          >
-            <Link href={selectedCategory && selectedCategory !== 'all' ? `/shop?category=${encodeURIComponent(selectedCategory)}` : '/shop'}>
-              <button className="px-8 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
-                {buttonText}
-              </button>
-            </Link>
-          </motion.div>
         </div>
       </div>
     </section>
