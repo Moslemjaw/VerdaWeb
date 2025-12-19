@@ -267,7 +267,7 @@ export default function Explore() {
         )}
 
         {/* Card Stack */}
-        <div className="flex-1 relative max-w-sm mx-auto w-full min-h-0">
+        <div className="flex-1 relative max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto w-full min-h-0">
           {isComplete ? (
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
