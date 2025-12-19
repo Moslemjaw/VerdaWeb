@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Search, Menu, User, LogOut, LayoutDashboard, Globe } from "lucide-react";
+import {
+  ShoppingBag,
+  Search,
+  Menu,
+  User,
+  LogOut,
+  LayoutDashboard,
+  Globe,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,16 +30,16 @@ export default function Navbar() {
   const [location, setLocation] = useLocation();
 
   const { data: newInContent } = useQuery({
-    queryKey: ['newInNavLabel'],
+    queryKey: ["newInNavLabel"],
     queryFn: async () => {
-      const res = await fetch('/api/content/new_in');
-      if (!res.ok) return { navLabel: 'New In' };
+      const res = await fetch("/api/content/new_in");
+      if (!res.ok) return { navLabel: "New In" };
       const data = await res.json();
-      return { navLabel: data.content?.navLabel || 'New In' };
+      return { navLabel: data.content?.navLabel || "New In" };
     },
   });
 
-  const darkPages = ['/', '/new-in'];
+  const darkPages = ["/", "/new-in"];
   const isOnDarkPage = darkPages.includes(location);
 
   useEffect(() => {
@@ -62,26 +70,28 @@ export default function Navbar() {
         isScrolled
           ? "bg-background/80 backdrop-blur-md py-4 border-b text-foreground"
           : isOnDarkPage
-            ? "bg-transparent py-6 text-white"
-            : "bg-transparent py-6 text-foreground"
+          ? "bg-transparent py-6 text-white"
+          : "bg-transparent py-6 text-foreground"
       )}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link href="/">
           <span className="text-2xl font-serif font-bold tracking-widest uppercase cursor-pointer">
-            Verda
+            ON OFF
           </span>
         </Link>
 
         <div className="hidden md:flex items-center space-x-8 text-sm tracking-widest uppercase font-medium">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href}>
-              <span 
+              <span
                 className={cn(
                   "cursor-pointer hover:opacity-70 transition-opacity",
                   location === link.href && "underline underline-offset-4"
                 )}
-                data-testid={`nav-link-${link.label.toLowerCase().replace(' ', '-')}`}
+                data-testid={`nav-link-${link.label
+                  .toLowerCase()
+                  .replace(" ", "-")}`}
               >
                 {link.label}
               </span>
@@ -91,19 +101,25 @@ export default function Navbar() {
 
         <div className="flex items-center space-x-4 md:space-x-6">
           <Link href="/shop">
-            <span className="p-2 -m-2 cursor-pointer hover:opacity-70 transition-opacity inline-flex" data-testid="nav-search-icon">
+            <span
+              className="p-2 -m-2 cursor-pointer hover:opacity-70 transition-opacity inline-flex"
+              data-testid="nav-search-icon"
+            >
               <Search className="w-5 h-5" />
             </span>
           </Link>
           <Link href="/shop">
-            <span className="relative p-2 -m-2 cursor-pointer hover:opacity-70 transition-opacity inline-flex" data-testid="nav-cart-icon">
+            <span
+              className="relative p-2 -m-2 cursor-pointer hover:opacity-70 transition-opacity inline-flex"
+              data-testid="nav-cart-icon"
+            >
               <ShoppingBag className="w-5 h-5" />
             </span>
           </Link>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button 
+              <button
                 className="hidden md:flex items-center space-x-1 hover:opacity-70 transition-opacity text-xs tracking-wider"
                 data-testid="nav-currency-selector"
               >
@@ -113,13 +129,15 @@ export default function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               {availableCurrencies.map((curr) => (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   key={curr.code}
                   onClick={() => setCurrency(curr.code)}
                   className={cn(currency.code === curr.code && "bg-accent")}
                 >
                   <span className="w-12">{curr.code}</span>
-                  <span className="text-muted-foreground text-xs">{curr.name}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {curr.name}
+                  </span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -128,7 +146,7 @@ export default function Navbar() {
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button 
+                <button
                   className="flex items-center space-x-2 hover:opacity-70 transition-opacity"
                   data-testid="nav-user-menu"
                 >
@@ -138,20 +156,31 @@ export default function Navbar() {
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem className="flex flex-col items-start">
                   <span className="font-medium">{user?.name}</span>
-                  <span className="text-xs text-muted-foreground">{user?.email}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {user?.email}
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setLocation('/account')} data-testid="nav-account-link">
+                <DropdownMenuItem
+                  onClick={() => setLocation("/account")}
+                  data-testid="nav-account-link"
+                >
                   <User className="w-4 h-4 mr-2" />
                   My Account
                 </DropdownMenuItem>
                 {isAdmin && (
-                  <DropdownMenuItem onClick={() => setLocation('/admin')} data-testid="nav-admin-link">
+                  <DropdownMenuItem
+                    onClick={() => setLocation("/admin")}
+                    data-testid="nav-admin-link"
+                  >
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Admin Dashboard
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => logout()} data-testid="nav-logout">
+                <DropdownMenuItem
+                  onClick={() => logout()}
+                  data-testid="nav-logout"
+                >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </DropdownMenuItem>
@@ -159,7 +188,7 @@ export default function Navbar() {
             </DropdownMenu>
           ) : (
             <Link href="/login">
-              <span 
+              <span
                 className="text-sm tracking-widest uppercase font-medium hover:opacity-70 transition-opacity cursor-pointer ml-2 inline-flex items-center h-5"
                 data-testid="nav-login-link"
               >
@@ -184,7 +213,9 @@ export default function Navbar() {
                       "text-left py-2 hover:text-muted-foreground transition-colors min-h-[44px]",
                       location === link.href && "underline underline-offset-4"
                     )}
-                    data-testid={`mobile-nav-${link.label.toLowerCase().replace(' ', '-')}`}
+                    data-testid={`mobile-nav-${link.label
+                      .toLowerCase()
+                      .replace(" ", "-")}`}
                   >
                     {link.label}
                   </button>
@@ -192,16 +223,19 @@ export default function Navbar() {
                 {isAuthenticated ? (
                   <>
                     {isAdmin && (
-                      <button 
-                        onClick={() => handleNavClick('/admin')} 
+                      <button
+                        onClick={() => handleNavClick("/admin")}
                         className="text-left hover:text-muted-foreground"
                         data-testid="mobile-nav-admin"
                       >
                         Admin Dashboard
                       </button>
                     )}
-                    <button 
-                      onClick={() => { logout(); setIsSheetOpen(false); }} 
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsSheetOpen(false);
+                      }}
                       className="text-left hover:text-muted-foreground"
                       data-testid="mobile-nav-logout"
                     >
@@ -211,14 +245,14 @@ export default function Navbar() {
                 ) : (
                   <>
                     <button
-                      onClick={() => handleNavClick('/login')}
+                      onClick={() => handleNavClick("/login")}
                       className="text-left hover:text-muted-foreground"
                       data-testid="mobile-nav-login"
                     >
                       Login
                     </button>
                     <button
-                      onClick={() => handleNavClick('/signup')}
+                      onClick={() => handleNavClick("/signup")}
                       className="text-left hover:text-muted-foreground"
                       data-testid="mobile-nav-signup"
                     >
